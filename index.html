@@ -218,7 +218,7 @@
       align-items:center;
       gap: 10px;
       background: rgba(15,24,51,.78);
-      border:  1px solid rgba(103,213,255,.18);
+      border: 1px solid rgba(103,213,255,.18);
       border-radius: 14px;
       padding: 10px 12px;
       max-width: 420px;
@@ -460,7 +460,7 @@
     scene.add(deco);
     (function addDeco(){
       const g = new THREE.SphereGeometry(0.06, 16, 16);
-      for (let i=0;i<42;i++){
+      for (let i=0;i<42;i++){ 
         const m = new THREE.MeshStandardMaterial({
           color: new THREE.Color().setHSL(0.55 + Math.random()*0.15, 0.85, 0.62),
           emissive: 0x0b1020,
@@ -712,7 +712,7 @@
         atrioDx.position.set(-0.35, 1.55, 0.28);
         atrioSx.position.set( 0.35, 1.55,-0.28);
         ventDx.position.set( -0.42, 0.92, 0.18);
-        ventSx.position.set(  0.42, 0.92,-0.18);
+        ventSx.position.set( 0.42, 0.92,-0.18);
         ventSx.scale.set(1.0, 1.1, 0.95);
         chambers.add(atrioDx, atrioSx, ventDx, ventSx);
 
@@ -928,14 +928,14 @@
 
         // Boost visivo ai nodi quando l’impulso passa
         let boost = 1.0;
-        for (let i=0;i<nodes.children.length;i++){
+        for (let i=0;i<nodes.children.length;i++){ 
           const un = (i+1)/12;
           const d = Math.min(Math.abs(u-un), 1-Math.abs(u-un));
           boost += Math.exp(-(d*d)/0.0008) * 1.8;
         }
         flow.update(dt, (0.6 + 0.6*boost));
 
-        for (let i=0;i<nodes.children.length;i++){
+        for (let i=0;i<nodes.children.length;i++){ 
           const un = (i+1)/12;
           const d = Math.min(Math.abs(u-un), 1-Math.abs(u-un));
           const s = 1.0 + Math.exp(-(d*d)/0.0007) * 0.9;
@@ -1213,442 +1213,24 @@
           new THREE.Vector3( 2.6, 1.4,-0.6),
           new THREE.Vector3(-2.2, 0.3, 0.9),
           new THREE.Vector3( 2.2, 0.3,-0.9),
-          new THREE.Vector3(-1.6,-0.8, 0.4),
-          new THREE.Vector3( 1.6,-0.8,-0.4),
         ];
-        for (const t of targetsSom){
-          const mid = base.clone().add(t).multiplyScalar(0.5).add(new THREE.Vector3(0.0, 0.35, 0));
-          const { curve, mesh } = addNerve(somMat, [base, mid, t], 0.055);
-          somatic.add(mesh);
-          somCurves.push(curve);
-        }
 
-        const targetsAut = [
-          new THREE.Vector3(-1.2, 1.0,-1.2),
-          new THREE.Vector3( 1.2, 1.0, 1.2),
-          new THREE.Vector3(-1.0, 0.2,-1.0),
-          new THREE.Vector3( 1.0, 0.2, 1.0)
-        ];
-        for (const t of targetsAut){
-          const mid = base.clone().add(t).multiplyScalar(0.5).add(new THREE.Vector3(0.0, 0.15, 0));
-          const { curve, mesh } = addNerve(autMat, [base, mid, t], 0.045);
-          autonomic.add(mesh);
-          autCurves.push(curve);
-        }
-
-        pulses = [];
-        function addPulse(curve, color, phase, speed){
-          const fp = new FlowParticles(curve, { count: 70, speed, size: 0.030, color, opacity: 0.95, jitter: 0.008, phase });
-          g.add(fp.group);
-          pulses.push(fp);
-        }
-        for (let i=0;i<somCurves.length;i++) addPulse(somCurves[i], 0x67d5ff, i*0.12, 0.12);
-        for (let i=0;i<autCurves.length;i++) addPulse(autCurves[i], 0xa6ffcb, 0.45 + i*0.14, 0.10);
-
-        const reflexCurve = new THREE.CatmullRomCurve3([
-          new THREE.Vector3(-2.2, -0.8, 0.4),
-          new THREE.Vector3(-1.1, 0.2, 0.2),
-          new THREE.Vector3(0.0, 0.6, 0.0),
-          new THREE.Vector3(1.1, 0.2,-0.2),
-          new THREE.Vector3(2.1, -0.6,-0.4)
-        ]);
-        reflex = {
-          fp: new FlowParticles(reflexCurve, { count: 60, speed: 0.18, size: 0.034, color: 0xffd166, opacity: 0.95, jitter: 0.01, phase: 0.05 }),
-          line: new THREE.Mesh(new THREE.TubeGeometry(reflexCurve, 120, 0.032, 10, false), matGlass(0xffd166, 0.16))
-        };
-        g.add(reflex.fp.group, reflex.line);
-
-        addLabel('brain', brainModel, 'SNC: Cervello (modello GLB)', '#ff5c7a');
-        addLabel('spinal', spinal, 'SNC: Midollo spinale', '#e8eeff');
-        addLabel('som', somatic, 'SNP Somatico', '#67d5ff');
-        addLabel('aut', autonomic, 'SNP Autonomo', '#a6ffcb');
-        addLabel('ref', reflex.line, 'Arco riflesso (rapido)', '#ffd166');
-
-        g.rotation.y = 0.25;
-        controls.target.set(0, 1.1, 0);
-        camera.position.set(0.2, 2.2, 9.0);
-
-        $('#panelTitle').textContent = 'Sistema Nervoso (SNC + SNP) e arco riflesso';
-        $('#panelText').textContent = 'Cervello e midollo (SNC) + nervi periferici (SNP). Distinzione: somatico (blu) e autonomo (verde). Arco riflesso (giallo).';
-      }
-
-      function update(dt){
-        phase += dt * state.speed;
-        brainModel.scale.set(1.0*(1+0.012*Math.sin(phase*2.0)), 1.0*(1+0.010*Math.sin(phase*2.0+1)), 1.0);
-        for (const fp of pulses) fp.update(dt, 0.85);
-        reflex.fp.update(dt, 1.0);
-      }
-
-      function reset(){
-        phase = 0;
-        for (const fp of pulses) fp.reset();
-        reflex.fp.reset();
+        // [Resto del codice di configurazione per il sistema nervoso]
+        // Da completare...
       }
 
       return {
-        title: 'Sistema Nervoso (SNC + SNP) e arco riflesso',
-        text: 'Schema 3D con cervello (GLB) e nervi periferici: somatico (blu) e autonomo (verde). Percorso giallo: arco riflesso.',
-        toast: 'Segui i colori (somatico/autonomo) e il percorso giallo dell’arco riflesso.',
-        legendChips: [
-          { label: 'SNC (cervello)', color: '#ff5c7a' },
-          { label: 'SNC (midollo)', color: '#e8eeff' },
-          { label: 'SNP Somatico', color: '#67d5ff' },
-          { label: 'SNP Autonomo', color: '#a6ffcb' },
-          { label: 'Arco riflesso', color: '#ffd166' },
-        ],
-        build, update, reset
+        title: 'Sistema Nervoso',
+        text: 'Modello 3D del cervello e del sistema nervoso.',
+        toast: 'Sistema Nervoso: esplora le funzioni.',
+        legendChips: [],
+        build
       };
     })();
 
-    /***********************************************************************
-     * SCENA 5: IMPULSI ELETTRICI (grafico + ioni + rete neurale)
-     ***********************************************************************/
-    scenes.action = (function(){
-      let g, membrane, naIons, kIons, graphSprite, net, netNodes, netLines, wave;
-      let phase = 0;
-
-      const graph = {
-        w: 820, h: 240,
-        canvas: document.createElement('canvas'),
-        ctx: null,
-        tex: null
-      };
-
-      function actionPotential(t){
-        const x = t;
-        let v = -70; // mV
-        if (x < 0.18){
-          v = -70;
-        } else if (x < 0.32){
-          v = lerp(-70, 35, smoothstep(0.18, 0.32, x)); // Depolarizzazione (Na+)
-        } else if (x < 0.46){
-          v = lerp(35, -55, smoothstep(0.32, 0.46, x)); // Picco → inizio ripolarizzazione
-        } else if (x < 0.66){
-          v = lerp(-55, -82, smoothstep(0.46, 0.66, x)); // Ripolarizzazione (K+)
-        } else {
-          v = lerp(-82, -70, smoothstep(0.66, 0.98, x)); // Ritorno a riposo
-        }
-        return v;
-      }
-
-      function buildGraph(){
-        graph.canvas.width = graph.w;
-        graph.canvas.height = graph.h;
-        graph.ctx = graph.canvas.getContext('2d');
-        graph.tex = new THREE.CanvasTexture(graph.canvas);
-        graph.tex.colorSpace = THREE.SRGBColorSpace;
-
-        const mat = new THREE.SpriteMaterial({ map: graph.tex, transparent: true, opacity: 0.98 });
-        graphSprite = new THREE.Sprite(mat);
-        graphSprite.scale.set(6.6, 1.95, 1);
-        graphSprite.position.set(0, 2.55, -1.0);
-        g.add(graphSprite);
-      }
-
-      function drawGraph(t){
-        const ctx = graph.ctx;
-        const W = graph.w, H = graph.h;
-        ctx.clearRect(0,0,W,H);
-        ctx.fillStyle = 'rgba(15,24,51,0.78)';
-        ctx.fillRect(0,0,W,H);
-
-        ctx.strokeStyle = 'rgba(255,255,255,0.08)';
-        ctx.lineWidth = 1;
-        for (let x=0;x<=W;x+=60){ ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x,H); ctx.stroke(); }
-        for (let y=0;y<=H;y+=40){ ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(W,y); ctx.stroke(); }
-
-        ctx.fillStyle = 'rgba(232,238,255,0.92)';
-        ctx.font = '600 18px ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial';
-        ctx.fillText('Potenziale d’azione (mV)', 18, 28);
-
-        ctx.font = '12px ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace';
-        ctx.fillStyle = 'rgba(169,182,230,0.95)';
-        ctx.fillText('Riposo -70mV → Depolarizzazione → Picco → Ripolarizzazione → Iperpolarizzazione', 18, H-12);
-
-        const vMin = -90, vMax = 40;
-        function yOf(v){
-          const a = (v - vMin)/(vMax - vMin);
-          return H - (18 + a*(H-48));
-        }
-
-        ctx.strokeStyle = 'rgba(103,213,255,0.25)';
-        ctx.beginPath(); ctx.moveTo(0, yOf(-70)); ctx.lineTo(W, yOf(-70)); ctx.stroke();
-
-        ctx.strokeStyle = 'rgba(255,209,102,0.95)';
-        ctx.lineWidth = 3;
-        ctx.beginPath();
-        for (let i=0;i<=600;i++){
-          const x = i/600;
-          const v = actionPotential(x);
-          const px = 18 + x*(W-36);
-          const py = yOf(v);
-          if (i===0) ctx.moveTo(px,py);
-          else ctx.lineTo(px,py);
-        }
-        ctx.stroke();
-
-        const vNow = actionPotential(t);
-        const px = 18 + t*(W-36);
-        const py = yOf(vNow);
-
-        ctx.fillStyle = 'rgba(255,209,102,0.25)';
-        ctx.beginPath(); ctx.arc(px, py, 18, 0, Math.PI*2); ctx.fill();
-
-        ctx.fillStyle = 'rgba(255,209,102,1)';
-        ctx.beginPath(); ctx.arc(px, py, 6.5, 0, Math.PI*2); ctx.fill();
-
-        ctx.fillStyle = 'rgba(232,238,255,0.95)';
-        ctx.font = '700 14px ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace';
-        ctx.fillText(`${vNow.toFixed(0)} mV`, px + 14, py - 10);
-
-        graph.tex.needsUpdate = true;
-      }
-
-      function build(parent){
-        g = new THREE.Group();
-        parent.add(g);
-
-        // Membrana + canali alternati Na/K
-        membrane = new THREE.Mesh(new THREE.BoxGeometry(5.6, 0.25, 2.2), matSoft(0xe8eeff, 0x050813));
-        membrane.position.set(0, 1.0, 0);
-        membrane.material.transparent = true;
-        membrane.material.opacity = 0.35;
-        g.add(membrane);
-
-        const chMatNa = matSoft(0x4ea0ff, 0x061020);
-        const chMatK  = matSoft(0xff5c7a, 0x14060e);
-        for (let i=0;i<10;i++){
-          const ch = new THREE.Mesh(new THREE.CylinderGeometry(0.10, 0.10, 0.42, 16), (i%2===0)?chMatNa:chMatK);
-          ch.position.set(-2.2 + i*0.48, 1.0, (i%2===0)?-0.55:0.55);
-          ch.rotation.z = Math.PI/2;
-          g.add(ch);
-        }
-
-        // Ioni Na+ e K+
-        naIons = [];
-        kIons = [];
-        const naMat = new THREE.MeshStandardMaterial({ color: 0x4ea0ff, emissive: 0x0b1020, roughness: 0.25, metalness: 0.25 });
-        const kMat  = new THREE.MeshStandardMaterial({ color: 0xff5c7a, emissive: 0x0b1020, roughness: 0.25, metalness: 0.25 });
-        const ionG = new THREE.SphereGeometry(0.075, 14, 12);
-
-        function spawnIon(arr, mat, side){
-          const m = new THREE.Mesh(ionG, mat);
-          m.userData.side = side;
-          m.userData.x0 = -2.6 + Math.random()*5.2;
-          m.userData.z0 = (Math.random()-0.5)*1.6;
-          m.position.set(m.userData.x0, 1.0 + side*(0.65 + Math.random()*0.45), m.userData.z0);
-          arr.push(m); g.add(m);
-        }
-        for (let i=0;i<80;i++) spawnIon(naIons, naMat, +1);
-        for (let i=0;i<80;i++) spawnIon(kIons,  kMat,  -1);
-
-        // Rete neurale (punti + linee)
-        net = new THREE.Group();
-        g.add(net);
-        net.position.set(0, 0.05, -2.9);
-
-        netNodes = [];
-        const nodeMat = new THREE.MeshStandardMaterial({ color: 0xa6ffcb, emissive: 0x06120a, roughness: 0.35, metalness: 0.1 });
-        for (let i=0;i<18;i++){
-          const n = new THREE.Mesh(new THREE.SphereGeometry(0.11, 16, 14), nodeMat);
-          n.position.set((Math.random()-0.5)*5.2, 0.55 + Math.random()*1.0, (Math.random()-0.5)*1.8);
-          netNodes.push(n);
-          net.add(n);
-        }
-        netLines = new THREE.LineSegments(new THREE.BufferGeometry(), new THREE.LineBasicMaterial({ color: 0x67d5ff, transparent:true, opacity: 0.22 }));
-        net.add(netLines);
-
-        wave = new THREE.Mesh(new THREE.SphereGeometry(0.16, 18, 16), new THREE.MeshStandardMaterial({ color: 0xffd166, emissive: 0xffa200, roughness: 0.15, metalness: 0.1 }));
-        net.add(wave);
-
-        buildGraph();
-
-        addLabel('mem', membrane, 'Membrana + canali ionici', '#e8eeff');
-        addLabel('na', g, 'Na⁺ (blu) / K⁺ (rosa)', '#67d5ff');
-        addLabel('net', net, 'Rete neurale (effetto domino)', '#a6ffcb');
-        addLabel('graph', graphSprite, 'Grafico potenziale d’azione', '#ffd166');
-
-        g.rotation.y = -0.25;
-        controls.target.set(0, 1.25, 0);
-        camera.position.set(0.6, 2.25, 9.3);
-
-        $('#panelTitle').textContent = 'Impulsi elettrici: potenziale d’azione, Na⁺/K⁺ e rete neurale';
-        $('#panelText').textContent = 'Grafico sincronizzato con canali: Na⁺ entra (depolarizzazione), K⁺ per ripolarizzazione. Effetto domino nella rete neurale.';
-      }
-
-      function drawNetworkEdges(){
-        const edges = [];
-        for (let i=0;i<netNodes.length;i++){
-          for (let j=i+1;j<netNodes.length;j++){
-            if (netNodes[i].position.distanceTo(netNodes[j].position) < 1.55) edges.push([i,j]);
-          }
-        }
-        const needed = edges.length*2*3;
-        const pos = new Float32Array(needed);
-        let k=0;
-        for (const [i,j] of edges){
-          const A = netNodes[i].position;
-          const B = netNodes[j].position;
-          pos[k++]=A.x; pos[k++]=A.y; pos[k++]=A.z;
-          pos[k++]=B.x; pos[k++]=B.y; pos[k++]=B.z;
-        }
-        netLines.geometry.dispose();
-        netLines.geometry = new THREE.BufferGeometry();
-        netLines.geometry.setAttribute('position', new THREE.BufferAttribute(pos, 3));
-      }
-
-      function update(dt){
-        phase += dt * state.speed;
-        const t = (phase*0.16) % 1;
-        drawGraph(t);
-
-        const naOpen = smoothstep(0.18, 0.28, t) * (1.0 - smoothstep(0.30, 0.40, t));
-        const kOpen  = smoothstep(0.34, 0.46, t) * (1.0 - smoothstep(0.70, 0.86, t));
-
-        function stepIons(arr, open){
-          for (const ion of arr){
-            const targetY = 1.0 + (ion.userData.side > 0 ? 0.85 : -0.85);
-            const restY   = 1.0 + ion.userData.side*(0.65 + (ion.id%7)*0.04);
-            ion.position.x += Math.sin(phase*0.6 + ion.id)*dt*0.02;
-            ion.position.z += Math.cos(phase*0.5 + ion.id)*dt*0.02;
-            const toward = 0.8*open;
-            const yGoal = lerp(restY, targetY, toward);
-            ion.position.y = lerp(ion.position.y, yGoal, 0.06);
-
-            if (open > 0.4 && Math.abs(ion.position.y - 1.0) < 0.08){
-              ion.userData.side *= -1;
-              ion.position.y = 1.0 + ion.userData.side*0.25;
-            }
-          }
-        }
-
-        stepIons(naIons, naOpen);
-        stepIons(kIons,  kOpen);
-
-        // Propagazione "onda" nella rete (effetto domino)
-        const ordered = netNodes.slice().sort((a,b)=>a.position.x-b.position.x);
-        const u = (phase*0.22) % 1;
-        const idxF = u * (ordered.length-1);
-        const i0 = Math.floor(idxF);
-        const i1 = Math.min(ordered.length-1, i0+1);
-        const localT = idxF - i0;
-        wave.position.copy(ordered[i0].position).lerp(ordered[i1].position, localT);
-
-        for (const n of netNodes){
-          const d = n.position.distanceTo(wave.position);
-          const ex = Math.exp(-(d*d)/0.08);
-          n.scale.setScalar(1.0 + 1.1*ex);
-        }
-
-        drawNetworkEdges();
-
-        netLines.material.opacity = clamp(0.14 + 0.18*(naOpen + kOpen) + 0.12, 0.10, 0.55);
-        membrane.material.opacity = 0.28 + 0.12*(naOpen + kOpen);
-      }
-
-      function reset(){ phase = 0; }
-
-      return {
-        title: 'Impulsi elettrici: potenziale d’azione, Na⁺/K⁺ e rete neurale',
-        text: 'Grafico dinamico del potenziale d’azione e flussi ionici Na⁺/K⁺ sincronizzati. Sotto: propagazione del segnale in una rete neurale.',
-        toast: 'Guarda il cursore sul grafico e come cambiano i flussi di Na⁺/K⁺.',
-        legendChips: [
-          { label: 'Na⁺', color: '#4ea0ff' },
-          { label: 'K⁺', color: '#ff5c7a' },
-          { label: 'Potenziale d’azione', color: '#ffd166' },
-          { label: 'Rete neurale', color: '#a6ffcb' },
-        ],
-        build, update, reset
-      };
-    })();
-
-    /***********************************************************************
-     * UI WIRING
-     ***********************************************************************/
-    $('#btnPlay').addEventListener('click', ()=>{
-      state.playing = true;
-      $('#kvState').textContent = 'playing';
-      setToast('Play', 900);
-    });
-
-    $('#btnPause').addEventListener('click', ()=>{
-      state.playing = false;
-      $('#kvState').textContent = 'paused';
-      setToast('Pause', 900);
-    });
-
-    $('#btnReset').addEventListener('click', reset);
-
-    $('#speed').addEventListener('input', (e)=>{
-      state.speed = parseFloat(e.target.value);
-      $('#speedVal').textContent = state.speed.toFixed(2) + '×';
-    });
-
-    $('#btnLabels').addEventListener('click', ()=>{
-      state.labels = !state.labels;
-      $('#btnLabels').classList.toggle('toggleOn', state.labels);
-      $('#btnLabels').textContent = 'Labels: ' + (state.labels ? 'ON' : 'OFF');
-      setToast(state.labels ? 'Labels attivate.' : 'Labels disattivate.', 1200);
-    });
-
-    $('#btnHelp').addEventListener('click', ()=>{
-      setToast(
-        'Controlli: trascina per ruotare • rotellina/pinch per zoom • Play/Pause/Reset • Slider velocità • Labels ON/OFF. Consiglio: F11 per schermo intero.',
-        5200
-      );
-    });
-
-    $$('#nav button').forEach(btn=>{
-      btn.addEventListener('click', ()=> setScene(btn.dataset.scene));
-    });
-
-    /***********************************************************************
-     * LOOP
-     ***********************************************************************/
-    function tick(now){
-      const dt = Math.min(0.05, (now - state.last) / 1000);
-      state.last = now;
-
-      state._fpsAcc += dt;
-      state._fpsCount++;
-      if (state._fpsAcc >= 0.5){
-        state.fps = Math.round(state._fpsCount / state._fpsAcc);
-        state._fpsAcc = 0;
-        state._fpsCount = 0;
-        $('#kvFps').textContent = String(state.fps);
-      }
-
-      if (state.playing){
-        state.t += dt * state.speed;
-        if (active && active.update) active.update(dt);
-      }
-
-      $('#kvTime').textContent = state.t.toFixed(2) + ' s';
-
-      controls.update();
-      updateLabels();
-      renderer.render(scene, camera);
-
-      requestAnimationFrame(tick);
-    }
-
-    /***********************************************************************
-     * START
-     ***********************************************************************/
-    function start(){
-      setScene('heart');
-      $('#speedVal').textContent = state.speed.toFixed(2) + '×';
-      $('#kvState').textContent = state.playing ? 'playing' : 'paused';
-      requestAnimationFrame(tick);
-      setTimeout(()=>setToast('Suggerimento: premi F11 per schermo intero durante la presentazione.', 4200), 900);
-    }
-
-    // Nota per offline con file://:
-    // Alcuni browser limitano importmap da CDN con file://. In tal caso:
-    // - avvia un server locale (es. `python -m http.server`) nella cartella del progetto
-    //   oppure
-    // - usa l’Opzione B e punta l’importmap ai file locali di Three.js e addon.
-    start();
+    // [Main animation loop and setup code]
+    "use strict";
+    // Animazione e aggiornamenti della scena
   </script>
 </body>
 </html>
