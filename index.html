@@ -4,15 +4,11 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
-  <meta name="description"
-    content="Presentazione 3D interattiva — Biologia. Un viaggio esplorativo nel corpo umano con modelli ad alta fedeltà." />
-  <title>Biologia 3D — Experience</title>
-
-  <!-- GSAP per animazioni PRO -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+  <meta name="description" content="Presentazione 3D interattiva — Biologia." />
+  <title>Biologia 3D</title>
 
   <!-- Foglio di stile -->
-  <link rel="stylesheet" href="style.css?v=10" />
+  <link rel="stylesheet" href="style.css?v=11" />
 
   <!-- Three.js Import Map -->
   <script type="importmap">
@@ -27,61 +23,46 @@
 
 <body>
   <div class="app">
-    <!-- ─── UI LAYER ─── -->
-    <div class="ui-layer" id="ui-layer">
-      <!-- Header Flottante -->
-      <header class="header" id="header">
-        <div class="logo">BioDepth</div>
-        <p class="chapter-indicator" id="chapter-indicator">Microstruttura</p>
-      </header>
+    <!-- ─── LAYOUT CLASSICO v1 ─── -->
 
-      <!-- Info Model (Tipografia leggibile, sinistra) -->
-      <div class="info-panel" id="info-panel">
-        <h2 id="info-title">Cuore Umano</h2>
-        <div class="info-line"></div>
-        <p id="info-desc">
-          Il motore della vita. Osserva l'anatomia muscolare e la complessità dei vasi sanguigni.
-        </p>
-      </div>
+    <!-- Header -->
+    <header class="header" id="header">
+      <h1>🔬 Presentazione 3D — Biologia</h1>
+      <p id="chapter-indicator">Microstruttura</p>
+    </header>
 
-      <!-- Controlli Top-Right -->
-      <div class="controls-group" id="controls">
-        <button id="btn-toggle-text" class="ctrl-btn icon-btn" title="Focus Mode (Nascondi Testo)">
-          <svg width="24" height="24" fill="none" viewBox="0 0 24 24">
-            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-              d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
-            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-              d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7Z" />
-          </svg>
-        </button>
-        <button id="btn-rotate" class="ctrl-btn icon-btn" title="Auto Rotazione">
-          <svg width="24" height="24" fill="none" viewBox="0 0 24 24">
-            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-              d="M4 12c0-4.418 3.582-8 8-8s8 3.582 8 8-3.582 8-8 8-8-3.582-8-8Zm0 0H2.5m1.5 0V9.5" />
-          </svg>
-        </button>
-      </div>
-
-      <!-- Navigazione (Bottom Center) -->
-      <nav class="nav-bar" id="nav-bar"></nav>
-
-      <!-- Context Actions (Bottom Right) -->
-      <div class="context-stack" id="context-actions"></div>
-    </div>
-
-    <!-- ─── 3D VIEWER ─── -->
+    <!-- Viewer 3D -->
     <div class="viewer-container">
       <canvas id="canvas3d"></canvas>
 
-      <!-- Loader Legacy (Spinner Overlay) -->
+      <!-- Loader Legacy -->
       <div class="loader-overlay" id="loader">
         <div class="spinner"></div>
-        <div class="loader-text">Caricamento...</div>
+        <div class="loader-text">Caricamento modello...</div>
+      </div>
+
+      <!-- Info Panel (Card) -->
+      <div class="info-panel" id="info-panel">
+        <h2 id="info-title">Modello</h2>
+        <div class="info-line"></div>
+        <p id="info-desc">Descrizione...</p>
+      </div>
+
+      <!-- Controls -->
+      <div class="controls-group">
+        <button id="btn-toggle-text" class="ctrl-btn" title="Mostra/Nascondi Testo">👁️</button>
+        <button id="btn-rotate" class="ctrl-btn" title="Rotazione">🔄</button>
       </div>
     </div>
+
+    <!-- Navigation (Simple Bar) -->
+    <div class="nav-bar" id="nav-bar"></div>
+
+    <!-- Context Actions -->
+    <div class="context-actions" id="context-actions"></div>
   </div>
 
-  <script type="module" src="script.js?v=10"></script>
+  <script type="module" src="script.js?v=11"></script>
 </body>
 
 </html>

@@ -1,26 +1,26 @@
 /* ================================================================
-   PRESENTAZIONE 3D BIOLOGIA — DESIGN "APPLE STANDARD" v9
-   Clean Dark Mode, Readable Typography, Functional UI
+   PRESENTAZIONE 3D BIOLOGIA — DESIGN "LEGACY HYBRID" v11
+   Sfondo Dark (Moderno) + UI White (Classica)
    ================================================================ */
 
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
 :root {
-  /* Apple Standard Dark Palette */
+  /* Sfondo Scuro (Richiesto dall'utente) */
   --bg-deep: #1d1d1f;
-  /* Apple Website Grey */
   --bg-gradient: radial-gradient(circle at 50% 120%, #2c2c2e 0%, #000000 100%);
-  --accent: #2997ff;
-  --text: #f5f5f7;
-  --text-muted: #86868b;
 
-  --glass: rgba(40, 40, 40, 0.7);
-  --glass-border: rgba(255, 255, 255, 0.15);
-  --glass-blur: blur(20px) saturate(180%);
+  /* UI Chiara (Classica) */
+  --ui-bg: #ffffff;
+  --ui-text: #1d1d1f;
+  --ui-text-muted: #6e6e73;
+  --ui-border: #e5e5ea;
+  --ui-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 
-  --font-stack: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --accent: #007aff;
+  /* Apple Blue Classic */
+  --font-stack: 'Inter', -apple-system, sans-serif;
   --radius: 12px;
-  --ease: cubic-bezier(0.25, 1, 0.5, 1);
 }
 
 *,
@@ -29,7 +29,6 @@
   box-sizing: border-box;
   margin: 0;
   padding: 0;
-  -webkit-font-smoothing: antialiased;
 }
 
 body,
@@ -39,7 +38,7 @@ html {
   overflow: hidden;
   background: var(--bg-deep);
   font-family: var(--font-stack);
-  color: var(--text);
+  color: var(--ui-text);
 }
 
 /* ─── APP CONTAINER ─── */
@@ -49,12 +48,45 @@ html {
   height: 100%;
 }
 
+/* ─── HEADER (Barra Bianca in alto) ─── */
+.header {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  padding: 16px 24px;
+  background: var(--ui-bg);
+  border-bottom: 1px solid var(--ui-border);
+  box-shadow: var(--ui-shadow);
+  z-index: 20;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.header h1 {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--ui-text);
+  margin: 0;
+}
+
+.header p {
+  font-size: 14px;
+  color: var(--ui-text-muted);
+  font-weight: 500;
+  margin: 0;
+}
+
 /* ─── VIEWER 3D ─── */
 .viewer-container {
   position: absolute;
-  inset: 0;
+  top: 60px;
+  /* Spazio per header */
+  bottom: 0;
+  left: 0;
+  width: 100%;
   z-index: 0;
-  /* Gradiente di sfondo CSS visibile se il renderer è trasparente */
   background: var(--bg-gradient);
 }
 
@@ -65,127 +97,86 @@ canvas {
   outline: none;
 }
 
-/* ─── UI LAYER ─── */
-.ui-layer {
-  position: absolute;
-  inset: 0;
-  z-index: 10;
-  pointer-events: none;
-  /* Cruciale: lascia passare i click al canvas */
-}
-
-/* Elementi interattivi */
-.header,
-.info-panel,
-.controls-group,
-.nav-bar,
-.context-stack .action-btn {
-  pointer-events: auto;
-}
-
-/* HEADER */
-.header {
-  position: absolute;
-  top: 24px;
-  width: 100%;
-  text-align: center;
-  z-index: 20;
-}
-
-.logo {
-  font-size: 13px;
-  font-weight: 600;
-  letter-spacing: 0.5px;
-  text-transform: uppercase;
-  color: var(--text-muted);
-  margin-bottom: 6px;
-}
-
-.chapter-indicator {
-  display: inline-block;
-  font-size: 14px;
-  font-weight: 500;
-  color: #fff;
-  opacity: 0.9;
-}
-
-/* INFO PANEL - Standard Readability */
+/* ─── INFO PANEL (Card Bianca Flottante) ─── */
 .info-panel {
   position: absolute;
-  top: 20%;
-  left: 40px;
-  max-width: 380px;
+  top: 24px;
+  left: 24px;
+  width: 320px;
   padding: 24px;
-  z-index: 15;
-  /* Optional Glass Background for readability */
-  /* background: rgba(0,0,0,0.2); 
-     backdrop-filter: blur(10px);
-     border-radius: var(--radius); */
+  background: var(--ui-bg);
+  border-radius: var(--radius);
+  box-shadow: var(--ui-shadow);
+  border: 1px solid var(--ui-border);
+  z-index: 10;
+  transition: opacity 0.3s ease;
 }
 
 .info-panel h2 {
-  font-size: 48px;
+  font-size: 22px;
   font-weight: 700;
-  /* Bold, standard Apple Title */
-  line-height: 1.1;
-  letter-spacing: -0.5px;
-  margin-bottom: 20px;
-  color: #fff;
+  margin-bottom: 8px;
+  color: var(--ui-text);
 }
 
 .info-line {
   width: 40px;
-  height: 3px;
+  height: 4px;
   background: var(--accent);
-  margin-bottom: 20px;
+  margin-bottom: 12px;
   border-radius: 2px;
 }
 
 .info-panel p {
-  font-size: 16px;
+  font-size: 14px;
   line-height: 1.5;
-  color: #d2d2d7;
-  font-weight: 400;
+  color: var(--ui-text-muted);
 }
 
-/* FOCUS MODE: Hide Text Only */
-.info-hidden .info-panel,
-.info-hidden .header {
+/* Hidden State */
+.info-hidden .info-panel {
   opacity: 0;
-  transform: translateY(-10px);
   pointer-events: none;
-  transition: all 0.4s var(--ease);
 }
 
-/* CONTROLS (Top Right) */
+/* ─── CONTROLS (Bottoni Bianchi) ─── */
 .controls-group {
   position: absolute;
   top: 24px;
   right: 24px;
   display: flex;
+  flex-direction: column;
   gap: 10px;
+  z-index: 15;
 }
 
 .ctrl-btn {
-  width: 40px;
-  height: 40px;
+  width: 44px;
+  height: 44px;
   border-radius: 50%;
-  background: rgba(60, 60, 60, 0.6);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  backdrop-filter: blur(12px);
-  color: #fff;
+  background: var(--ui-bg);
+  border: 1px solid var(--ui-border);
+  box-shadow: var(--ui-shadow);
+  font-size: 18px;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all 0.2s ease;
+  transition: transform 0.2s ease;
 }
 
 .ctrl-btn:hover {
-  background: rgba(255, 255, 255, 0.3);
   transform: scale(1.05);
+  background: #f5f5f7;
 }
 
+.ctrl-btn.active {
+  background: var(--accent);
+  color: #fff;
+  border-color: var(--accent);
+}
+
+/* ─── NAV BAR (Pillola Bianca in basso) ─── */
 .nav-bar {
   position: absolute;
   bottom: 32px;
@@ -193,58 +184,56 @@ canvas {
   transform: translateX(-50%);
   display: flex;
   gap: 8px;
-  padding: 6px;
-  background: rgba(28, 28, 30, 0.85);
-  /* Dark solid/translucent */
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  backdrop-filter: blur(20px);
-  border-radius: 100px;
+  padding: 8px 12px;
+  background: var(--ui-bg);
+  border-radius: 30px;
+  box-shadow: var(--ui-shadow);
+  border: 1px solid var(--ui-border);
   z-index: 30;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
 }
 
 .nav-btn {
   background: transparent;
   border: none;
-  color: #98989d;
   font-size: 14px;
   font-weight: 500;
-  padding: 8px 18px;
-  border-radius: 100px;
+  padding: 8px 16px;
+  border-radius: 20px;
   cursor: pointer;
-  white-space: nowrap;
+  color: var(--ui-text-muted);
   transition: all 0.2s ease;
 }
 
 .nav-btn:hover {
-  color: #fff;
-  background: rgba(255, 255, 255, 0.1);
+  background: #f2f2f7;
+  color: var(--ui-text);
 }
 
 .nav-btn.active {
-  background: #fff;
-  color: #000;
+  background: var(--accent);
+  color: #fff;
   font-weight: 600;
 }
 
-/* CONTEXT ACTIONS (Bottom Right) */
-.context-stack {
+/* ─── CONTEXT ACTIONS (Bottoni Bianchi dx) ─── */
+.context-actions {
   position: absolute;
   bottom: 100px;
-  right: 32px;
+  right: 24px;
   display: flex;
   flex-direction: column;
   gap: 12px;
   align-items: flex-end;
+  z-index: 25;
 }
 
 .action-btn {
   padding: 12px 20px;
-  background: rgba(41, 151, 255, 0.15);
-  border: 1px solid rgba(41, 151, 255, 0.4);
-  backdrop-filter: blur(16px);
+  background: var(--ui-bg);
+  border: 1px solid var(--ui-border);
   border-radius: 12px;
-  color: #fff;
+  box-shadow: var(--ui-shadow);
+  color: var(--accent);
   font-size: 14px;
   font-weight: 600;
   cursor: pointer;
@@ -252,21 +241,19 @@ canvas {
   align-items: center;
   gap: 8px;
   transition: transform 0.2s ease;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
 }
 
 .action-btn:hover {
-  background: var(--accent);
-  /* Solid blue on hover */
   transform: translateY(-2px);
+  background: #f5f5f7;
 }
 
-/* LOADER OVERLAY (Restored) */
+/* ─── LOADER (Spinner) ─── */
 .loader-overlay {
   position: absolute;
   inset: 0;
-  background: rgba(0, 0, 0, 0.8);
-  backdrop-filter: blur(10px);
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(5px);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -283,8 +270,8 @@ canvas {
 .spinner {
   width: 48px;
   height: 48px;
-  border: 4px solid rgba(255, 255, 255, 0.1);
-  border-top-color: var(--accent);
+  border: 4px solid rgba(255, 255, 255, 0.2);
+  border-top-color: #fff;
   border-radius: 50%;
   animation: spin 0.8s linear infinite;
 }
@@ -297,45 +284,40 @@ canvas {
 
 .loader-text {
   margin-top: 16px;
+  color: #fff;
   font-size: 14px;
-  color: var(--text-muted);
   font-weight: 500;
-  letter-spacing: 0.5px;
 }
 
 @media (max-width: 768px) {
+  .header {
+    padding: 12px 16px;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+  }
+
   .info-panel {
     top: auto;
-    bottom: 140px;
-    left: 20px;
-    right: 20px;
-    padding: 0;
-    max-width: none;
-  }
-
-  .info-panel h2 {
-    font-size: 32px;
-    margin-bottom: 12px;
-  }
-
-  .info-line {
-    margin-bottom: 12px;
-  }
-
-  .info-panel p {
-    font-size: 14px;
-    max-width: none;
+    bottom: 80px;
+    left: 16px;
+    right: 16px;
+    width: auto;
   }
 
   .nav-bar {
+    bottom: 16px;
     width: 92%;
     overflow-x: auto;
     justify-content: flex-start;
-    bottom: 20px;
   }
 
-  .context-stack {
-    bottom: 200px;
-    right: 20px;
+  .context-actions {
+    bottom: 180px;
+  }
+
+  .viewer-container {
+    top: 60px;
+    /* Adjust based on mobile header */
   }
 }

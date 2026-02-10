@@ -1,6 +1,6 @@
 /* ================================================================
-   PRESENTAZIONE 3D BIOLOGIA — LOGICA APP (v10 Final Polish)
-   High Res, Legacy Loader, Optimized
+   PRESENTAZIONE 3D BIOLOGIA — LOGICA APP (v11 Legacy)
+   No GSAP, Simple Logic, High Performance
    ================================================================ */
 
 import * as THREE from 'three';
@@ -82,8 +82,7 @@ const SECTIONS = [
 
 // ─── DOM ELEMENTS ────────────────────────────────────────────────
 const canvas = document.getElementById('canvas3d');
-const uiLayer = document.getElementById('ui-layer');
-const loaderOverlay = document.getElementById('loader'); // Legacy Spinner
+const loaderOverlay = document.getElementById('loader');
 const navBar = document.getElementById('nav-bar');
 const contextStack = document.getElementById('context-actions');
 const infoTitle = document.getElementById('info-title');
@@ -97,7 +96,6 @@ const renderer = new THREE.WebGLRenderer({
   alpha: true,
   powerPreference: 'high-performance'
 });
-// FIX PIXELATION: Use full device pixel ratio
 renderer.setPixelRatio(window.devicePixelRatio);
 renderer.setClearColor(0x000000, 0);
 renderer.shadowMap.enabled = true;
@@ -118,8 +116,8 @@ controls.enablePan = false;
 controls.minDistance = 2;
 controls.maxDistance = 20;
 
-// Lighting Setup
-const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+// Lighting Setup 
+const ambientLight = new THREE.AmbientLight(0xffffff, 0.7);
 scene.add(ambientLight);
 
 const keyLight = new THREE.DirectionalLight(0xffffff, 1.0);
@@ -129,7 +127,7 @@ keyLight.shadow.mapSize.width = 2048;
 keyLight.shadow.mapSize.height = 2048;
 scene.add(keyLight);
 
-const rimLight = new THREE.DirectionalLight(0x44aaff, 0.6);
+const rimLight = new THREE.DirectionalLight(0x44aaff, 0.5);
 rimLight.position.set(-5, 3, -5);
 scene.add(rimLight);
 
@@ -158,18 +156,12 @@ function wrapModel(gltf) {
   const scaleFactor = 4.0 / maxDim;
   wrapper.scale.setScalar(scaleFactor);
 
-  // FIX TEXTURE QUALITY & SHADOWS
   const maxAnisotropy = renderer.capabilities.maxAnisotropy;
   root.traverse(c => {
     if (c.isMesh) {
       c.castShadow = true;
       c.receiveShadow = true;
-      c.material.depthWrite = true;
-
-      // Enhance textures
       if (c.material.map) c.material.map.anisotropy = maxAnisotropy;
-      if (c.material.normalMap) c.material.normalMap.anisotropy = maxAnisotropy;
-      if (c.material.roughnessMap) c.material.roughnessMap.anisotropy = maxAnisotropy;
     }
   });
 
@@ -191,14 +183,10 @@ async function loadModel(id) {
   if (!data) return;
   const { model, section } = data;
 
-  // UI Fade Out
-  gsap.to([infoTitle, infoDesc], { opacity: 0, y: -10, duration: 0.2 });
-
-  // Show Loader
   loaderOverlay.classList.remove('hidden');
 
   if (currentModel) {
-    scene.remove(currentModel); // Instant remove for clearer loading state
+    scene.remove(currentModel);
     currentModel = null;
   }
 
@@ -207,22 +195,32 @@ async function loadModel(id) {
       loader.load(model.file, resolve, undefined, reject);
     });
 
-    // Hide Loader
     loaderOverlay.classList.add('hidden');
 
     const wrapper = wrapModel(gltf);
     currentModel = wrapper;
     scene.add(wrapper);
 
-    // Smooth Scale In
-    wrapper.scale.set(0, 0, 0);
-    gsap.to(wrapper.scale, { x: 1, y: 1, z: 1, duration: 0.6, ease: 'back.out(1)', delay: 0.1 });
+    // Simple Camera Move
+    const startPos = camera.position.clone();
+    const endPos = new THREE.Vector3(model.cam[0], model.cam[1], model.cam[2]);
 
-    // Move Camera
-    gsap.to(camera.position, {
-      x: model.cam[0], y: model.cam[1], z: model.cam[2],
-      duration: 1.0, ease: 'power2.inOut'
-    });
+    // Basic Custom Tween for Camera
+    const duration = 1000;
+    const start = performance.now();
+
+    function tweenCamera(now) {
+      const elapsed = now - start;
+      const progress = Math.min(elapsed / duration, 1);
+      // Ease out cubic
+      const ease = 1 - Math.pow(1 - progress, 3);
+
+      camera.position.lerpVectors(startPos, endPos, ease);
+      controls.update();
+
+      if (progress < 1) requestAnimationFrame(tweenCamera);
+    }
+    requestAnimationFrame(tweenCamera);
 
     // Update Text
     infoTitle.textContent = model.name;
@@ -232,16 +230,13 @@ async function loadModel(id) {
     updateNav(section.id);
     updateActions(model.actions);
 
-    // Fade In Text
-    gsap.to([infoTitle, infoDesc], { opacity: 1, y: 0, duration: 0.5, delay: 0.2 });
-
   } catch (err) {
     console.error(err);
     loaderOverlay.classList.add('hidden');
   }
 }
 
-// ─── NAVBAR & ACTIONS ────────────────────────────────────────────
+// ─── UI UPDATES ──────────────────────────────────────────────────
 function updateNav(activeSecId) {
   navBar.innerHTML = '';
   SECTIONS.forEach(sec => {
@@ -256,50 +251,40 @@ function updateNav(activeSecId) {
 
 function updateActions(actions) {
   contextStack.innerHTML = '';
-  actions.forEach((act, i) => {
+  actions.forEach(act => {
     const btn = document.createElement('button');
     btn.className = 'action-btn';
     btn.innerHTML = `<span>${act.label}</span>`;
     if (act.icon) btn.innerHTML += ` <span style="font-size:1.2em">${act.icon}</span>`;
 
     btn.onclick = () => loadModel(act.target);
-    gsap.fromTo(btn, { x: 20, opacity: 0 }, { x: 0, opacity: 1, duration: 0.4, delay: 0.3 + (i * 0.1) });
-    contextStack.appendChild(btn);
+    contextStack.appendChild(btn); // No animation
   });
 }
 
-// ─── FOCUS & CONTROLS ────────────────────────────────────────────
+// ─── EVENTS ──────────────────────────────────────────────────────
 const btnToggleText = document.getElementById('btn-toggle-text');
-let isFocus = false;
+let isTextHidden = false;
 
 btnToggleText.addEventListener('click', () => {
-  isFocus = !isFocus;
-  const ui = document.getElementById('ui-layer');
-
-  if (isFocus) ui.classList.add('info-hidden');
-  else ui.classList.remove('info-hidden');
-
-  btnToggleText.classList.toggle('active', isFocus);
+  isTextHidden = !isTextHidden;
+  const app = document.querySelector('.app');
+  if (isTextHidden) app.classList.add('info-hidden');
+  else app.classList.remove('info-hidden');
 });
 
 const btnRotate = document.getElementById('btn-rotate');
 btnRotate.addEventListener('click', () => {
   controls.autoRotate = !controls.autoRotate;
-  btnRotate.classList.toggle('active', controls.autoRotate);
 });
 
-// ─── RENDER LOOP ─────────────────────────────────────────────────
+// ─── LOOP ────────────────────────────────────────────────────────
 const clock = new THREE.Clock();
 
 function animate() {
   requestAnimationFrame(animate);
   const t = clock.getElapsedTime();
   controls.update();
-
-  if (currentModel) {
-    currentModel.position.y = Math.sin(t * 0.5) * 0.05;
-  }
-
   renderer.render(scene, camera);
 }
 
