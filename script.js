@@ -1,6 +1,6 @@
 /* ================================================================
-   PRESENTAZIONE 3D BIOLOGIA — LOGICA APP (v9 Apple Standard)
-   Clean, Fast, Responsive
+   PRESENTAZIONE 3D BIOLOGIA — LOGICA APP (v10 Final Polish)
+   High Res, Legacy Loader, Optimized
    ================================================================ */
 
 import * as THREE from 'three';
@@ -82,8 +82,8 @@ const SECTIONS = [
 
 // ─── DOM ELEMENTS ────────────────────────────────────────────────
 const canvas = document.getElementById('canvas3d');
-const uiLayer = document.getElementById('ui-layer'); // Wrapper UI
-const loaderBar = document.getElementById('loader-bar');
+const uiLayer = document.getElementById('ui-layer');
+const loaderOverlay = document.getElementById('loader'); // Legacy Spinner
 const navBar = document.getElementById('nav-bar');
 const contextStack = document.getElementById('context-actions');
 const infoTitle = document.getElementById('info-title');
@@ -94,15 +94,16 @@ const chapterInd = document.getElementById('chapter-indicator');
 const renderer = new THREE.WebGLRenderer({
   canvas,
   antialias: true,
-  alpha: true, // Transparent for CSS gradient
+  alpha: true,
   powerPreference: 'high-performance'
 });
-renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+// FIX PIXELATION: Use full device pixel ratio
+renderer.setPixelRatio(window.devicePixelRatio);
 renderer.setClearColor(0x000000, 0);
 renderer.shadowMap.enabled = true;
 renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 renderer.toneMapping = THREE.ACESFilmicToneMapping;
-renderer.toneMappingExposure = 1.2; // Brighter exposure
+renderer.toneMappingExposure = 1.2;
 renderer.outputEncoding = THREE.sRGBEncoding;
 
 const scene = new THREE.Scene();
@@ -117,8 +118,8 @@ controls.enablePan = false;
 controls.minDistance = 2;
 controls.maxDistance = 20;
 
-// Lighting Setup (Balanced for visibility)
-const ambientLight = new THREE.AmbientLight(0xffffff, 0.6); // Increased base light
+// Lighting Setup
+const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
 scene.add(ambientLight);
 
 const keyLight = new THREE.DirectionalLight(0xffffff, 1.0);
@@ -128,12 +129,12 @@ keyLight.shadow.mapSize.width = 2048;
 keyLight.shadow.mapSize.height = 2048;
 scene.add(keyLight);
 
-const rimLight = new THREE.DirectionalLight(0x44aaff, 0.6); // Subtle blue rim
+const rimLight = new THREE.DirectionalLight(0x44aaff, 0.6);
 rimLight.position.set(-5, 3, -5);
 scene.add(rimLight);
 
 const fillLight = new THREE.DirectionalLight(0xffffff, 0.4);
-fillLight.position.set(0, 0, 5); // Front fill
+fillLight.position.set(0, 0, 5);
 scene.add(fillLight);
 
 // ─── GLTF LOADER ─────────────────────────────────────────────────
@@ -154,14 +155,21 @@ function wrapModel(gltf) {
   const size = new THREE.Vector3();
   box.getSize(size);
   const maxDim = Math.max(size.x, size.y, size.z);
-  const scaleFactor = 4.0 / maxDim; // Standard size
+  const scaleFactor = 4.0 / maxDim;
   wrapper.scale.setScalar(scaleFactor);
 
+  // FIX TEXTURE QUALITY & SHADOWS
+  const maxAnisotropy = renderer.capabilities.maxAnisotropy;
   root.traverse(c => {
     if (c.isMesh) {
       c.castShadow = true;
       c.receiveShadow = true;
       c.material.depthWrite = true;
+
+      // Enhance textures
+      if (c.material.map) c.material.map.anisotropy = maxAnisotropy;
+      if (c.material.normalMap) c.material.normalMap.anisotropy = maxAnisotropy;
+      if (c.material.roughnessMap) c.material.roughnessMap.anisotropy = maxAnisotropy;
     }
   });
 
@@ -183,37 +191,32 @@ async function loadModel(id) {
   if (!data) return;
   const { model, section } = data;
 
-  // UI Fade Out Text
+  // UI Fade Out
   gsap.to([infoTitle, infoDesc], { opacity: 0, y: -10, duration: 0.2 });
 
-  // Loader
-  gsap.to(loaderBar, { width: '30%', duration: 0.3 });
+  // Show Loader
+  loaderOverlay.classList.remove('hidden');
 
   if (currentModel) {
-    gsap.to(currentModel.scale, {
-      x: 0, y: 0, z: 0, duration: 0.3, ease: 'back.in(1)', onComplete: () => {
-        scene.remove(currentModel);
-      }
-    });
+    scene.remove(currentModel); // Instant remove for clearer loading state
+    currentModel = null;
   }
 
   try {
     const gltf = await new Promise((resolve, reject) => {
-      loader.load(model.file, resolve, (xhr) => {
-        if (xhr.total) {
-          const pct = (xhr.loaded / xhr.total) * 100;
-          gsap.to(loaderBar, { width: pct + '%', duration: 0.2 });
-        }
-      }, reject);
+      loader.load(model.file, resolve, undefined, reject);
     });
+
+    // Hide Loader
+    loaderOverlay.classList.add('hidden');
 
     const wrapper = wrapModel(gltf);
     currentModel = wrapper;
     scene.add(wrapper);
 
-    // Scale In (Simpler)
+    // Smooth Scale In
     wrapper.scale.set(0, 0, 0);
-    gsap.to(wrapper.scale, { x: 1, y: 1, z: 1, duration: 0.8, ease: 'back.out(1.2)', delay: 0.1 });
+    gsap.to(wrapper.scale, { x: 1, y: 1, z: 1, duration: 0.6, ease: 'back.out(1)', delay: 0.1 });
 
     // Move Camera
     gsap.to(camera.position, {
@@ -230,11 +233,11 @@ async function loadModel(id) {
     updateActions(model.actions);
 
     // Fade In Text
-    gsap.to(loaderBar, { width: '0%', duration: 0.4, delay: 0.4 });
-    gsap.to([infoTitle, infoDesc], { opacity: 1, y: 0, duration: 0.5, delay: 0.3 });
+    gsap.to([infoTitle, infoDesc], { opacity: 1, y: 0, duration: 0.5, delay: 0.2 });
 
   } catch (err) {
     console.error(err);
+    loaderOverlay.classList.add('hidden');
   }
 }
 
@@ -256,12 +259,11 @@ function updateActions(actions) {
   actions.forEach((act, i) => {
     const btn = document.createElement('button');
     btn.className = 'action-btn';
-    btn.innerHTML = `<span>${act.label}</span>`; // Removed icon inside button mainly for cleaner look, or just text
-    // Re-adding icon if needed
+    btn.innerHTML = `<span>${act.label}</span>`;
     if (act.icon) btn.innerHTML += ` <span style="font-size:1.2em">${act.icon}</span>`;
 
     btn.onclick = () => loadModel(act.target);
-    gsap.fromTo(btn, { x: 20, opacity: 0 }, { x: 0, opacity: 1, duration: 0.4, delay: 0.5 + (i * 0.1) });
+    gsap.fromTo(btn, { x: 20, opacity: 0 }, { x: 0, opacity: 1, duration: 0.4, delay: 0.3 + (i * 0.1) });
     contextStack.appendChild(btn);
   });
 }
@@ -273,11 +275,7 @@ let isFocus = false;
 btnToggleText.addEventListener('click', () => {
   isFocus = !isFocus;
   const ui = document.getElementById('ui-layer');
-  const icon = isFocus ?
-    '<path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7Z"/><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"/>' : // Eye Open
-    '<path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.933 13.909 2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7Z"/><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.121 14.121 3 3m18 18L9.879 9.879"/>'; // Cross eye (simplified path) - Actually I'll just use a slash.
 
-  // Update UI Class
   if (isFocus) ui.classList.add('info-hidden');
   else ui.classList.remove('info-hidden');
 
@@ -290,7 +288,6 @@ btnRotate.addEventListener('click', () => {
   btnRotate.classList.toggle('active', controls.autoRotate);
 });
 
-
 // ─── RENDER LOOP ─────────────────────────────────────────────────
 const clock = new THREE.Clock();
 
@@ -300,7 +297,7 @@ function animate() {
   controls.update();
 
   if (currentModel) {
-    currentModel.position.y = Math.sin(t * 0.5) * 0.05; // Slower float
+    currentModel.position.y = Math.sin(t * 0.5) * 0.05;
   }
 
   renderer.render(scene, camera);

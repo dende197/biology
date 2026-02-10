@@ -12,7 +12,7 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
 
   <!-- Foglio di stile -->
-  <link rel="stylesheet" href="style.css?v=9" />
+  <link rel="stylesheet" href="style.css?v=10" />
 
   <!-- Three.js Import Map -->
   <script type="importmap">
@@ -73,14 +73,15 @@
     <div class="viewer-container">
       <canvas id="canvas3d"></canvas>
 
-      <!-- Loader integrato -->
-      <div class="loader-bar-container" id="loader">
-        <div class="loader-bar" id="loader-bar"></div>
+      <!-- Loader Legacy (Spinner Overlay) -->
+      <div class="loader-overlay" id="loader">
+        <div class="spinner"></div>
+        <div class="loader-text">Caricamento...</div>
       </div>
     </div>
   </div>
 
-  <script type="module" src="script.js?v=9"></script>
+  <script type="module" src="script.js?v=10"></script>
 </body>
 
 </html>
