@@ -428,6 +428,21 @@ body {
     padding-top: 16px;
   }
 
+  /* --- Utility per nascondere UI (Focus Mode) --- */
+  .ui-hidden {
+    opacity: 0 !important;
+    pointer-events: none !important;
+    transform: translateY(10px);
+  }
+
+  /* Transizione fluida per elementi che saranno nascosti */
+  .info-panel,
+  .nav-bar,
+  .context-actions,
+  .header {
+    transition: opacity 0.5s ease, transform 0.5s ease, background 0.3s, border 0.3s, box-shadow 0.3s;
+  }
+
   .viewer {
     height: 70vh;
     /* Fixed height on mobile for scroll */

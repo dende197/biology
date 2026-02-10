@@ -9,7 +9,7 @@
   <title>Presentazione 3D — Biologia</title>
 
   <!-- Foglio di stile -->
-  <link rel="stylesheet" href="style.css?v=5" />
+  <link rel="stylesheet" href="style.css?v=6" />
 
   <!--
     Import Map per Three.js (CDN unpkg).
@@ -53,15 +53,15 @@
 
       <!-- Controlli overlay (alto a destra): auto-rotate, reset vista -->
       <div class="controls-overlay">
-        <button class="ctrl-btn" id="btn-rotate" title="Auto-rotazione">🔄</button>
-        <button class="ctrl-btn" id="btn-reset" title="Reimposta vista">🎯</button>
+        <button id="btn-toggle-ui" class="ctrl-btn" title="Nascondi Interfaccia (Focus)">👁️</button>
+        <button id="btn-rotate" class="ctrl-btn" title="Auto-rotazione">🔄</button>
+        <button id="btn-reset" class="ctrl-btn" title="Reimposta vista">🎯</button>
       </div>
 
       <!-- Hint / Toast (basso a destra) -->
       <div class="hint" id="hint"></div>
     </div>
 
-    <!-- ─── BARRA PULSANTI MODELLI ─── -->
     <!-- ─── BARRA DI NAVIGAZIONE (Macro Categorie) ─── -->
     <div class="nav-bar" id="nav-bar"></div>
 
@@ -70,7 +70,7 @@
   </div>
 
   <!-- Script principale (ES Module) -->
-  <script type="module" src="script.js?v=5"></script>
+  <script type="module" src="script.js?v=6"></script>
 </body>
 
 </html>

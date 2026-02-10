@@ -157,7 +157,7 @@ renderer.setClearColor(0x000000, 0); // Trasparente
 renderer.shadowMap.enabled = true;
 renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 renderer.toneMapping = THREE.ACESFilmicToneMapping;
-renderer.toneMappingExposure = 1.4; // Leggermente ridotto per mood dark
+renderer.toneMappingExposure = 1.0; // Esposizione ridotta per evitare bruciature sui modelli chiari
 renderer.outputEncoding = THREE.sRGBEncoding;
 
 // ─── SCENA ───────────────────────────────────────────────────────
@@ -185,7 +185,7 @@ scene.add(ambientLight);
 const hemiLight = new THREE.HemisphereLight(0xffffff, 0xcccccc, 0.7);
 scene.add(hemiLight);
 
-const keyLight = new THREE.DirectionalLight(0xffffff, 1.0);
+const keyLight = new THREE.DirectionalLight(0xffffff, 0.8); // 1.0 -> 0.8
 keyLight.position.set(5, 10, 6);
 keyLight.castShadow = true;
 keyLight.shadow.mapSize.set(2048, 2048);
@@ -194,24 +194,21 @@ keyLight.shadow.camera.far = 30;
 keyLight.shadow.bias = -0.001;
 scene.add(keyLight);
 
-const fillLight = new THREE.DirectionalLight(0xffffff, 0.5);
+const fillLight = new THREE.DirectionalLight(0xffffff, 0.3); // 0.5 -> 0.3
 fillLight.position.set(-6, 4, 4);
 scene.add(fillLight);
 
-const rimLight = new THREE.DirectionalLight(0xffffff, 0.6); // Più forte per stacco dal fondo scuro
+const rimLight = new THREE.DirectionalLight(0xffffff, 0.5); // 0.6 -> 0.5
 rimLight.position.set(0, 3, -8);
 scene.add(rimLight);
 
-const frontLight = new THREE.DirectionalLight(0xffffff, 0.4);
+const frontLight = new THREE.DirectionalLight(0xffffff, 0.2); // 0.4 -> 0.2
 frontLight.position.set(0, 2, 8);
 scene.add(frontLight);
 
-// ─── GRIGLIA ─────────────────────────────────────────────────────
-const gridHelper = new THREE.GridHelper(20, 20, 0x444444, 0x222222);
-gridHelper.position.y = -1.5;
-gridHelper.material.transparent = true;
-gridHelper.material.opacity = 0.2;
-scene.add(gridHelper);
+// ─── GRIGLIA (RIMOSSA) ───────────────────────────────────────────
+// const gridHelper = new THREE.GridHelper(20, 20, 0x444444, 0x222222);
+// scene.add(gridHelper);
 
 // ─── GLTF LOADER ─────────────────────────────────────────────────
 const gltfLoader = new GLTFLoader();
@@ -400,6 +397,22 @@ btnReset.addEventListener('click', () => {
     controls.update();
     showHint('🎯 Vista reimpostata', 1500);
   }
+});
+
+const btnToggleUI = document.getElementById('btn-toggle-ui');
+let isUIHidden = false;
+btnToggleUI.addEventListener('click', () => {
+  isUIHidden = !isUIHidden;
+
+  const uiElements = document.querySelectorAll('.header, .info-panel, .nav-bar, .context-actions');
+  uiElements.forEach(el => {
+    if (isUIHidden) el.classList.add('ui-hidden');
+    else el.classList.remove('ui-hidden');
+  });
+
+  btnToggleUI.textContent = isUIHidden ? '👁️' : '🙈';
+  btnToggleUI.classList.toggle('active', isUIHidden);
+  showHint(isUIHidden ? 'Modo Focus attivo' : 'Interfaccia visibile', 1500);
 });
 
 function onResize() {
