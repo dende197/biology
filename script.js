@@ -1,86 +1,129 @@
 /* ================================================================
    PRESENTAZIONE 3D BIOLOGIA — LOGICA THREE.JS (r133)
-   Caricamento modelli GLB con KHR_materials_pbrSpecularGlossiness.
-   Ogni sezione è commentata in italiano per comprensione.
+   Struttura a capitoli con navigazione contestuale.
    ================================================================ */
 
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 
-// ─── CONFIGURAZIONE MODELLI ─────────────────────────────────────
-// Array con i dati di ogni modello caricabile.
-// Array con i dati di ogni modello caricabile.
-const MODELS = [
+// ─── CONFIGURAZIONE SEZIONI E MODELLI ────────────────────────────
+// Organizzazione gerarchica: Capitoli -> Modelli principali -> Dettagli
+const SECTIONS = [
   {
-    id: 'heart',
-    file: 'models/jantung_manusia.glb',
-    name: 'Cuore Umano',
-    icon: '❤️',
-    description: 'Il cuore è un organo muscolare cavo che pompa il sangue attraverso il sistema circolatorio. ' +
-      'È diviso in 4 camere: 2 atri (superiori) e 2 ventricoli (inferiori). ' +
-      'Il lato destro riceve sangue deossigenato e lo invia ai polmoni; il sinistro riceve sangue ossigenato e lo distribuisce al corpo.',
-    scale: 3.0,
-    cameraPos: [0, 1.5, 6],
-    targetPos: [0, 0, 0],
+    id: 'neuron_unit',
+    title: 'Neurone & Sinapsi',
+    icon: '⚡',
+    models: [
+      {
+        id: 'neuron_main',
+        file: 'models/result-4.glb',
+        name: 'Neurone Completo',
+        icon: '⚡',
+        description: 'L\'unità fondamentale del sistema nervoso. Osserva la struttura ramificata: ' +
+          'il corpo cellulare (soma), i dendriti ramificati e il lungo assone per la trasmissione dei segnali.',
+        scale: 3.5,
+        cameraPos: [0, 2, 8],
+        targetPos: [0, 0, 0],
+        actions: [
+          { label: '🔍 Vedi Dettaglio Sinapsi', target: 'synapse_detail', icon: '🔬' }
+        ]
+      },
+      {
+        id: 'synapse_detail',
+        file: 'models/result.glb',
+        name: 'Sinapsi (Dettaglio)',
+        icon: '🔬',
+        description: 'Il punto di connessione tra due neuroni. Qui i neurotrasmettitori vengono rilasciati ' +
+          'per trasmettere il segnale chimico da una cellula all\'altra.',
+        scale: 4.0,
+        cameraPos: [0, 2, 6],
+        targetPos: [0, 0, 0],
+        actions: [
+          { label: '⬅ Torna al Neurone', target: 'neuron_main', icon: '↩️' }
+        ]
+      }
+    ]
   },
   {
-    id: 'cerebellum',
-    file: 'models/cerebellum-2.glb',
-    name: 'Cervelletto',
+    id: 'cns_unit',
+    title: 'Sistema Nervoso Centrale',
     icon: '🧠',
-    description: 'Il cervelletto è una parte del sistema nervoso centrale situata alla base del cervello. ' +
-      'Svolge un ruolo fondamentale nel controllo motorio, nella coordinazione, nell\'equilibrio e ' +
-      'nell\'apprendimento di movimenti complessi.',
-    scale: 3.0,
-    cameraPos: [0, 1.5, 6],
-    targetPos: [0, 0, 0],
+    models: [
+      {
+        id: 'cns_main',
+        file: 'models/result-2.glb',
+        name: 'Encefalo & Tronco',
+        icon: '🧠',
+        description: 'Visione d\'insieme del Sistema Nervoso Centrale: include cervello, cervelletto e tronco encefalico. ' +
+          'È il centro di controllo di tutte le funzioni corporee.',
+        scale: 3.0,
+        cameraPos: [0, 1.5, 7],
+        targetPos: [0, 0, 0],
+        actions: [
+          { label: '🦴 Vedi Midollo Spinale', target: 'spinal_cord', icon: '🦴' },
+          { label: '🧠 Vedi Cervelletto', target: 'cerebellum', icon: '🧩' }
+        ]
+      },
+      {
+        id: 'spinal_cord',
+        file: 'models/result-3.glb',
+        name: 'Midollo Spinale',
+        icon: '🦴',
+        description: 'La via di comunicazione principale tra il cervello e il resto del corpo. ' +
+          'Trasmette impulsi motori e sensoriali e coordina i riflessi.',
+        scale: 3.0,
+        cameraPos: [0, 2, 7],
+        targetPos: [0, 0, 0],
+        actions: [
+          { label: '⬅ Torna al SNC', target: 'cns_main', icon: '↩️' }
+        ]
+      },
+      {
+        id: 'cerebellum',
+        file: 'models/cerebellum-2.glb',
+        name: 'Cervelletto',
+        icon: '🧩',
+        description: 'Situato alla base del cervello, è essenziale per la coordinazione motoria, ' +
+          'l\'equilibrio e l\'apprendimento di movimenti fluidi e precisi.',
+        scale: 3.0,
+        cameraPos: [0, 1.5, 6],
+        targetPos: [0, 0, 0],
+        actions: [
+          { label: '⬅ Torna al SNC', target: 'cns_main', icon: '↩️' }
+        ]
+      }
+    ]
   },
   {
-    id: 'model1',
-    file: 'models/result.glb',
-    name: 'Modello Anatomico 1',
-    icon: '🔬',
-    description: 'Visualizzazione 3D dettagliata di una struttura anatomica complessa. ' +
-      'Utilizza i controlli per esplorare il modello da ogni angolazione.',
-    scale: 3.0,
-    cameraPos: [0, 2, 7],
-    targetPos: [0, 0, 0],
-  },
-  {
-    id: 'model2',
-    file: 'models/result-2.glb',
-    name: 'Modello Anatomico 2',
-    icon: '🧬',
-    description: 'Rappresentazione tridimensionale ad alta risoluzione. ' +
-      'Particolare attenzione è stata data alla resa dei materiali e delle superfici.',
-    scale: 3.0,
-    cameraPos: [0, 2, 7],
-    targetPos: [0, 0, 0],
-  },
-  {
-    id: 'model3',
-    file: 'models/result-3.glb',
-    name: 'Modello Anatomico 3',
-    icon: '🦴',
-    description: 'Struttura biologica visualizzata in 3D. ' +
-      'Permette lo studio approfondito della morfologia e delle connessioni spaziali.',
-    scale: 3.0,
-    cameraPos: [0, 2, 7],
-    targetPos: [0, 0, 0],
-  },
-  {
-    id: 'model4',
-    file: 'models/result-4.glb',
-    name: 'Modello Anatomico 4',
-    icon: '🩺',
-    description: 'Modello 3D interattivo per la didattica. ' +
-      'Ruota e zoomare per osservare i dettagli nascosti della struttura.',
-    scale: 3.0,
-    cameraPos: [0, 2, 7],
-    targetPos: [0, 0, 0],
+    id: 'cardio_unit',
+    title: 'Apparato Cardiocircolatorio',
+    icon: '❤️',
+    models: [
+      {
+        id: 'heart_main',
+        file: 'models/jantung_manusia.glb',
+        name: 'Cuore Umano',
+        icon: '❤️',
+        description: 'Il motore del sistema circolatorio. Pompa sangue ossigenato a tutto il corpo ' +
+          'e sangue deossigenato ai polmoni. Osserva i vasi principali e la struttura muscolare.',
+        scale: 3.0,
+        cameraPos: [0, 1.5, 6],
+        targetPos: [0, 0, 0],
+        actions: []
+      }
+    ]
   }
 ];
+
+// Helper per trovare un modello dal suo ID
+function findModelConfig(modelId) {
+  for (const section of SECTIONS) {
+    const found = section.models.find(m => m.id === modelId);
+    if (found) return { model: found, section: section };
+  }
+  return null;
+}
 
 // ─── ELEMENTI DOM ────────────────────────────────────────────────
 const canvas = document.getElementById('canvas3d');
@@ -90,10 +133,19 @@ const infoTitle = document.getElementById('info-title');
 const infoIcon = document.getElementById('info-icon');
 const infoDesc = document.getElementById('info-desc');
 const hintEl = document.getElementById('hint');
-const btnBar = document.getElementById('model-bar');
+const navBar = document.getElementById('nav-bar');
+const contextContainer = document.getElementById('context-actions');
+
+// Creazione dinamica breadcrumbs
+let infoBreadcrumbs = document.getElementById('info-breadcrumbs');
+if (!infoBreadcrumbs) {
+  infoBreadcrumbs = document.createElement('div');
+  infoBreadcrumbs.className = 'info-breadcrumbs';
+  infoBreadcrumbs.id = 'info-breadcrumbs';
+  infoTitle.parentElement.parentElement.insertBefore(infoBreadcrumbs, infoTitle.parentElement);
+}
 
 // ─── SETUP RENDERER ─────────────────────────────────────────────
-// WebGLRenderer con sfondo chiaro, ombre morbide, encoding sRGB.
 const renderer = new THREE.WebGLRenderer({
   canvas,
   antialias: true,
@@ -104,19 +156,18 @@ renderer.setClearColor(0xf0f2f8, 1);
 renderer.shadowMap.enabled = true;
 renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 renderer.toneMapping = THREE.ACESFilmicToneMapping;
-renderer.toneMappingExposure = 1.5;
+renderer.toneMappingExposure = 1.6;
 renderer.outputEncoding = THREE.sRGBEncoding;
 
 // ─── SCENA ───────────────────────────────────────────────────────
 const scene = new THREE.Scene();
 scene.background = new THREE.Color(0xf0f2f8);
-// Nessuna nebbia — vogliamo colori puri e fedeli ai modelli
 
 // ─── CAMERA ──────────────────────────────────────────────────────
 const camera = new THREE.PerspectiveCamera(42, 1, 0.1, 200);
 camera.position.set(0, 1.5, 6);
 
-// ─── CONTROLLI ORBITALI ──────────────────────────────────────────
+// ─── CONTROLLI ───────────────────────────────────────────────────
 const controls = new OrbitControls(camera, renderer.domElement);
 controls.enableDamping = true;
 controls.dampingFactor = 0.06;
@@ -127,44 +178,34 @@ controls.autoRotate = false;
 controls.autoRotateSpeed = 1.2;
 
 // ─── LUCI ────────────────────────────────────────────────────────
-// Forte luce ambientale per illuminare uniformemente i colori dei modelli
 const ambientLight = new THREE.AmbientLight(0xffffff, 0.9);
 scene.add(ambientLight);
 
-// Hemisphere: simula cielo chiaro + riflesso pavimento
 const hemiLight = new THREE.HemisphereLight(0xffffff, 0xcccccc, 0.7);
 scene.add(hemiLight);
 
-// Luce direzionale principale — ombre morbide
 const keyLight = new THREE.DirectionalLight(0xffffff, 1.0);
 keyLight.position.set(5, 10, 6);
 keyLight.castShadow = true;
 keyLight.shadow.mapSize.set(2048, 2048);
 keyLight.shadow.camera.near = 0.5;
 keyLight.shadow.camera.far = 30;
-keyLight.shadow.camera.left = -6;
-keyLight.shadow.camera.right = 6;
-keyLight.shadow.camera.top = 6;
-keyLight.shadow.camera.bottom = -6;
 keyLight.shadow.bias = -0.001;
 scene.add(keyLight);
 
-// Fill da sinistra
 const fillLight = new THREE.DirectionalLight(0xffffff, 0.5);
 fillLight.position.set(-6, 4, 4);
 scene.add(fillLight);
 
-// Rim dal retro
 const rimLight = new THREE.DirectionalLight(0xffffff, 0.3);
 rimLight.position.set(0, 3, -8);
 scene.add(rimLight);
 
-// Front per evitare zone troppo scure
 const frontLight = new THREE.DirectionalLight(0xffffff, 0.4);
 frontLight.position.set(0, 2, 8);
 scene.add(frontLight);
 
-// ─── GRIGLIA SOTTILE CHIARA ──────────────────────────────────────
+// ─── GRIGLIA ─────────────────────────────────────────────────────
 const gridHelper = new THREE.GridHelper(20, 20, 0xd0d4e0, 0xdfe2ec);
 gridHelper.position.y = -1.5;
 gridHelper.material.transparent = true;
@@ -172,20 +213,14 @@ gridHelper.material.opacity = 0.35;
 scene.add(gridHelper);
 
 // ─── GLTF LOADER ─────────────────────────────────────────────────
-// Three.js r133 ha supporto nativo per KHR_materials_pbrSpecularGlossiness.
-// Non usiamo cache/clone perché Three.js clone() perde texture e materiali PBR.
 const gltfLoader = new GLTFLoader();
 
-/**
- * Carica un modello GLB preservando materiali e texture originali.
- */
 async function loadGLB(url) {
   return new Promise((resolve, reject) => {
     gltfLoader.load(
       url,
       (gltf) => {
         const root = gltf.scene || gltf.scenes?.[0];
-        // Solo ombre, NON tocchiamo mai i materiali
         root.traverse((child) => {
           if (child.isMesh) {
             child.castShadow = true;
@@ -209,57 +244,45 @@ async function loadGLB(url) {
 }
 
 // ─── GESTIONE MODELLO ATTIVO ─────────────────────────────────────
-let currentModel = null;    // Wrapper group nella scena
+let currentModel = null;
 let currentConfig = null;
 let animProgress = 0;
 let isAnimatingIn = false;
-let targetScale = 1;        // Scala finale calcolata da autoFit
+let targetScale = 1;
 
-/**
- * Centra e scala il modello con un wrapper group.
- * Il modello è centrato usando il bounding box, poi il wrapper
- * viene scalato e posizionato — il modello rimane sempre intero.
- */
 function wrapAndFit(rawModel, config) {
-  // 1. Calcola bounding box del modello grezzo
   const box = new THREE.Box3().setFromObject(rawModel);
   const center = new THREE.Vector3();
   const size = new THREE.Vector3();
   box.getCenter(center);
   box.getSize(size);
 
-  // 2. Sposta il modello così che il centro del bbox sia in (0,0,0)
   rawModel.position.set(-center.x, -center.y, -center.z);
 
-  // 3. Gruppo wrapper — contiene il modello centrato
   const wrapper = new THREE.Group();
   wrapper.add(rawModel);
 
-  // 4. Scala uniforme basata sulla dimensione massima
   const maxDim = Math.max(size.x, size.y, size.z);
   targetScale = maxDim > 0 ? (config.scale || 3.0) / maxDim : 1;
-
-  // Parte da zero per animazione scale-in
   wrapper.scale.setScalar(0.001);
-
-  // 5. Centra il wrapper: posizione 0,0,0 di default, camera guarda al centro
   wrapper.position.set(0, 0, 0);
 
   return wrapper;
 }
 
-/**
- * Cambia il modello visualizzato con animazione scale-in.
- */
 async function switchModel(modelId) {
-  const config = MODELS.find(m => m.id === modelId);
-  if (!config) return;
+  const cfg = findModelConfig(modelId);
+  if (!cfg) return;
 
-  // Mostra loader
+  const config = cfg.model;
+  const section = cfg.section;
+
+  // Stesso modello? Non ricaricare
+  // if (currentConfig && currentConfig.id === modelId) return;
+
   loaderOverlay.classList.remove('hidden');
   loaderText.textContent = 'Caricamento modello…';
 
-  // Rimuovi modello attuale
   if (currentModel) {
     scene.remove(currentModel);
     currentModel = null;
@@ -273,37 +296,87 @@ async function switchModel(modelId) {
     currentModel = wrapper;
     currentConfig = config;
 
-    // Avvia animazione entrata
     animProgress = 0;
     isAnimatingIn = true;
 
-    // Camera e target
+    // Aggiorna camera con animazione (opzionale, qui scatto diretto)
     camera.position.set(...config.cameraPos);
     controls.target.set(...config.targetPos);
     controls.update();
 
-    // Aggiorna UI
+    // Aggiorna UI Info
     infoIcon.textContent = config.icon;
     infoTitle.textContent = config.name;
     infoDesc.textContent = config.description;
+    infoBreadcrumbs.textContent = section.title;
 
-    document.querySelectorAll('.model-btn').forEach(btn => {
-      btn.classList.toggle('active', btn.dataset.model === modelId);
-    });
+    // Aggiorna Navigazione (Pillola attiva)
+    updateNavUI(section.id);
+
+    // Aggiorna Azioni Contestuali
+    updateContextActions(config.actions);
 
     setTimeout(() => loaderOverlay.classList.add('hidden'), 300);
-    showHint('🖱️ Trascina per ruotare · Rotellina per zoom · Pinch su mobile');
+    // Hint solo la prima volta o cambio sezione
+    // showHint('🖱️ Usa mouse/touch per esplorare');
 
   } catch (err) {
-    console.error('Errore nel caricamento:', err);
-    loaderText.textContent = 'Errore nel caricamento del modello.';
+    console.error('Errore:', err);
+    loaderText.textContent = 'Errore caricamento.';
     setTimeout(() => loaderOverlay.classList.add('hidden'), 2000);
   }
 }
 
-// ─── HINT / TOAST ────────────────────────────────────────────────
-let hintTimeout = null;
+// ─── UI UPDATES ──────────────────────────────────────────────────
 
+function updateNavUI(activeSectionId) {
+  // Aggiorna stato attivo dei tab (sezioni)
+  const buttons = navBar.querySelectorAll('.nav-btn');
+  buttons.forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.section === activeSectionId);
+  });
+}
+
+function updateContextActions(actions) {
+  contextContainer.innerHTML = ''; // Pulisci vecchi bottoni
+
+  if (!actions || actions.length === 0) return;
+
+  actions.forEach((action, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'action-btn';
+    btn.innerHTML = `<span class="icon">${action.icon || '👉'}</span> ${action.label}`;
+    // Delay staggered per animazione entrata
+    btn.style.animationDelay = `${i * 0.1}s`;
+
+    btn.addEventListener('click', () => {
+      switchModel(action.target);
+    });
+
+    contextContainer.appendChild(btn);
+  });
+}
+
+function createNavigation() {
+  navBar.innerHTML = '';
+  SECTIONS.forEach(section => {
+    const btn = document.createElement('button');
+    btn.className = 'nav-btn';
+    btn.dataset.section = section.id;
+    btn.innerHTML = `<span>${section.icon}</span> ${section.title}`;
+
+    btn.addEventListener('click', () => {
+      // Al click sulla sezione, carica il PRIMO modello di quella sezione
+      const firstModelId = section.models[0].id;
+      switchModel(firstModelId);
+    });
+
+    navBar.appendChild(btn);
+  });
+}
+
+// ─── UTILS ───────────────────────────────────────────────────────
+let hintTimeout = null;
 function showHint(text, duration = 4000) {
   hintEl.textContent = text;
   hintEl.classList.add('show');
@@ -311,19 +384,6 @@ function showHint(text, duration = 4000) {
   hintTimeout = setTimeout(() => hintEl.classList.remove('show'), duration);
 }
 
-// ─── CREAZIONE PULSANTI MODELLO ──────────────────────────────────
-function createButtons() {
-  MODELS.forEach((m, i) => {
-    const btn = document.createElement('button');
-    btn.className = 'model-btn' + (i === 0 ? ' active' : '');
-    btn.dataset.model = m.id;
-    btn.innerHTML = `<span class="btn-icon">${m.icon}</span>${m.name}`;
-    btn.addEventListener('click', () => switchModel(m.id));
-    btnBar.appendChild(btn);
-  });
-}
-
-// ─── PULSANTE AUTO-ROTATE ────────────────────────────────────────
 const btnRotate = document.getElementById('btn-rotate');
 btnRotate.addEventListener('click', () => {
   controls.autoRotate = !controls.autoRotate;
@@ -331,7 +391,6 @@ btnRotate.addEventListener('click', () => {
   showHint(controls.autoRotate ? '🔄 Auto-rotazione attiva' : '⏹ Auto-rotazione disattivata', 2000);
 });
 
-// Pulsante reset vista
 const btnReset = document.getElementById('btn-reset');
 btnReset.addEventListener('click', () => {
   if (currentConfig) {
@@ -342,7 +401,6 @@ btnReset.addEventListener('click', () => {
   }
 });
 
-// ─── RESIZE HANDLER ──────────────────────────────────────────────
 function onResize() {
   const w = canvas.clientWidth;
   const h = canvas.clientHeight;
@@ -351,29 +409,25 @@ function onResize() {
   camera.aspect = w / h;
   camera.updateProjectionMatrix();
 }
-
 window.addEventListener('resize', onResize, { passive: true });
 onResize();
 
-// ─── EASING ──────────────────────────────────────────────────────
 function easeOutBack(t) {
   const c1 = 1.70158;
   const c3 = c1 + 1;
   return 1 + c3 * Math.pow(t - 1, 3) + c1 * Math.pow(t - 1, 2);
 }
 
-// ─── LOOP DI ANIMAZIONE ──────────────────────────────────────────
+// ─── ANIMATION LOOP ──────────────────────────────────────────────
 const clock = new THREE.Clock();
 
 function animate() {
   requestAnimationFrame(animate);
-
   const dt = clock.getDelta();
   const elapsed = clock.getElapsedTime();
 
   controls.update();
 
-  // Animazione scale-in
   if (isAnimatingIn && currentModel) {
     animProgress += dt * 1.8;
     if (animProgress >= 1) {
@@ -384,7 +438,6 @@ function animate() {
     currentModel.scale.setScalar(targetScale * t);
   }
 
-  // Leggera oscillazione verticale (respiro)
   if (currentModel && !isAnimatingIn) {
     currentModel.position.y = Math.sin(elapsed * 0.8) * 0.04;
   }
@@ -392,7 +445,9 @@ function animate() {
   renderer.render(scene, camera);
 }
 
-// ─── AVVIO ───────────────────────────────────────────────────────
-createButtons();
+// ─── START ───────────────────────────────────────────────────────
+createNavigation();
 animate();
-switchModel(MODELS[0].id);
+
+// Carica il primo modello della prima sezione all'avvio
+switchModel(SECTIONS[0].models[0].id);
