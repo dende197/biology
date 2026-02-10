@@ -149,19 +149,20 @@ if (!infoBreadcrumbs) {
 const renderer = new THREE.WebGLRenderer({
   canvas,
   antialias: true,
+  alpha: true, // Importante: lascia vedere il gradiente CSS
   powerPreference: 'high-performance'
 });
 renderer.setPixelRatio(window.devicePixelRatio);
-renderer.setClearColor(0xf0f2f8, 1);
+renderer.setClearColor(0x000000, 0); // Trasparente
 renderer.shadowMap.enabled = true;
 renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 renderer.toneMapping = THREE.ACESFilmicToneMapping;
-renderer.toneMappingExposure = 1.6;
+renderer.toneMappingExposure = 1.4; // Leggermente ridotto per mood dark
 renderer.outputEncoding = THREE.sRGBEncoding;
 
 // ─── SCENA ───────────────────────────────────────────────────────
 const scene = new THREE.Scene();
-scene.background = new THREE.Color(0xf0f2f8);
+// scene.background = null; // Trasparente di default
 
 // ─── CAMERA ──────────────────────────────────────────────────────
 const camera = new THREE.PerspectiveCamera(42, 1, 0.1, 200);
@@ -197,7 +198,7 @@ const fillLight = new THREE.DirectionalLight(0xffffff, 0.5);
 fillLight.position.set(-6, 4, 4);
 scene.add(fillLight);
 
-const rimLight = new THREE.DirectionalLight(0xffffff, 0.3);
+const rimLight = new THREE.DirectionalLight(0xffffff, 0.6); // Più forte per stacco dal fondo scuro
 rimLight.position.set(0, 3, -8);
 scene.add(rimLight);
 
@@ -206,10 +207,10 @@ frontLight.position.set(0, 2, 8);
 scene.add(frontLight);
 
 // ─── GRIGLIA ─────────────────────────────────────────────────────
-const gridHelper = new THREE.GridHelper(20, 20, 0xd0d4e0, 0xdfe2ec);
+const gridHelper = new THREE.GridHelper(20, 20, 0x444444, 0x222222);
 gridHelper.position.y = -1.5;
 gridHelper.material.transparent = true;
-gridHelper.material.opacity = 0.35;
+gridHelper.material.opacity = 0.2;
 scene.add(gridHelper);
 
 // ─── GLTF LOADER ─────────────────────────────────────────────────
