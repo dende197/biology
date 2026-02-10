@@ -78,26 +78,26 @@ const hintEl = document.getElementById('hint');
 const btnBar = document.getElementById('model-bar');
 
 // ─── SETUP RENDERER ─────────────────────────────────────────────
-// WebGLRenderer con antialiasing e sfondo trasparente.
+// WebGLRenderer con antialiasing, sfondo chiaro.
 const renderer = new THREE.WebGLRenderer({
   canvas,
   antialias: true,
-  alpha: true,
+  alpha: false,
   powerPreference: 'high-performance'
 });
 renderer.setPixelRatio(window.devicePixelRatio);
-renderer.setClearColor(0x000000, 0);
+renderer.setClearColor(0xf0f2f8, 1); // Sfondo grigio chiaro come il CSS
 renderer.shadowMap.enabled = true;
 renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 renderer.toneMapping = THREE.ACESFilmicToneMapping;
-renderer.toneMappingExposure = 1.4;
-renderer.outputColorSpace = THREE.SRGBColorSpace;
+renderer.toneMappingExposure = 1.6;
+renderer.outputEncoding = THREE.sRGBEncoding; // r149 API
 
 // ─── SCENA ───────────────────────────────────────────────────────
 const scene = new THREE.Scene();
+scene.background = new THREE.Color(0xf0f2f8);
 
-// Leggera nebbia per profondità atmosferica (ridotta per non scurire i modelli)
-scene.fog = new THREE.FogExp2(0x06080f, 0.012);
+// Nessuna nebbia: i modelli devono essere visibili con i colori originali
 
 // ─── CAMERA ──────────────────────────────────────────────────────
 const camera = new THREE.PerspectiveCamera(42, 1, 0.1, 200);
@@ -116,92 +116,60 @@ controls.autoRotateSpeed = 1.2;
 controls.maxPolarAngle = Math.PI * 0.85;
 
 // ─── LUCI ────────────────────────────────────────────────────────
-// Luce ambientale più forte per illuminare bene i colori originali dei modelli
-const ambientLight = new THREE.AmbientLight(0xffffff, 0.8);
+// Ambiente forte per illuminare uniformemente i colori dei modelli
+const ambientLight = new THREE.AmbientLight(0xffffff, 1.0);
 scene.add(ambientLight);
 
-// Luce direzionale principale (simula il sole, genera ombre)
-const keyLight = new THREE.DirectionalLight(0xffffff, 2.0);
-keyLight.position.set(5, 8, 4);
+// Hemisphere light: cielo chiaro + riflesso dal pavimento (illuminazione naturale)
+const hemiLight = new THREE.HemisphereLight(0xffffff, 0xb0b0b0, 0.8);
+scene.add(hemiLight);
+
+// Luce direzionale principale (simula il sole, genera ombre morbide)
+const keyLight = new THREE.DirectionalLight(0xffffff, 1.2);
+keyLight.position.set(5, 10, 6);
 keyLight.castShadow = true;
 keyLight.shadow.mapSize.set(2048, 2048);
 keyLight.shadow.camera.near = 0.5;
 keyLight.shadow.camera.far = 30;
-keyLight.shadow.camera.left = -5;
-keyLight.shadow.camera.right = 5;
-keyLight.shadow.camera.top = 5;
-keyLight.shadow.camera.bottom = -5;
+keyLight.shadow.camera.left = -6;
+keyLight.shadow.camera.right = 6;
+keyLight.shadow.camera.top = 6;
+keyLight.shadow.camera.bottom = -6;
 keyLight.shadow.bias = -0.001;
 scene.add(keyLight);
 
-// Luce di riempimento (bianca da sinistra, per vedere bene i colori)
-const fillLight = new THREE.DirectionalLight(0xffffff, 1.0);
-fillLight.position.set(-6, 3, 4);
+// Luce di riempimento da sinistra
+const fillLight = new THREE.DirectionalLight(0xffffff, 0.6);
+fillLight.position.set(-6, 4, 4);
 scene.add(fillLight);
 
-// Luce rim (contorno dal retro)
-const rimLight = new THREE.DirectionalLight(0xffffff, 0.6);
-rimLight.position.set(0, 4, -8);
+// Luce dal retro per contorno
+const rimLight = new THREE.DirectionalLight(0xffffff, 0.4);
+rimLight.position.set(0, 3, -8);
 scene.add(rimLight);
 
-// Luce dal basso per eliminare ombre troppo scure
-const bottomLight = new THREE.PointLight(0xffffff, 0.5, 15);
-bottomLight.position.set(0, -2, 0);
-scene.add(bottomLight);
-
-// Luce extra frontale per illuminazione uniforme
-const frontLight = new THREE.DirectionalLight(0xffffff, 0.8);
+// Luce frontale per evitare zone d'ombra
+const frontLight = new THREE.DirectionalLight(0xffffff, 0.5);
 frontLight.position.set(0, 2, 8);
 scene.add(frontLight);
 
-// ─── PIANO DI APPOGGIO (griglia sottile) ─────────────────────────
-const gridHelper = new THREE.GridHelper(20, 20, 0x1a2550, 0x111a38);
+// ─── PIANO DI APPOGGIO (griglia sottile chiara) ──────────────────
+const gridHelper = new THREE.GridHelper(20, 20, 0xd0d4e0, 0xdfe2ec);
 gridHelper.position.y = -0.8;
 gridHelper.material.transparent = true;
-gridHelper.material.opacity = 0.15;
+gridHelper.material.opacity = 0.4;
 scene.add(gridHelper);
-
-// ─── PARTICELLE DECORATIVE DI SFONDO ─────────────────────────────
-// Piccole sfere fluttuanti per atmosfera
-const decoGroup = new THREE.Group();
-scene.add(decoGroup);
-
-(function createDecoParticles() {
-  const geo = new THREE.SphereGeometry(0.04, 12, 12);
-  for (let i = 0; i < 60; i++) {
-    const mat = new THREE.MeshStandardMaterial({
-      color: new THREE.Color().setHSL(0.55 + Math.random() * 0.18, 0.75, 0.55),
-      emissive: 0x0b1020,
-      roughness: 0.3,
-      metalness: 0.2,
-      transparent: true,
-      opacity: 0.45
-    });
-    const mesh = new THREE.Mesh(geo, mat);
-    mesh.position.set(
-      (Math.random() - 0.5) * 20,
-      Math.random() * 10 - 1,
-      (Math.random() - 0.5) * 20
-    );
-    mesh.scale.setScalar(0.5 + Math.random() * 2.0);
-    // Salvo dati per animazione fluttuante
-    mesh.userData.baseY = mesh.position.y;
-    mesh.userData.speed = 0.3 + Math.random() * 0.6;
-    mesh.userData.amp = 0.15 + Math.random() * 0.4;
-    mesh.userData.phase = Math.random() * Math.PI * 2;
-    decoGroup.add(mesh);
-  }
-})();
 
 // ─── GLTF LOADER ─────────────────────────────────────────────────
 // Nota: NON usiamo cache con clone() perché clone() di Three.js
 // non preserva correttamente texture, mappe e materiali PBR.
 // Ogni volta ricarichiamo il GLB per mantenere colori originali.
+// Usiamo Three.js r149 che supporta KHR_materials_pbrSpecularGlossiness.
 const gltfLoader = new GLTFLoader();
 
 /**
  * Carica un modello GLB.
- * Preserva integralmente i materiali e le texture originali.
+ * Preserva integralmente i materiali e le texture originali del file.
  */
 async function loadGLB(url) {
   return new Promise((resolve, reject) => {
@@ -209,17 +177,17 @@ async function loadGLB(url) {
       url,
       (gltf) => {
         const root = gltf.scene || gltf.scenes?.[0];
-        // Abilita ombre e migliora la resa dei materiali originali
+        // Abilita ombre su tutti i mesh, NON toccare i materiali
         root.traverse((child) => {
           if (child.isMesh) {
             child.castShadow = true;
             child.receiveShadow = true;
-            // Assicurati che i materiali usino lo spazio colore corretto
+            // Assicura encoding sRGB sulle texture (r149 API)
             if (child.material) {
               const mats = Array.isArray(child.material) ? child.material : [child.material];
               mats.forEach(mat => {
-                if (mat.map) mat.map.colorSpace = THREE.SRGBColorSpace;
-                if (mat.emissiveMap) mat.emissiveMap.colorSpace = THREE.SRGBColorSpace;
+                if (mat.map) mat.map.encoding = THREE.sRGBEncoding;
+                if (mat.emissiveMap) mat.emissiveMap.encoding = THREE.sRGBEncoding;
                 mat.needsUpdate = true;
               });
             }
@@ -438,13 +406,8 @@ function animate() {
   // Leggera oscillazione verticale del modello (respiro)
   if (currentModel && !isAnimatingIn) {
     const baseY = currentConfig ? currentConfig.position[1] : 0;
-    currentModel.position.y = baseY + Math.sin(elapsed * 0.8) * 0.05;
+    currentModel.position.y = baseY + Math.sin(elapsed * 0.8) * 0.04;
   }
-
-  // Animazione particelle decorative (fluttuano)
-  decoGroup.children.forEach((p) => {
-    p.position.y = p.userData.baseY + Math.sin(elapsed * p.userData.speed + p.userData.phase) * p.userData.amp;
-  });
 
   // Render della scena
   renderer.render(scene, camera);
