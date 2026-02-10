@@ -85,19 +85,19 @@ const renderer = new THREE.WebGLRenderer({
   alpha: true,
   powerPreference: 'high-performance'
 });
-renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+renderer.setPixelRatio(window.devicePixelRatio);
 renderer.setClearColor(0x000000, 0);
 renderer.shadowMap.enabled = true;
 renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 renderer.toneMapping = THREE.ACESFilmicToneMapping;
-renderer.toneMappingExposure = 1.1;
+renderer.toneMappingExposure = 1.4;
 renderer.outputColorSpace = THREE.SRGBColorSpace;
 
 // ─── SCENA ───────────────────────────────────────────────────────
 const scene = new THREE.Scene();
 
-// Leggera nebbia per profondità atmosferica
-scene.fog = new THREE.FogExp2(0x06080f, 0.035);
+// Leggera nebbia per profondità atmosferica (ridotta per non scurire i modelli)
+scene.fog = new THREE.FogExp2(0x06080f, 0.012);
 
 // ─── CAMERA ──────────────────────────────────────────────────────
 const camera = new THREE.PerspectiveCamera(42, 1, 0.1, 200);
@@ -111,20 +111,20 @@ controls.dampingFactor = 0.06;
 controls.minDistance = 2;
 controls.maxDistance = 15;
 controls.target.set(0, 0.5, 0);
-controls.autoRotate = true;
+controls.autoRotate = false;
 controls.autoRotateSpeed = 1.2;
 controls.maxPolarAngle = Math.PI * 0.85;
 
 // ─── LUCI ────────────────────────────────────────────────────────
-// Luce ambientale morbida (illuminazione base)
-const ambientLight = new THREE.AmbientLight(0x8aa3ff, 0.35);
+// Luce ambientale più forte per illuminare bene i colori originali dei modelli
+const ambientLight = new THREE.AmbientLight(0xffffff, 0.8);
 scene.add(ambientLight);
 
 // Luce direzionale principale (simula il sole, genera ombre)
-const keyLight = new THREE.DirectionalLight(0xffffff, 1.6);
+const keyLight = new THREE.DirectionalLight(0xffffff, 2.0);
 keyLight.position.set(5, 8, 4);
 keyLight.castShadow = true;
-keyLight.shadow.mapSize.set(1024, 1024);
+keyLight.shadow.mapSize.set(2048, 2048);
 keyLight.shadow.camera.near = 0.5;
 keyLight.shadow.camera.far = 30;
 keyLight.shadow.camera.left = -5;
@@ -134,20 +134,25 @@ keyLight.shadow.camera.bottom = -5;
 keyLight.shadow.bias = -0.001;
 scene.add(keyLight);
 
-// Luce di riempimento (colore accent, da sinistra)
-const fillLight = new THREE.DirectionalLight(0x67d5ff, 0.6);
+// Luce di riempimento (bianca da sinistra, per vedere bene i colori)
+const fillLight = new THREE.DirectionalLight(0xffffff, 1.0);
 fillLight.position.set(-6, 3, 4);
 scene.add(fillLight);
 
-// Luce rim (contorno verde dal retro)
-const rimLight = new THREE.DirectionalLight(0xa6ffcb, 0.3);
+// Luce rim (contorno dal retro)
+const rimLight = new THREE.DirectionalLight(0xffffff, 0.6);
 rimLight.position.set(0, 4, -8);
 scene.add(rimLight);
 
-// Luce dal basso (sottile, per drammaticità)
-const bottomLight = new THREE.PointLight(0x4ea0ff, 0.4, 12);
+// Luce dal basso per eliminare ombre troppo scure
+const bottomLight = new THREE.PointLight(0xffffff, 0.5, 15);
 bottomLight.position.set(0, -2, 0);
 scene.add(bottomLight);
+
+// Luce extra frontale per illuminazione uniforme
+const frontLight = new THREE.DirectionalLight(0xffffff, 0.8);
+frontLight.position.set(0, 2, 8);
+scene.add(frontLight);
 
 // ─── PIANO DI APPOGGIO (griglia sottile) ─────────────────────────
 const gridHelper = new THREE.GridHelper(20, 20, 0x1a2550, 0x111a38);
@@ -188,32 +193,39 @@ scene.add(decoGroup);
   }
 })();
 
-// ─── GLTF LOADER E CACHE ────────────────────────────────────────
+// ─── GLTF LOADER ─────────────────────────────────────────────────
+// Nota: NON usiamo cache con clone() perché clone() di Three.js
+// non preserva correttamente texture, mappe e materiali PBR.
+// Ogni volta ricarichiamo il GLB per mantenere colori originali.
 const gltfLoader = new GLTFLoader();
-const modelCache = new Map();
 
 /**
- * Carica un modello GLB e lo mette in cache.
- * Restituisce un clone per poter avere istanze indipendenti.
+ * Carica un modello GLB.
+ * Preserva integralmente i materiali e le texture originali.
  */
 async function loadGLB(url) {
-  if (modelCache.has(url)) {
-    return modelCache.get(url).clone(true);
-  }
   return new Promise((resolve, reject) => {
     gltfLoader.load(
       url,
       (gltf) => {
         const root = gltf.scene || gltf.scenes?.[0];
-        // Abilita ombre su tutte le mesh del modello
+        // Abilita ombre e migliora la resa dei materiali originali
         root.traverse((child) => {
           if (child.isMesh) {
             child.castShadow = true;
             child.receiveShadow = true;
+            // Assicurati che i materiali usino lo spazio colore corretto
+            if (child.material) {
+              const mats = Array.isArray(child.material) ? child.material : [child.material];
+              mats.forEach(mat => {
+                if (mat.map) mat.map.colorSpace = THREE.SRGBColorSpace;
+                if (mat.emissiveMap) mat.emissiveMap.colorSpace = THREE.SRGBColorSpace;
+                mat.needsUpdate = true;
+              });
+            }
           }
         });
-        modelCache.set(url, root);
-        resolve(root.clone(true));
+        resolve(root);
       },
       // Progresso caricamento
       (xhr) => {
@@ -268,7 +280,7 @@ function autoFitModel(model, config) {
 async function switchModel(modelId) {
   const config = MODELS.find(m => m.id === modelId);
   if (!config) return;
-  
+
   // Mostra il loader
   loaderOverlay.classList.remove('hidden');
   loaderText.textContent = 'Caricamento modello…';
@@ -356,7 +368,7 @@ function createButtons() {
 
 // ─── PULSANTE AUTO-ROTATE ────────────────────────────────────────
 const btnRotate = document.getElementById('btn-rotate');
-btnRotate.classList.add('active');
+// Auto-rotate è disattivato di default per non disturbare la navigazione
 btnRotate.addEventListener('click', () => {
   controls.autoRotate = !controls.autoRotate;
   btnRotate.classList.toggle('active', controls.autoRotate);
