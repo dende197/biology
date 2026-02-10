@@ -3,20 +3,18 @@
 
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
   <meta name="description"
-    content="Presentazione 3D interattiva — Apparato cardiocircolatorio e Sistema nervoso. Modelli 3D didattici con animazioni." />
-  <title>Presentazione 3D — Biologia</title>
+    content="Presentazione 3D interattiva — Biologia. Un viaggio esplorativo nel corpo umano con modelli ad alta fedeltà." />
+  <title>Biologia 3D — Experience</title>
+
+  <!-- GSAP per animazioni PRO -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
 
   <!-- Foglio di stile -->
-  <link rel="stylesheet" href="style.css?v=6" />
+  <link rel="stylesheet" href="style.css?v=8" />
 
-  <!--
-    Import Map per Three.js (CDN unpkg).
-    Questo permette di usare "import * as THREE from 'three'"
-    e di caricare gli addons (OrbitControls, GLTFLoader) senza bundler.
-    Funziona su tutti i browser moderni e su GitHub Pages.
-  -->
+  <!-- Three.js Import Map -->
   <script type="importmap">
     {
       "imports": {
@@ -28,49 +26,67 @@
 </head>
 
 <body>
-  <div class="app">
-    <!-- ─── HEADER: Titolo e descrizione ─── -->
-    <header class="header">
-      <h1>🔬 Presentazione Modello 3D — Biologia</h1>
-      <p>Apparato cardiocircolatorio &amp; Sistema nervoso · Modelli 3D interattivi per la presentazione scolastica</p>
-    </header>
-
-    <!-- ─── AREA 3D: Canvas WebGL ─── -->
-    <div class="viewer" id="viewer">
-      <canvas id="canvas3d"></canvas>
-
-      <!-- Loading overlay: visibile durante il caricamento dei modelli -->
-      <div class="loader-overlay" id="loader">
-        <div class="spinner"></div>
-        <div class="loader-text" id="loader-text">Caricamento modello…</div>
-      </div>
-
-      <!-- Pannello info modello corrente (overlay in alto a sinistra) -->
-      <div class="info-panel" id="info-panel">
-        <h2><span class="icon" id="info-icon">❤️</span> <span id="info-title">Cuore Umano</span></h2>
-        <p id="info-desc">Seleziona un modello per visualizzarne i dettagli.</p>
-      </div>
-
-      <!-- Controlli overlay (alto a destra): auto-rotate, reset vista -->
-      <div class="controls-overlay">
-        <button id="btn-toggle-ui" class="ctrl-btn" title="Nascondi Interfaccia (Focus)">👁️</button>
-        <button id="btn-rotate" class="ctrl-btn" title="Auto-rotazione">🔄</button>
-        <button id="btn-reset" class="ctrl-btn" title="Reimposta vista">🎯</button>
-      </div>
-
-      <!-- Hint / Toast (basso a destra) -->
-      <div class="hint" id="hint"></div>
-    </div>
-
-    <!-- ─── BARRA DI NAVIGAZIONE (Macro Categorie) ─── -->
-    <div class="nav-bar" id="nav-bar"></div>
-
-    <!-- ─── AZIONI CONTESTUALI (Dettagli / Floating) ─── -->
-    <div class="context-actions" id="context-actions"></div>
+  <!-- ─── INTRO SEQUENCE ─── -->
+  <div class="intro-overlay" id="intro-overlay">
+    <h1 class="intro-title">Biologia <span class="accent">3D</span></h1>
+    <p class="intro-subtitle">Esplora la vita in ogni dettaglio</p>
   </div>
 
-  <!-- Script principale (ES Module) -->
-  <script type="module" src="script.js?v=6"></script>
+  <div class="app">
+    <!-- ─── UI LAYER ─── -->
+    <div class="ui-layer" id="ui-layer">
+      <!-- Header Flottante -->
+      <header class="header" id="header">
+        <div class="logo">BioDepth</div>
+        <p class="chapter-indicator" id="chapter-indicator">Microstruttura</p>
+      </header>
+
+      <!-- Info Model (Grande tipografia, sinistra) -->
+      <div class="info-panel" id="info-panel">
+        <h2 id="info-title">Cuore Umano</h2>
+        <div class="info-line"></div>
+        <p id="info-desc">
+          Il motore della vita. Osserva l'anatomia muscolare e la complessità dei vasi sanguigni.
+        </p>
+      </div>
+
+      <!-- Controlli Top-Right -->
+      <div class="controls-group" id="controls">
+        <button id="btn-toggle-ui" class="ctrl-btn icon-btn" title="Focus Mode (Nascondi Testo)">
+          <svg width="24" height="24" fill="none" viewBox="0 0 24 24">
+            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
+            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7Z" />
+          </svg>
+        </button>
+        <button id="btn-rotate" class="ctrl-btn icon-btn" title="Auto Rotazione">
+          <svg width="24" height="24" fill="none" viewBox="0 0 24 24">
+            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M4 12c0-4.418 3.582-8 8-8s8 3.582 8 8-3.582 8-8 8-8-3.582-8-8Zm0 0H2.5m1.5 0V9.5" />
+          </svg>
+        </button>
+      </div>
+
+      <!-- Navigazione (Bottom Center) -->
+      <nav class="nav-bar" id="nav-bar"></nav>
+
+      <!-- Context Actions (Bottom Right) -->
+      <div class="context-stack" id="context-actions"></div>
+    </div>
+
+    <!-- ─── 3D VIEWER ─── -->
+    <div class="viewer-container">
+      <canvas id="canvas3d"></canvas>
+
+      <!-- Loader integrato non invasivo -->
+      <div class="loader-bar-container" id="loader">
+        <div class="loader-bar" id="loader-bar"></div>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="script.js?v=8"></script>
 </body>
 
 </html>

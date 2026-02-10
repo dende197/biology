@@ -1,41 +1,26 @@
 /* ================================================================
-   PRESENTAZIONE 3D BIOLOGIA — DESIGN "LIQUID GLASS" (Apple Style)
-   Sfondo scuro elegante, UI glassmorphism, blur avanzato.
+   PRESENTAZIONE 3D BIOLOGIA — DESIGN "APPLE PRO" v7
+   Magazine Layout, Cinema Typography, GSAP Animation Ready
    ================================================================ */
 
-/* --- Google Font --- */
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;800&display=swap');
 
-/* --- Variabili globali --- */
 :root {
-  /* Apple Dark Mode Palette */
-  --bg-primary: #121212;
-  /* Sfondo pagina molto scuro */
-  --bg-gradient-1: #1c1c1e;
-  --bg-gradient-2: #2c2c2e;
-
-  /* Glass Material */
-  --glass-bg: rgba(30, 30, 32, 0.65);
-  --glass-border: rgba(255, 255, 255, 0.1);
-  --glass-blur: blur(20px) saturate(180%);
-  --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-
-  /* Accents */
-  --accent: #0A84FF;
-  /* Apple System Blue */
-  --accent-hover: #409CFF;
+  --bg-deep: #000000;
+  --bg-gradient: radial-gradient(circle at 50% 120%, #1c1c1e 0%, #000000 100%);
+  --accent: #2997ff;
+  /* Apple Blue Pro */
   --text: #ffffff;
   --text-muted: #86868b;
-  /* Apple Grey */
 
-  --font: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-  --radius: 20px;
-  --radius-sm: 14px;
-  --transition: all 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
-  /* Ease-out Apple style */
+  --glass: rgba(28, 28, 30, 0.65);
+  --glass-border: rgba(255, 255, 255, 0.1);
+  --glass-blur: blur(20px) saturate(180%);
+
+  --font-display: 'Inter', -apple-system, sans-serif;
+  --ease-expo: cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-/* --- Reset e base --- */
 *,
 *::before,
 *::after {
@@ -43,433 +28,316 @@
   margin: 0;
   padding: 0;
   -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
 }
 
-html,
-body {
+body,
+html {
+  width: 100%;
   height: 100%;
-  font-family: var(--font);
-  color: var(--text);
   overflow: hidden;
-  background: var(--bg-primary);
+  background: var(--bg-deep);
+  font-family: var(--font-display);
+  color: var(--text);
 }
 
-/* --- Sfondo scuro con bagliore sottile --- */
-body {
-  background: radial-gradient(circle at 50% 120%, #1c1c1e 0%, #000000 100%);
-}
-
-/* --- Layout principale --- */
-.app {
-  height: 100%;
+/* ─── INTRO OVERLAY ─── */
+.intro-overlay {
+  position: fixed;
+  inset: 0;
+  background: #000;
+  z-index: 1000;
   display: flex;
   flex-direction: column;
-  position: relative;
-  overflow: hidden;
-}
-
-/* --- Header --- */
-.header {
-  padding: 24px 28px 20px;
-  text-align: center;
-  position: relative;
-  z-index: 10;
+  justify-content: center;
+  align-items: center;
   pointer-events: none;
-  /* Lascia passare click */
 }
 
-.header h1 {
-  font-size: 24px;
-  font-weight: 700;
-  letter-spacing: -0.5px;
-  color: var(--text);
-  margin-bottom: 6px;
-  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+.intro-title {
+  font-size: 4rem;
+  font-weight: 800;
+  letter-spacing: -2px;
+  background: linear-gradient(180deg, #fff 0%, #86868b 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  opacity: 0;
+  /* Animato via GSAP */
 }
 
-.header p {
-  font-size: 14px;
-  color: var(--text-muted);
-  font-weight: 500;
+.intro-subtitle {
+  margin-top: 1rem;
+  font-size: 1.2rem;
+  color: var(--accent);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  opacity: 0;
 }
 
-/* --- Area 3D (canvas) --- */
-.viewer {
-  flex: 1;
+/* ─── APP CONTAINER ─── */
+.app {
   position: relative;
-  min-height: 0;
-  /* Nessun bordo/radius qui per immersività totale, o leggero margine se preferito */
+  width: 100%;
+  height: 100%;
 }
 
-.viewer canvas {
+/* ─── VIEWER 3D ─── */
+.viewer-container {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+}
+
+canvas {
   display: block;
   width: 100%;
   height: 100%;
   outline: none;
 }
 
-/* --- Loading overlay --- */
-.loader-overlay {
+/* ─── UI LAYER ─── */
+.ui-layer {
   position: absolute;
   inset: 0;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  background: rgba(0, 0, 0, 0.85);
-  /* Molto scuro */
-  backdrop-filter: blur(10px);
-  z-index: 50;
-  transition: opacity 0.5s ease, visibility 0.5s ease;
-}
-
-.loader-overlay.hidden {
-  opacity: 0;
-  visibility: hidden;
+  z-index: 10;
   pointer-events: none;
+  /* Lascia passare click al canvas */
 }
 
-.spinner {
-  width: 48px;
-  height: 48px;
-  border: 4px solid rgba(255, 255, 255, 0.1);
-  border-top-color: var(--accent);
-  border-radius: 50%;
-  animation: spin 0.8s linear infinite;
+/* Elementi UI interattivi devono riattivare pointer-events */
+.header,
+.info-panel,
+.controls-group,
+.nav-bar,
+.context-stack button {
+  pointer-events: auto;
 }
 
-@keyframes spin {
-  to {
-    transform: rotate(360deg);
-  }
+/* HEADER */
+.header {
+  position: absolute;
+  top: 32px;
+  width: 100%;
+  text-align: center;
+  z-index: 20;
 }
 
-.loader-text {
-  margin-top: 20px;
+.logo {
   font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 2px;
+  text-transform: uppercase;
   color: var(--text-muted);
-  font-weight: 500;
+  margin-bottom: 8px;
 }
 
-/* --- Pannello info modello (Liquid Glass Card) --- */
+.chapter-indicator {
+  display: inline-block;
+  padding: 6px 16px;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 20px;
+  font-size: 13px;
+  color: #fff;
+  backdrop-filter: blur(10px);
+}
+
+/* INFO PANEL - BIG TYPOGRAPHY */
 .info-panel {
   position: absolute;
-  top: 24px;
-  left: 24px;
-  max-width: 360px;
-  padding: 24px;
-
-  /* Liquid Glass Effect */
-  background: var(--glass-bg);
-  backdrop-filter: var(--glass-blur);
-  -webkit-backdrop-filter: var(--glass-blur);
-  border: 1px solid var(--glass-border);
-  border-radius: var(--radius);
-  box-shadow: var(--glass-shadow);
-
-  z-index: 20;
-  transition: var(--transition);
-  animation: fadeSlideIn 0.8s cubic-bezier(0.16, 1, 0.3, 1) both;
-}
-
-@keyframes fadeSlideIn {
-  from {
-    opacity: 0;
-    transform: translateY(-20px);
-  }
-
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.info-breadcrumbs {
-  font-size: 11px;
-  text-transform: uppercase;
-  letter-spacing: 1.5px;
-  color: var(--accent);
-  font-weight: 700;
-  margin-bottom: 12px;
-  opacity: 0.9;
+  top: 25%;
+  left: 6vw;
+  max-width: 400px;
+  z-index: 15;
 }
 
 .info-panel h2 {
-  font-size: 20px;
-  font-weight: 700;
-  margin-bottom: 10px;
-  color: var(--text);
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  letter-spacing: -0.5px;
+  font-size: 3.5rem;
+  /* Massive title */
+  font-weight: 300;
+  /* Thin */
+  line-height: 1.1;
+  letter-spacing: -1.5px;
+  margin-bottom: 24px;
+  text-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+  transform-origin: left;
 }
 
-.info-panel h2 .icon {
-  font-size: 22px;
+.info-line {
+  width: 60px;
+  height: 2px;
+  background: var(--accent);
+  margin-bottom: 24px;
 }
 
 .info-panel p {
-  font-size: 14px;
-  color: #d1d1d6;
-  /* Apple lighter grey */
+  font-size: 1.1rem;
   line-height: 1.6;
+  color: rgba(255, 255, 255, 0.8);
   font-weight: 400;
+  max-width: 320px;
 }
 
-/* --- Barra di Navigazione (Liquid Floating Dock) --- */
-.nav-bar {
+/* FOCUS MODE: Hide info only */
+.ui-hidden .info-panel,
+.ui-hidden .header,
+.ui-hidden .nav-bar {
+  opacity: 0;
+  transform: translateY(20px);
+  pointer-events: none;
+  transition: all 0.6s var(--ease-expo);
+}
+
+/* CONTROLS (Top Right) */
+.controls-group {
   position: absolute;
-  bottom: 32px;
-  left: 50%;
-  transform: translateX(-50%);
-  display: flex;
-  gap: 8px;
-  padding: 8px;
-
-  /* Liquid Dock Style */
-  background: rgba(30, 30, 30, 0.75);
-  backdrop-filter: blur(25px) saturate(180%);
-  -webkit-backdrop-filter: blur(25px) saturate(180%);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  border-radius: 24px;
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
-
-  z-index: 30;
-  max-width: 90%;
-  overflow-x: auto;
-}
-
-.nav-btn {
-  padding: 12px 24px;
-  border: none;
-  background: transparent;
-  border-radius: 16px;
-
-  font-family: var(--font);
-  font-size: 14px;
-  font-weight: 500;
-  color: var(--text-muted);
-  cursor: pointer;
-  transition: var(--transition);
-  white-space: nowrap;
-  letter-spacing: -0.2px;
-
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.nav-btn:hover {
-  background: rgba(255, 255, 255, 0.08);
-  /* White overlay on hover */
-  color: var(--text);
-  transform: translateY(-2px);
-}
-
-.nav-btn.active {
-  background: var(--text);
-  /* White active button like iOS tabs or pills */
-  color: #000;
-  /* Black text on white */
-  box-shadow: 0 4px 15px rgba(255, 255, 255, 0.25);
-  font-weight: 600;
-  transform: scale(1.05);
-}
-
-.nav-btn.active:hover {
-  background: #f2f2f7;
-}
-
-/* --- Pulsanti Azione Contestuale (Floating Glass Buttons) --- */
-.context-actions {
-  position: absolute;
-  bottom: 120px;
+  top: 32px;
   right: 32px;
   display: flex;
-  flex-direction: column;
-  gap: 14px;
-  align-items: flex-end;
-  z-index: 25;
-}
-
-.action-btn {
-  padding: 14px 24px;
-
-  background: rgba(10, 132, 255, 0.15);
-  /* Blue tint glass */
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border: 1px solid rgba(10, 132, 255, 0.4);
-  border-radius: 16px;
-
-  font-family: var(--font);
-  font-size: 14px;
-  font-weight: 600;
-  color: #fff;
-  cursor: pointer;
-
-  box-shadow: 0 8px 32px rgba(10, 132, 255, 0.25);
-  transition: var(--transition);
-  display: flex;
-  align-items: center;
-  gap: 10px;
-
-  animation: floatIn 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) both;
-}
-
-@keyframes floatIn {
-  from {
-    opacity: 0;
-    transform: translateX(40px) scale(0.9);
-  }
-
-  to {
-    opacity: 1;
-    transform: translateX(0) scale(1);
-  }
-}
-
-.action-btn:hover {
-  transform: translateX(-4px) scale(1.03);
-  background: var(--accent);
-  border-color: var(--accent);
-  box-shadow: 0 12px 40px rgba(10, 132, 255, 0.5);
-}
-
-.action-btn .icon {
-  font-size: 18px;
-}
-
-/* --- Hint/Toast --- */
-.hint {
-  position: absolute;
-  bottom: 24px;
-  right: 24px;
-  padding: 12px 18px;
-
-  background: rgba(30, 30, 30, 0.8);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 12px;
-  backdrop-filter: blur(20px);
-
-  font-size: 13px;
-  font-weight: 500;
-  color: #d1d1d6;
-  z-index: 20;
-  opacity: 0;
-  transform: translateY(10px);
-  transition: var(--transition);
-  pointer-events: none;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
-}
-
-.hint.show {
-  opacity: 1;
-  transform: translateY(0);
-}
-
-/* --- Controlli extra --- */
-.controls-overlay {
-  position: absolute;
-  top: 24px;
-  right: 24px;
-  display: flex;
-  flex-direction: column;
   gap: 12px;
-  z-index: 40;
 }
 
 .ctrl-btn {
   width: 44px;
   height: 44px;
   border-radius: 50%;
-  /* Circle buttons */
-
-  background: rgba(44, 44, 46, 0.6);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(15px);
-  -webkit-backdrop-filter: blur(15px);
-
+  background: rgba(40, 40, 45, 0.5);
+  border: 1px solid var(--glass-border);
+  backdrop-filter: blur(12px);
+  color: #fff;
+  cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #fff;
-  cursor: pointer;
-  font-size: 18px;
-  transition: var(--transition);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  transition: all 0.3s ease;
 }
 
 .ctrl-btn:hover {
-  background: rgba(60, 60, 62, 0.8);
-  transform: scale(1.1);
+  background: rgba(255, 255, 255, 0.2);
+  transform: scale(1.05);
 }
 
 .ctrl-btn.active {
-  background: var(--accent);
-  border-color: var(--accent);
-  box-shadow: 0 0 15px rgba(10, 132, 255, 0.6);
+  background: var(--text);
+  color: #000;
 }
 
-/* --- Responsive --- */
+/* NAV BAR (Floating Dock) */
+.nav-bar {
+  position: absolute;
+  bottom: 40px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 12px;
+  padding: 10px 14px;
+  background: rgba(20, 20, 22, 0.7);
+  border: 1px solid var(--glass-border);
+  backdrop-filter: blur(24px);
+  border-radius: 30px;
+  z-index: 30;
+}
+
+.nav-btn {
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  font-size: 14px;
+  font-weight: 500;
+  padding: 10px 20px;
+  border-radius: 20px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.nav-btn:hover {
+  color: #fff;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.nav-btn.active {
+  background: #fff;
+  color: #000;
+  font-weight: 600;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+}
+
+/* CONTEXT STACK (Bottom Right) */
+.context-stack {
+  position: absolute;
+  bottom: 120px;
+  right: 40px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 16px;
+}
+
+.action-btn {
+  padding: 16px 28px;
+  background: rgba(41, 151, 255, 0.15);
+  border: 1px solid rgba(41, 151, 255, 0.3);
+  backdrop-filter: blur(16px);
+  border-radius: 16px;
+  color: #fff;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+}
+
+.action-btn:hover {
+  transform: scale(1.05) translateX(-5px);
+  background: var(--accent);
+  border-color: var(--accent);
+}
+
+/* LOADER BAR */
+.loader-bar-container {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 4px;
+  background: transparent;
+  pointer-events: none;
+}
+
+.loader-bar {
+  height: 100%;
+  width: 0%;
+  background: var(--accent);
+  transition: width 0.2s linear;
+}
+
 @media (max-width: 768px) {
-  body {
-    overflow: auto;
-  }
-
-  .app {
-    height: auto;
-    min-height: 100vh;
-  }
-
-  .header {
-    padding-top: 16px;
-  }
-
-  /* --- Utility per nascondere UI (Focus Mode) --- */
-  .ui-hidden {
-    opacity: 0 !important;
-    pointer-events: none !important;
-    transform: translateY(10px);
-  }
-
-  /* Transizione fluida per elementi che saranno nascosti */
-  .info-panel,
-  .nav-bar,
-  .context-actions,
-  .header {
-    transition: opacity 0.5s ease, transform 0.5s ease, background 0.3s, border 0.3s, box-shadow 0.3s;
-  }
-
-  .viewer {
-    height: 70vh;
-    /* Fixed height on mobile for scroll */
-    min-height: 500px;
-    margin: 0;
-    /* Full width on mobile */
-  }
-
   .info-panel {
-    top: 16px;
-    left: 16px;
-    right: 16px;
-    width: auto;
-    max-width: none;
-    padding: 16px;
+    top: auto;
+    bottom: 140px;
+    left: 20px;
+    right: 20px;
+  }
+
+  .info-panel h2 {
+    font-size: 2.5rem;
   }
 
   .nav-bar {
-    position: fixed;
-    /* Sticky bottom on mobile */
     bottom: 20px;
-    width: 92%;
+    width: 90%;
+    overflow-x: auto;
     justify-content: flex-start;
   }
 
-  .context-actions {
-    bottom: 90px;
-    right: 16px;
+  .controls-group {
+    top: 20px;
+    right: 20px;
+  }
+
+  .context-stack {
+    bottom: 240px;
+    right: 20px;
   }
 }

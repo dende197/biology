@@ -1,467 +1,324 @@
 /* ================================================================
-   PRESENTAZIONE 3D BIOLOGIA — LOGICA THREE.JS (r133)
-   Struttura a capitoli con navigazione contestuale.
+   PRESENTAZIONE 3D BIOLOGIA — LOGICA APP (v7 Apple Pro)
+   GSAP Animation, Cinematic Intro, Advanced Interaction
    ================================================================ */
 
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 
-// ─── CONFIGURAZIONE SEZIONI E MODELLI ────────────────────────────
-// Organizzazione gerarchica: Capitoli -> Modelli principali -> Dettagli
+// GSAP è caricato da CDN in index.html (window.gsap)
+const tl = gsap.timeline();
+
+// ─── DATI (SEZIONI) ──────────────────────────────────────────────
 const SECTIONS = [
   {
-    id: 'neuron_unit',
-    title: 'Neurone & Sinapsi',
-    icon: '⚡',
+    id: 'microunit',
+    title: 'Microstruttura',
     models: [
       {
         id: 'neuron_main',
         file: 'models/result-4.glb',
-        name: 'Neurone Completo',
-        icon: '⚡',
-        description: 'L\'unità fondamentale del sistema nervoso. Osserva la struttura ramificata: ' +
-          'il corpo cellulare (soma), i dendriti ramificati e il lungo assone per la trasmissione dei segnali.',
-        scale: 3.5,
-        cameraPos: [0, 2, 8],
-        targetPos: [0, 0, 0],
-        actions: [
-          { label: '🔍 Vedi Dettaglio Sinapsi', target: 'synapse_detail', icon: '🔬' }
-        ]
+        name: 'Neurone',
+        desc: 'L\'unità fondamentale del pensiero. Osserva la complessità delle ramificazioni dendritiche.',
+        cam: [0, 2, 9],
+        actions: [{ label: 'Esamina Sinapsi', target: 'synapse', icon: '⚡' }]
       },
       {
-        id: 'synapse_detail',
+        id: 'synapse',
         file: 'models/result.glb',
-        name: 'Sinapsi (Dettaglio)',
-        icon: '🔬',
-        description: 'Il punto di connessione tra due neuroni. Qui i neurotrasmettitori vengono rilasciati ' +
-          'per trasmettere il segnale chimico da una cellula all\'altra.',
-        scale: 4.0,
-        cameraPos: [0, 2, 6],
-        targetPos: [0, 0, 0],
-        actions: [
-          { label: '⬅ Torna al Neurone', target: 'neuron_main', icon: '↩️' }
-        ]
+        name: 'Sinapsi',
+        desc: 'Il ponte chimico tra i neuroni. Qui il segnale diventa neurotrasmettitore.',
+        cam: [0, 2, 7],
+        actions: [{ label: 'Torna al Neurone', target: 'neuron_main', icon: '↩️' }]
       }
     ]
   },
   {
-    id: 'cns_unit',
-    title: 'Sistema Nervoso Centrale',
-    icon: '🧠',
+    id: 'cns',
+    title: 'Sist. Nervoso',
     models: [
       {
         id: 'cns_main',
         file: 'models/result-2.glb',
-        name: 'Encefalo & Tronco',
-        icon: '🧠',
-        description: 'Visione d\'insieme del Sistema Nervoso Centrale: include cervello, cervelletto e tronco encefalico. ' +
-          'È il centro di controllo di tutte le funzioni corporee.',
-        scale: 3.0,
-        cameraPos: [0, 1.5, 7],
-        targetPos: [0, 0, 0],
+        name: 'Encefalo',
+        desc: 'Il centro di controllo assoluto. Comprende cervello, cervelletto e tronco encefalico.',
+        cam: [0, 1.5, 7],
         actions: [
-          { label: '🦴 Vedi Midollo Spinale', target: 'spinal_cord', icon: '🦴' },
-          { label: '🧠 Vedi Cervelletto', target: 'cerebellum', icon: '🧩' }
+          { label: 'Vedi Midollo', target: 'spinal', icon: '🦴' },
+          { label: 'Vedi Cervelletto', target: 'cerebellum', icon: '🧠' }
         ]
       },
       {
-        id: 'spinal_cord',
+        id: 'spinal',
         file: 'models/result-3.glb',
         name: 'Midollo Spinale',
-        icon: '🦴',
-        description: 'La via di comunicazione principale tra il cervello e il resto del corpo. ' +
-          'Trasmette impulsi motori e sensoriali e coordina i riflessi.',
-        scale: 3.0,
-        cameraPos: [0, 2, 7],
-        targetPos: [0, 0, 0],
-        actions: [
-          { label: '⬅ Torna al SNC', target: 'cns_main', icon: '↩️' }
-        ]
+        desc: 'L\'autostrada delle informazioni sensoriali e motorie.',
+        cam: [0, 2, 7],
+        actions: [{ label: 'Torna al SNC', target: 'cns_main', icon: '↩️' }]
       },
       {
         id: 'cerebellum',
         file: 'models/cerebellum-2.glb',
         name: 'Cervelletto',
-        icon: '🧩',
-        description: 'Situato alla base del cervello, è essenziale per la coordinazione motoria, ' +
-          'l\'equilibrio e l\'apprendimento di movimenti fluidi e precisi.',
-        scale: 3.0,
-        cameraPos: [0, 1.5, 6],
-        targetPos: [0, 0, 0],
-        actions: [
-          { label: '⬅ Torna al SNC', target: 'cns_main', icon: '↩️' }
-        ]
+        desc: 'Il maestro della coordinazione e dell\'equilibrio.',
+        cam: [0, 1.5, 6],
+        actions: [{ label: 'Torna al SNC', target: 'cns_main', icon: '↩️' }]
       }
     ]
   },
   {
-    id: 'cardio_unit',
-    title: 'Apparato Cardiocircolatorio',
-    icon: '❤️',
+    id: 'cardio',
+    title: 'Cardiocircolatorio',
     models: [
       {
-        id: 'heart_main',
+        id: 'heart',
         file: 'models/jantung_manusia.glb',
         name: 'Cuore Umano',
-        icon: '❤️',
-        description: 'Il motore del sistema circolatorio. Pompa sangue ossigenato a tutto il corpo ' +
-          'e sangue deossigenato ai polmoni. Osserva i vasi principali e la struttura muscolare.',
-        scale: 3.0,
-        cameraPos: [0, 1.5, 6],
-        targetPos: [0, 0, 0],
+        desc: 'La pompa instancabile della vita. 100.000 battiti al giorno per nutrire ogni cellula.',
+        cam: [0, 1.5, 6],
         actions: []
       }
     ]
   }
 ];
 
-// Helper per trovare un modello dal suo ID
-function findModelConfig(modelId) {
-  for (const section of SECTIONS) {
-    const found = section.models.find(m => m.id === modelId);
-    if (found) return { model: found, section: section };
-  }
-  return null;
-}
-
-// ─── ELEMENTI DOM ────────────────────────────────────────────────
+// ─── DOM ELEMENTS ────────────────────────────────────────────────
 const canvas = document.getElementById('canvas3d');
-const loaderOverlay = document.getElementById('loader');
-const loaderText = document.getElementById('loader-text');
-const infoTitle = document.getElementById('info-title');
-const infoIcon = document.getElementById('info-icon');
-const infoDesc = document.getElementById('info-desc');
-const hintEl = document.getElementById('hint');
+const uiLayer = document.getElementById('ui-layer');
+const loaderBar = document.getElementById('loader-bar');
 const navBar = document.getElementById('nav-bar');
-const contextContainer = document.getElementById('context-actions');
+const contextStack = document.getElementById('context-actions');
+const infoTitle = document.getElementById('info-title');
+const infoDesc = document.getElementById('info-desc');
+const chapterInd = document.getElementById('chapter-indicator');
 
-// Creazione dinamica breadcrumbs
-let infoBreadcrumbs = document.getElementById('info-breadcrumbs');
-if (!infoBreadcrumbs) {
-  infoBreadcrumbs = document.createElement('div');
-  infoBreadcrumbs.className = 'info-breadcrumbs';
-  infoBreadcrumbs.id = 'info-breadcrumbs';
-  infoTitle.parentElement.parentElement.insertBefore(infoBreadcrumbs, infoTitle.parentElement);
-}
-
-// ─── SETUP RENDERER ─────────────────────────────────────────────
+// ─── THREE.JS SETUP ──────────────────────────────────────────────
 const renderer = new THREE.WebGLRenderer({
   canvas,
   antialias: true,
-  alpha: true, // Importante: lascia vedere il gradiente CSS
+  alpha: true,
   powerPreference: 'high-performance'
 });
-renderer.setPixelRatio(window.devicePixelRatio);
-renderer.setClearColor(0x000000, 0); // Trasparente
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2)); // Limit pixel ratio for perf
+renderer.setClearColor(0x000000, 0);
 renderer.shadowMap.enabled = true;
 renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 renderer.toneMapping = THREE.ACESFilmicToneMapping;
-renderer.toneMappingExposure = 1.0; // Esposizione ridotta per evitare bruciature sui modelli chiari
+renderer.toneMappingExposure = 0.9; // Cinematic dark mood
 renderer.outputEncoding = THREE.sRGBEncoding;
 
-// ─── SCENA ───────────────────────────────────────────────────────
 const scene = new THREE.Scene();
-// scene.background = null; // Trasparente di default
 
-// ─── CAMERA ──────────────────────────────────────────────────────
-const camera = new THREE.PerspectiveCamera(42, 1, 0.1, 200);
-camera.position.set(0, 1.5, 6);
+const camera = new THREE.PerspectiveCamera(35, 1, 0.1, 100); // 35mm lens effect (more cinematic)
+camera.position.set(0, 0, 10);
 
-// ─── CONTROLLI ───────────────────────────────────────────────────
 const controls = new OrbitControls(camera, renderer.domElement);
 controls.enableDamping = true;
-controls.dampingFactor = 0.06;
-controls.minDistance = 1.5;
-controls.maxDistance = 18;
-controls.target.set(0, 0, 0);
-controls.autoRotate = false;
-controls.autoRotateSpeed = 1.2;
+controls.dampingFactor = 0.04;
+controls.enablePan = false;
+controls.minDistance = 2;
+controls.maxDistance = 20;
 
-// ─── LUCI ────────────────────────────────────────────────────────
-const ambientLight = new THREE.AmbientLight(0xffffff, 0.9);
+// Lighting Setup (Dramatic)
+const ambientLight = new THREE.AmbientLight(0xffffff, 0.4);
 scene.add(ambientLight);
 
-const hemiLight = new THREE.HemisphereLight(0xffffff, 0xcccccc, 0.7);
-scene.add(hemiLight);
-
-const keyLight = new THREE.DirectionalLight(0xffffff, 0.8); // 1.0 -> 0.8
-keyLight.position.set(5, 10, 6);
+const keyLight = new THREE.DirectionalLight(0xffffff, 1.2);
+keyLight.position.set(5, 8, 5);
 keyLight.castShadow = true;
-keyLight.shadow.mapSize.set(2048, 2048);
-keyLight.shadow.camera.near = 0.5;
-keyLight.shadow.camera.far = 30;
-keyLight.shadow.bias = -0.001;
+keyLight.shadow.mapSize.width = 2048;
+keyLight.shadow.mapSize.height = 2048;
 scene.add(keyLight);
 
-const fillLight = new THREE.DirectionalLight(0xffffff, 0.3); // 0.5 -> 0.3
-fillLight.position.set(-6, 4, 4);
-scene.add(fillLight);
-
-const rimLight = new THREE.DirectionalLight(0xffffff, 0.5); // 0.6 -> 0.5
-rimLight.position.set(0, 3, -8);
+const rimLight = new THREE.DirectionalLight(0x44aaff, 1.5); // Blue rim light
+rimLight.position.set(-5, 2, -5);
 scene.add(rimLight);
 
-const frontLight = new THREE.DirectionalLight(0xffffff, 0.2); // 0.4 -> 0.2
-frontLight.position.set(0, 2, 8);
-scene.add(frontLight);
-
-// ─── GRIGLIA (RIMOSSA) ───────────────────────────────────────────
-// const gridHelper = new THREE.GridHelper(20, 20, 0x444444, 0x222222);
-// scene.add(gridHelper);
+const fillLight = new THREE.DirectionalLight(0xffffff, 0.3);
+fillLight.position.set(-5, 0, 5);
+scene.add(fillLight);
 
 // ─── GLTF LOADER ─────────────────────────────────────────────────
-const gltfLoader = new GLTFLoader();
-
-async function loadGLB(url) {
-  return new Promise((resolve, reject) => {
-    gltfLoader.load(
-      url,
-      (gltf) => {
-        const root = gltf.scene || gltf.scenes?.[0];
-        root.traverse((child) => {
-          if (child.isMesh) {
-            child.castShadow = true;
-            child.receiveShadow = true;
-          }
-        });
-        resolve(root);
-      },
-      (xhr) => {
-        if (xhr.total > 0) {
-          const pct = Math.round((xhr.loaded / xhr.total) * 100);
-          loaderText.textContent = `Caricamento modello… ${pct}%`;
-        }
-      },
-      (err) => {
-        console.error('Errore caricamento GLB:', url, err);
-        reject(err);
-      }
-    );
-  });
-}
-
-// ─── GESTIONE MODELLO ATTIVO ─────────────────────────────────────
+const loader = new GLTFLoader();
 let currentModel = null;
-let currentConfig = null;
-let animProgress = 0;
-let isAnimatingIn = false;
-let targetScale = 1;
+let currentSection = null;
 
-function wrapAndFit(rawModel, config) {
-  const box = new THREE.Box3().setFromObject(rawModel);
+function wrapModel(gltf) {
+  const root = gltf.scene || gltf.scenes[0];
+  const box = new THREE.Box3().setFromObject(root);
   const center = new THREE.Vector3();
-  const size = new THREE.Vector3();
   box.getCenter(center);
-  box.getSize(size);
 
-  rawModel.position.set(-center.x, -center.y, -center.z);
+  root.position.sub(center); // Center geometry
 
   const wrapper = new THREE.Group();
-  wrapper.add(rawModel);
+  wrapper.add(root);
 
+  // Normalize scale implies size ~3 units?
+  const size = new THREE.Vector3();
+  box.getSize(size);
   const maxDim = Math.max(size.x, size.y, size.z);
-  targetScale = maxDim > 0 ? (config.scale || 3.0) / maxDim : 1;
-  wrapper.scale.setScalar(0.001);
-  wrapper.position.set(0, 0, 0);
+  const scaleFactor = 4.0 / maxDim;
+  wrapper.scale.setScalar(scaleFactor);
+
+  // Material/Shadow fix
+  root.traverse(c => {
+    if (c.isMesh) {
+      c.castShadow = true;
+      c.receiveShadow = true;
+      c.material.depthWrite = true;
+    }
+  });
 
   return wrapper;
 }
 
-async function switchModel(modelId) {
-  const cfg = findModelConfig(modelId);
-  if (!cfg) return;
+// ─── APP LOGIC ───────────────────────────────────────────────────
 
-  const config = cfg.model;
-  const section = cfg.section;
+function findModel(id) {
+  for (const s of SECTIONS) {
+    const m = s.models.find(x => x.id === id);
+    if (m) return { model: m, section: s };
+  }
+  return null;
+}
 
-  // Stesso modello? Non ricaricare
-  // if (currentConfig && currentConfig.id === modelId) return;
+async function loadModel(id) {
+  const data = findModel(id);
+  if (!data) return;
+  const { model, section } = data;
 
-  loaderOverlay.classList.remove('hidden');
-  loaderText.textContent = 'Caricamento modello…';
+  // UI Updates (GSAP Out)
+  gsap.to([infoTitle, infoDesc], { opacity: 0, y: -20, duration: 0.3 });
+
+  // Loader Update
+  gsap.to(loaderBar, { width: '30%', duration: 0.5 });
 
   if (currentModel) {
-    scene.remove(currentModel);
-    currentModel = null;
+    gsap.to(currentModel.scale, {
+      x: 0, y: 0, z: 0, duration: 0.4, ease: 'back.in(1.7)', onComplete: () => {
+        scene.remove(currentModel);
+      }
+    });
   }
 
   try {
-    const rawModel = await loadGLB(config.file);
-    const wrapper = wrapAndFit(rawModel, config);
+    const gltf = await new Promise((resolve, reject) => {
+      loader.load(model.file, resolve, (xhr) => {
+        if (xhr.total) {
+          const pct = (xhr.loaded / xhr.total) * 100;
+          gsap.to(loaderBar, { width: pct + '%', duration: 0.2 });
+        }
+      }, reject);
+    });
 
-    scene.add(wrapper);
+    const wrapper = wrapModel(gltf);
     currentModel = wrapper;
-    currentConfig = config;
+    scene.add(wrapper);
 
-    animProgress = 0;
-    isAnimatingIn = true;
+    // Animate In (Elastic pop)
+    wrapper.scale.set(0, 0, 0);
+    gsap.to(wrapper.scale, { x: 1, y: 1, z: 1, duration: 1.2, ease: 'elastic.out(1, 0.5)', delay: 0.2 });
 
-    // Aggiorna camera con animazione (opzionale, qui scatto diretto)
-    camera.position.set(...config.cameraPos);
-    controls.target.set(...config.targetPos);
-    controls.update();
+    // Camera Move
+    gsap.to(camera.position, {
+      x: model.cam[0], y: model.cam[1], z: model.cam[2],
+      duration: 1.5, ease: 'power3.inOut'
+    });
 
-    // Aggiorna UI Info
-    infoIcon.textContent = config.icon;
-    infoTitle.textContent = config.name;
-    infoDesc.textContent = config.description;
-    infoBreadcrumbs.textContent = section.title;
+    // UI Updates (Content)
+    infoTitle.textContent = model.name;
+    infoDesc.textContent = model.desc;
+    chapterInd.textContent = section.title;
 
-    // Aggiorna Navigazione (Pillola attiva)
-    updateNavUI(section.id);
+    updateNav(section.id);
+    updateActions(model.actions);
 
-    // Aggiorna Azioni Contestuali
-    updateContextActions(config.actions);
-
-    setTimeout(() => loaderOverlay.classList.add('hidden'), 300);
-    // Hint solo la prima volta o cambio sezione
-    // showHint('🖱️ Usa mouse/touch per esplorare');
+    // UI Animate In
+    gsap.to(loaderBar, { width: '0%', duration: 0.5, delay: 0.5 });
+    gsap.to([infoTitle, infoDesc], { opacity: 1, y: 0, duration: 0.6, delay: 0.4, stagger: 0.1 });
 
   } catch (err) {
-    console.error('Errore:', err);
-    loaderText.textContent = 'Errore caricamento.';
-    setTimeout(() => loaderOverlay.classList.add('hidden'), 2000);
+    console.error(err);
   }
 }
 
-// ─── UI UPDATES ──────────────────────────────────────────────────
-
-function updateNavUI(activeSectionId) {
-  // Aggiorna stato attivo dei tab (sezioni)
-  const buttons = navBar.querySelectorAll('.nav-btn');
-  buttons.forEach(btn => {
-    btn.classList.toggle('active', btn.dataset.section === activeSectionId);
-  });
-}
-
-function updateContextActions(actions) {
-  contextContainer.innerHTML = ''; // Pulisci vecchi bottoni
-
-  if (!actions || actions.length === 0) return;
-
-  actions.forEach((action, i) => {
-    const btn = document.createElement('button');
-    btn.className = 'action-btn';
-    btn.innerHTML = `<span class="icon">${action.icon || '👉'}</span> ${action.label}`;
-    // Delay staggered per animazione entrata
-    btn.style.animationDelay = `${i * 0.1}s`;
-
-    btn.addEventListener('click', () => {
-      switchModel(action.target);
-    });
-
-    contextContainer.appendChild(btn);
-  });
-}
-
-function createNavigation() {
+// ─── UTILS ───────────────────────────────────────────────────────
+function updateNav(activeSecId) {
   navBar.innerHTML = '';
-  SECTIONS.forEach(section => {
+  SECTIONS.forEach(sec => {
     const btn = document.createElement('button');
     btn.className = 'nav-btn';
-    btn.dataset.section = section.id;
-    btn.innerHTML = `<span>${section.icon}</span> ${section.title}`;
-
-    btn.addEventListener('click', () => {
-      // Al click sulla sezione, carica il PRIMO modello di quella sezione
-      const firstModelId = section.models[0].id;
-      switchModel(firstModelId);
-    });
-
+    if (sec.id === activeSecId) btn.classList.add('active');
+    btn.textContent = sec.title;
+    btn.onclick = () => loadModel(sec.models[0].id);
     navBar.appendChild(btn);
   });
 }
 
-// ─── UTILS ───────────────────────────────────────────────────────
-let hintTimeout = null;
-function showHint(text, duration = 4000) {
-  hintEl.textContent = text;
-  hintEl.classList.add('show');
-  clearTimeout(hintTimeout);
-  hintTimeout = setTimeout(() => hintEl.classList.remove('show'), duration);
+function updateActions(actions) {
+  contextStack.innerHTML = '';
+  actions.forEach((act, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'action-btn';
+    btn.innerHTML = `<span>${act.label}</span> <span>${act.icon}</span>`;
+    btn.onclick = () => loadModel(act.target);
+
+    // Staggered entrance
+    gsap.fromTo(btn, { x: 50, opacity: 0 }, { x: 0, opacity: 1, duration: 0.5, delay: 0.6 + (i * 0.1) });
+    contextStack.appendChild(btn);
+  });
 }
 
-const btnRotate = document.getElementById('btn-rotate');
-btnRotate.addEventListener('click', () => {
-  controls.autoRotate = !controls.autoRotate;
-  btnRotate.classList.toggle('active', controls.autoRotate);
-  showHint(controls.autoRotate ? '🔄 Auto-rotazione attiva' : '⏹ Auto-rotazione disattivata', 2000);
-});
+// Focus Mode Logic (Hide Texts Only)
+let isFocus = false;
+document.getElementById('btn-toggle-ui').addEventListener('click', (e) => {
+  isFocus = !isFocus;
+  const btn = e.currentTarget;
 
-const btnReset = document.getElementById('btn-reset');
-btnReset.addEventListener('click', () => {
-  if (currentConfig) {
-    camera.position.set(...currentConfig.cameraPos);
-    controls.target.set(...currentConfig.targetPos);
-    controls.update();
-    showHint('🎯 Vista reimpostata', 1500);
+  if (isFocus) {
+    uiLayer.classList.add('ui-hidden');
+    btn.classList.add('active');
+  } else {
+    uiLayer.classList.remove('ui-hidden');
+    btn.classList.remove('active');
   }
 });
 
-const btnToggleUI = document.getElementById('btn-toggle-ui');
-let isUIHidden = false;
-btnToggleUI.addEventListener('click', () => {
-  isUIHidden = !isUIHidden;
+// Intro Sequence
+function playIntro() {
+  const introTl = gsap.timeline();
 
-  const uiElements = document.querySelectorAll('.header, .info-panel, .nav-bar, .context-actions');
-  uiElements.forEach(el => {
-    if (isUIHidden) el.classList.add('ui-hidden');
-    else el.classList.remove('ui-hidden');
-  });
-
-  btnToggleUI.textContent = isUIHidden ? '👁️' : '🙈';
-  btnToggleUI.classList.toggle('active', isUIHidden);
-  showHint(isUIHidden ? 'Modo Focus attivo' : 'Interfaccia visibile', 1500);
-});
-
-function onResize() {
-  const w = canvas.clientWidth;
-  const h = canvas.clientHeight;
-  if (w === 0 || h === 0) return;
-  renderer.setSize(w, h, false);
-  camera.aspect = w / h;
-  camera.updateProjectionMatrix();
-}
-window.addEventListener('resize', onResize, { passive: true });
-onResize();
-
-function easeOutBack(t) {
-  const c1 = 1.70158;
-  const c3 = c1 + 1;
-  return 1 + c3 * Math.pow(t - 1, 3) + c1 * Math.pow(t - 1, 2);
+  introTl.to('.intro-title', { opacity: 1, y: 0, duration: 1, ease: 'power2.out' })
+    .to('.intro-subtitle', { opacity: 1, y: 0, duration: 1 }, '-=0.5')
+    .to('.intro-overlay', { opacity: 0, duration: 1, delay: 1, pointerEvents: 'none' })
+    .add(() => loadModel(SECTIONS[0].models[0].id), '-=0.5'); // Start loading heart
 }
 
-// ─── ANIMATION LOOP ──────────────────────────────────────────────
+// ─── RENDER LOOP ─────────────────────────────────────────────────
 const clock = new THREE.Clock();
 
 function animate() {
   requestAnimationFrame(animate);
-  const dt = clock.getDelta();
-  const elapsed = clock.getElapsedTime();
+  const t = clock.getElapsedTime();
 
   controls.update();
 
-  if (isAnimatingIn && currentModel) {
-    animProgress += dt * 1.8;
-    if (animProgress >= 1) {
-      animProgress = 1;
-      isAnimatingIn = false;
-    }
-    const t = easeOutBack(Math.min(animProgress, 1));
-    currentModel.scale.setScalar(targetScale * t);
-  }
-
-  if (currentModel && !isAnimatingIn) {
-    currentModel.position.y = Math.sin(elapsed * 0.8) * 0.04;
+  if (currentModel) {
+    currentModel.rotation.y = Math.sin(t * 0.2) * 0.1; // Very subtle breathing rotation
+    currentModel.position.y = Math.sin(t * 1) * 0.05; // Float
   }
 
   renderer.render(scene, camera);
 }
 
-// ─── START ───────────────────────────────────────────────────────
-createNavigation();
-animate();
+window.addEventListener('resize', () => {
+  camera.aspect = window.innerWidth / window.innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(window.innerWidth, window.innerHeight);
+});
 
-// Carica il primo modello della prima sezione all'avvio
-switchModel(SECTIONS[0].models[0].id);
+// START
+animate();
+playIntro();
