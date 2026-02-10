@@ -12,7 +12,7 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
 
   <!-- Foglio di stile -->
-  <link rel="stylesheet" href="style.css?v=8" />
+  <link rel="stylesheet" href="style.css?v=9" />
 
   <!-- Three.js Import Map -->
   <script type="importmap">
@@ -26,12 +26,6 @@
 </head>
 
 <body>
-  <!-- ─── INTRO SEQUENCE ─── -->
-  <div class="intro-overlay" id="intro-overlay">
-    <h1 class="intro-title">Biologia <span class="accent">3D</span></h1>
-    <p class="intro-subtitle">Esplora la vita in ogni dettaglio</p>
-  </div>
-
   <div class="app">
     <!-- ─── UI LAYER ─── -->
     <div class="ui-layer" id="ui-layer">
@@ -41,7 +35,7 @@
         <p class="chapter-indicator" id="chapter-indicator">Microstruttura</p>
       </header>
 
-      <!-- Info Model (Grande tipografia, sinistra) -->
+      <!-- Info Model (Tipografia leggibile, sinistra) -->
       <div class="info-panel" id="info-panel">
         <h2 id="info-title">Cuore Umano</h2>
         <div class="info-line"></div>
@@ -52,7 +46,7 @@
 
       <!-- Controlli Top-Right -->
       <div class="controls-group" id="controls">
-        <button id="btn-toggle-ui" class="ctrl-btn icon-btn" title="Focus Mode (Nascondi Testo)">
+        <button id="btn-toggle-text" class="ctrl-btn icon-btn" title="Focus Mode (Nascondi Testo)">
           <svg width="24" height="24" fill="none" viewBox="0 0 24 24">
             <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
               d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
@@ -79,14 +73,14 @@
     <div class="viewer-container">
       <canvas id="canvas3d"></canvas>
 
-      <!-- Loader integrato non invasivo -->
+      <!-- Loader integrato -->
       <div class="loader-bar-container" id="loader">
         <div class="loader-bar" id="loader-bar"></div>
       </div>
     </div>
   </div>
 
-  <script type="module" src="script.js?v=8"></script>
+  <script type="module" src="script.js?v=9"></script>
 </body>
 
 </html>

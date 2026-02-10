@@ -1,24 +1,26 @@
 /* ================================================================
-   PRESENTAZIONE 3D BIOLOGIA — DESIGN "APPLE PRO" v7
-   Magazine Layout, Cinema Typography, GSAP Animation Ready
+   PRESENTAZIONE 3D BIOLOGIA — DESIGN "APPLE STANDARD" v9
+   Clean Dark Mode, Readable Typography, Functional UI
    ================================================================ */
 
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
 :root {
-  --bg-deep: #000000;
-  --bg-gradient: radial-gradient(circle at 50% 120%, #1c1c1e 0%, #000000 100%);
+  /* Apple Standard Dark Palette */
+  --bg-deep: #1d1d1f;
+  /* Apple Website Grey */
+  --bg-gradient: radial-gradient(circle at 50% 120%, #2c2c2e 0%, #000000 100%);
   --accent: #2997ff;
-  /* Apple Blue Pro */
-  --text: #ffffff;
+  --text: #f5f5f7;
   --text-muted: #86868b;
 
-  --glass: rgba(28, 28, 30, 0.65);
-  --glass-border: rgba(255, 255, 255, 0.1);
+  --glass: rgba(40, 40, 40, 0.7);
+  --glass-border: rgba(255, 255, 255, 0.15);
   --glass-blur: blur(20px) saturate(180%);
 
-  --font-display: 'Inter', -apple-system, sans-serif;
-  --ease-expo: cubic-bezier(0.16, 1, 0.3, 1);
+  --font-stack: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --radius: 12px;
+  --ease: cubic-bezier(0.25, 1, 0.5, 1);
 }
 
 *,
@@ -36,41 +38,8 @@ html {
   height: 100%;
   overflow: hidden;
   background: var(--bg-deep);
-  font-family: var(--font-display);
+  font-family: var(--font-stack);
   color: var(--text);
-}
-
-/* ─── INTRO OVERLAY ─── */
-.intro-overlay {
-  position: fixed;
-  inset: 0;
-  background: #000;
-  z-index: 1000;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  pointer-events: none;
-}
-
-.intro-title {
-  font-size: 4rem;
-  font-weight: 800;
-  letter-spacing: -2px;
-  background: linear-gradient(180deg, #fff 0%, #86868b 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  opacity: 0;
-  /* Animato via GSAP */
-}
-
-.intro-subtitle {
-  margin-top: 1rem;
-  font-size: 1.2rem;
-  color: var(--accent);
-  letter-spacing: 2px;
-  text-transform: uppercase;
-  opacity: 0;
 }
 
 /* ─── APP CONTAINER ─── */
@@ -85,6 +54,8 @@ html {
   position: absolute;
   inset: 0;
   z-index: 0;
+  /* Gradiente di sfondo CSS visibile se il renderer è trasparente */
+  background: var(--bg-gradient);
 }
 
 canvas {
@@ -100,152 +71,149 @@ canvas {
   inset: 0;
   z-index: 10;
   pointer-events: none;
-  /* Lascia passare click al canvas */
+  /* Cruciale: lascia passare i click al canvas */
 }
 
-/* Elementi UI interattivi devono riattivare pointer-events */
+/* Elementi interattivi */
 .header,
 .info-panel,
 .controls-group,
 .nav-bar,
-.context-stack button {
+.context-stack .action-btn {
   pointer-events: auto;
 }
 
 /* HEADER */
 .header {
   position: absolute;
-  top: 32px;
+  top: 24px;
   width: 100%;
   text-align: center;
   z-index: 20;
 }
 
 .logo {
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 600;
-  letter-spacing: 2px;
+  letter-spacing: 0.5px;
   text-transform: uppercase;
   color: var(--text-muted);
-  margin-bottom: 8px;
+  margin-bottom: 6px;
 }
 
 .chapter-indicator {
   display: inline-block;
-  padding: 6px 16px;
-  background: rgba(255, 255, 255, 0.08);
-  border-radius: 20px;
-  font-size: 13px;
+  font-size: 14px;
+  font-weight: 500;
   color: #fff;
-  backdrop-filter: blur(10px);
+  opacity: 0.9;
 }
 
-/* INFO PANEL - BIG TYPOGRAPHY */
+/* INFO PANEL - Standard Readability */
 .info-panel {
   position: absolute;
-  top: 25%;
-  left: 6vw;
-  max-width: 400px;
+  top: 20%;
+  left: 40px;
+  max-width: 380px;
+  padding: 24px;
   z-index: 15;
+  /* Optional Glass Background for readability */
+  /* background: rgba(0,0,0,0.2); 
+     backdrop-filter: blur(10px);
+     border-radius: var(--radius); */
 }
 
 .info-panel h2 {
-  font-size: 3.5rem;
-  /* Massive title */
-  font-weight: 300;
-  /* Thin */
+  font-size: 48px;
+  font-weight: 700;
+  /* Bold, standard Apple Title */
   line-height: 1.1;
-  letter-spacing: -1.5px;
-  margin-bottom: 24px;
-  text-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-  transform-origin: left;
+  letter-spacing: -0.5px;
+  margin-bottom: 20px;
+  color: #fff;
 }
 
 .info-line {
-  width: 60px;
-  height: 2px;
+  width: 40px;
+  height: 3px;
   background: var(--accent);
-  margin-bottom: 24px;
+  margin-bottom: 20px;
+  border-radius: 2px;
 }
 
 .info-panel p {
-  font-size: 1.1rem;
-  line-height: 1.6;
-  color: rgba(255, 255, 255, 0.8);
+  font-size: 16px;
+  line-height: 1.5;
+  color: #d2d2d7;
   font-weight: 400;
-  max-width: 320px;
 }
 
-/* FOCUS MODE: Hide info only */
-.ui-hidden .info-panel,
-.ui-hidden .header,
-.ui-hidden .nav-bar {
+/* FOCUS MODE: Hide Text Only */
+.info-hidden .info-panel,
+.info-hidden .header {
   opacity: 0;
-  transform: translateY(20px);
+  transform: translateY(-10px);
   pointer-events: none;
-  transition: all 0.6s var(--ease-expo);
+  transition: all 0.4s var(--ease);
 }
 
 /* CONTROLS (Top Right) */
 .controls-group {
   position: absolute;
-  top: 32px;
-  right: 32px;
+  top: 24px;
+  right: 24px;
   display: flex;
-  gap: 12px;
+  gap: 10px;
 }
 
 .ctrl-btn {
-  width: 44px;
-  height: 44px;
+  width: 40px;
+  height: 40px;
   border-radius: 50%;
-  background: rgba(40, 40, 45, 0.5);
-  border: 1px solid var(--glass-border);
+  background: rgba(60, 60, 60, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.2);
   backdrop-filter: blur(12px);
   color: #fff;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all 0.3s ease;
+  transition: all 0.2s ease;
 }
 
 .ctrl-btn:hover {
-  background: rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.3);
   transform: scale(1.05);
 }
 
-.ctrl-btn.active {
-  background: var(--text);
-  color: #000;
-}
-
-/* NAV BAR (Floating Dock) */
 .nav-bar {
   position: absolute;
-  bottom: 40px;
+  bottom: 32px;
   left: 50%;
   transform: translateX(-50%);
   display: flex;
-  gap: 12px;
-  padding: 10px 14px;
-  background: rgba(20, 20, 22, 0.7);
-  border: 1px solid var(--glass-border);
-  backdrop-filter: blur(24px);
-  border-radius: 30px;
+  gap: 8px;
+  padding: 6px;
+  background: rgba(28, 28, 30, 0.85);
+  /* Dark solid/translucent */
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(20px);
+  border-radius: 100px;
   z-index: 30;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
 }
 
 .nav-btn {
   background: transparent;
   border: none;
-  color: var(--text-muted);
+  color: #98989d;
   font-size: 14px;
   font-weight: 500;
-  padding: 10px 20px;
-  border-radius: 20px;
+  padding: 8px 18px;
+  border-radius: 100px;
   cursor: pointer;
-  transition: all 0.3s ease;
+  white-space: nowrap;
+  transition: all 0.2s ease;
 }
 
 .nav-btn:hover {
@@ -257,59 +225,59 @@ canvas {
   background: #fff;
   color: #000;
   font-weight: 600;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
 }
 
-/* CONTEXT STACK (Bottom Right) */
+/* CONTEXT ACTIONS (Bottom Right) */
 .context-stack {
   position: absolute;
-  bottom: 120px;
-  right: 40px;
+  bottom: 100px;
+  right: 32px;
   display: flex;
   flex-direction: column;
+  gap: 12px;
   align-items: flex-end;
-  gap: 16px;
 }
 
 .action-btn {
-  padding: 16px 28px;
+  padding: 12px 20px;
   background: rgba(41, 151, 255, 0.15);
-  border: 1px solid rgba(41, 151, 255, 0.3);
+  border: 1px solid rgba(41, 151, 255, 0.4);
   backdrop-filter: blur(16px);
-  border-radius: 16px;
+  border-radius: 12px;
   color: #fff;
   font-size: 14px;
   font-weight: 600;
   cursor: pointer;
   display: flex;
   align-items: center;
-  gap: 12px;
-  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+  gap: 8px;
+  transition: transform 0.2s ease;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
 }
 
 .action-btn:hover {
-  transform: scale(1.05) translateX(-5px);
   background: var(--accent);
-  border-color: var(--accent);
+  /* Solid blue on hover */
+  transform: translateY(-2px);
 }
 
-/* LOADER BAR */
+/* LOADER */
 .loader-bar-container {
   position: absolute;
   bottom: 0;
   left: 0;
   width: 100%;
-  height: 4px;
+  height: 3px;
   background: transparent;
   pointer-events: none;
+  z-index: 50;
 }
 
 .loader-bar {
   height: 100%;
   width: 0%;
   background: var(--accent);
-  transition: width 0.2s linear;
+  transition: width 0.2s ease-out;
 }
 
 @media (max-width: 768px) {
@@ -318,26 +286,33 @@ canvas {
     bottom: 140px;
     left: 20px;
     right: 20px;
+    padding: 0;
+    max-width: none;
   }
 
   .info-panel h2 {
-    font-size: 2.5rem;
+    font-size: 32px;
+    margin-bottom: 12px;
+  }
+
+  .info-line {
+    margin-bottom: 12px;
+  }
+
+  .info-panel p {
+    font-size: 14px;
+    max-width: none;
   }
 
   .nav-bar {
-    bottom: 20px;
-    width: 90%;
+    width: 92%;
     overflow-x: auto;
     justify-content: flex-start;
-  }
-
-  .controls-group {
-    top: 20px;
-    right: 20px;
+    bottom: 20px;
   }
 
   .context-stack {
-    bottom: 240px;
+    bottom: 200px;
     right: 20px;
   }
 }
