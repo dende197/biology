@@ -10,6 +10,7 @@ import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 
 // ─── CONFIGURAZIONE MODELLI ─────────────────────────────────────
 // Array con i dati di ogni modello caricabile.
+// Array con i dati di ogni modello caricabile.
 const MODELS = [
   {
     id: 'heart',
@@ -24,38 +25,57 @@ const MODELS = [
     targetPos: [0, 0, 0],
   },
   {
-    id: 'neuron',
-    file: 'models/neuron.glb',
-    name: 'Neurone',
-    icon: '🧬',
-    description: 'Il neurone è la cellula fondamentale del sistema nervoso. ' +
-      'È composto da: corpo cellulare (soma), dendriti (ricezione segnali), assone (trasmissione impulso) ' +
-      'e terminazioni sinaptiche. La guaina mielinica accelera la conduzione dell\'impulso elettrico.',
+    id: 'cerebellum',
+    file: 'models/cerebellum-2.glb',
+    name: 'Cervelletto',
+    icon: '🧠',
+    description: 'Il cervelletto è una parte del sistema nervoso centrale situata alla base del cervello. ' +
+      'Svolge un ruolo fondamentale nel controllo motorio, nella coordinazione, nell\'equilibrio e ' +
+      'nell\'apprendimento di movimenti complessi.',
     scale: 3.0,
-    cameraPos: [0, 1.5, 7],
+    cameraPos: [0, 1.5, 6],
     targetPos: [0, 0, 0],
   },
   {
-    id: 'brain',
-    file: 'models/human_brain.glb',
-    name: 'Cervello Umano',
-    icon: '🧠',
-    description: 'Il cervello è l\'organo principale del sistema nervoso centrale. ' +
-      'Controlla funzioni cognitive, motorie, sensoriali e autonome. ' +
-      'È diviso in emisfero destro e sinistro, connessi dal corpo calloso. ' +
-      'Contiene circa 86 miliardi di neuroni.',
+    id: 'model1',
+    file: 'models/result.glb',
+    name: 'Modello Anatomico 1',
+    icon: '🔬',
+    description: 'Visualizzazione 3D dettagliata di una struttura anatomica complessa. ' +
+      'Utilizza i controlli per esplorare il modello da ogni angolazione.',
     scale: 3.0,
     cameraPos: [0, 2, 7],
     targetPos: [0, 0, 0],
   },
   {
-    id: 'brain2',
-    file: 'models/brain_project.glb',
-    name: 'Cervello — Dettaglio',
-    icon: '🔬',
-    description: 'Vista dettagliata del cervello che evidenzia le principali aree funzionali: ' +
-      'lobo frontale (pensiero, decisioni), lobo parietale (sensazioni), ' +
-      'lobo temporale (udito, memoria), lobo occipitale (vista) e cervelletto (coordinazione motoria).',
+    id: 'model2',
+    file: 'models/result-2.glb',
+    name: 'Modello Anatomico 2',
+    icon: '🧬',
+    description: 'Rappresentazione tridimensionale ad alta risoluzione. ' +
+      'Particolare attenzione è stata data alla resa dei materiali e delle superfici.',
+    scale: 3.0,
+    cameraPos: [0, 2, 7],
+    targetPos: [0, 0, 0],
+  },
+  {
+    id: 'model3',
+    file: 'models/result-3.glb',
+    name: 'Modello Anatomico 3',
+    icon: '🦴',
+    description: 'Struttura biologica visualizzata in 3D. ' +
+      'Permette lo studio approfondito della morfologia e delle connessioni spaziali.',
+    scale: 3.0,
+    cameraPos: [0, 2, 7],
+    targetPos: [0, 0, 0],
+  },
+  {
+    id: 'model4',
+    file: 'models/result-4.glb',
+    name: 'Modello Anatomico 4',
+    icon: '🩺',
+    description: 'Modello 3D interattivo per la didattica. ' +
+      'Ruota e zoomare per osservare i dettagli nascosti della struttura.',
     scale: 3.0,
     cameraPos: [0, 2, 7],
     targetPos: [0, 0, 0],
