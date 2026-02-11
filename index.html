@@ -12,7 +12,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
 
-  <link rel="stylesheet" href="style.css?v=18" />
+  <link rel="stylesheet" href="style.css?v=19" />
 
   <script type="importmap">
     {
@@ -38,15 +38,15 @@
     <div class="viewer" id="viewer">
       <canvas id="canvas3d"></canvas>
 
-      <!-- Video Overlay -->
-      <div class="video-overlay hidden" id="video-overlay">
-        <div class="video-container">
-          <button id="btn-close-video" class="btn-close">✕</button>
-          <video id="video-player" controls>
-            <source src="videos/sanguenelcuore.mp4" type="video/mp4">
-            Il tuo browser non supporta il tag video.
-          </video>
+      <!-- Video Panel (floating, bottom-right) -->
+      <div class="video-panel hidden" id="video-panel">
+        <div class="video-panel-header">
+          <span class="video-panel-title">🎥 Sangue nel Cuore</span>
+          <button id="btn-close-video" class="video-panel-close">✕</button>
         </div>
+        <video id="video-player" controls>
+          <source src="videos/sanguenelcuore.mp4" type="video/mp4">
+        </video>
       </div>
 
       <!-- Loader Overlay -->
@@ -92,7 +92,7 @@
 
   </div>
 
-  <script type="module" src="script.js?v=18"></script>
+  <script type="module" src="script.js?v=19"></script>
 </body>
 
 </html>

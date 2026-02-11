@@ -377,66 +377,72 @@ canvas {
   letter-spacing: 0.02em;
 }
 
-/* ─────────── VIDEO OVERLAY ─────────── */
-.video-overlay {
+/* ─────────── VIDEO PANEL (Floating PiP) ─────────── */
+.video-panel {
   position: absolute;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.85);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 300;
+  bottom: 90px;
+  right: 20px;
+  width: 320px;
+  background: rgba(20, 20, 22, 0.92);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-md);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5);
+  z-index: 60;
+  overflow: hidden;
+  transform: translateY(0);
   opacity: 1;
-  transition: opacity 0.3s var(--ease);
+  transition: opacity 0.35s var(--ease), transform 0.35s var(--ease);
 }
 
-.video-overlay.hidden {
+.video-panel.hidden {
   opacity: 0;
   pointer-events: none;
+  transform: translateY(20px);
 }
 
-.video-container {
-  position: relative;
-  width: 90%;
-  max-width: 800px;
-  background: #000;
-  border-radius: var(--radius-md);
-  overflow: hidden;
-  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
-  border: 1px solid var(--glass-border);
+.video-panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--glass-border);
 }
 
-.video-container video {
-  width: 100%;
-  display: block;
-  outline: none;
+.video-panel-title {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  letter-spacing: 0.02em;
 }
 
-.btn-close {
-  position: absolute;
-  top: 15px;
-  right: 15px;
-  width: 32px;
-  height: 32px;
+.video-panel-close {
+  width: 24px;
+  height: 24px;
   border-radius: 50%;
-  background: rgba(0, 0, 0, 0.6);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  color: #fff;
-  font-size: 16px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: var(--text-tertiary);
+  font-size: 13px;
   cursor: pointer;
-  z-index: 10;
   display: flex;
   align-items: center;
   justify-content: center;
   transition: all 0.2s ease;
+  line-height: 1;
 }
 
-.btn-close:hover {
-  background: var(--accent);
-  border-color: var(--accent);
-  transform: scale(1.1);
+.video-panel-close:hover {
+  background: rgba(255, 59, 48, 0.3);
+  color: #ff3b30;
+  border-color: rgba(255, 59, 48, 0.4);
+}
+
+.video-panel video {
+  width: 100%;
+  display: block;
+  outline: none;
 }
 
 /* ─────────── RESPONSIVE ─────────── */

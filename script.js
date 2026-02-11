@@ -82,10 +82,10 @@ const SECTIONS = [
         name: 'Cuore — Anatomia',
         desc: 'Modello anatomico dettagliato. Ventricoli, atri, valvole e grandi vasi.',
         cam: [0, 1.5, 6],
+        showVideo: true,
         actions: [
           { type: 'model', label: 'Cuore Animato', target: 'heart_anim', icon: '💓' },
-          { type: 'model', label: 'Cuore Artificiale', target: 'heart_artificial', icon: '⚙️' },
-          { type: 'video', label: 'Video Esplicativo', target: 'videos/sanguenelcuore.mp4', icon: '🎥' }
+          { type: 'model', label: 'Cuore Artificiale', target: 'heart_artificial', icon: '⚙️' }
         ]
       },
       {
@@ -111,10 +111,11 @@ const infoTitle = document.getElementById('info-title');
 const infoDesc = document.getElementById('info-desc');
 const chapterInd = document.getElementById('chapter-indicator');
 
-// Video DOM
-const videoOverlay = document.getElementById('video-overlay');
+// Video Panel DOM
+const videoPanel = document.getElementById('video-panel');
 const videoPlayer = document.getElementById('video-player');
 const btnCloseVideo = document.getElementById('btn-close-video');
+let videoPanelDismissed = false; // user closed it manually
 
 /* ─── THREE.JS ─────────────────────────────────────────────────── */
 const renderer = new THREE.WebGLRenderer({
@@ -223,30 +224,24 @@ function tweenCameraTo(target, duration) {
   tweenRaf = requestAnimationFrame(step);
 }
 
-/* ─── VIDEO LOGIC ──────────────────────────────────────────────── */
-function openVideo(src) {
-  if (!videoOverlay || !videoPlayer) return;
-  // Update src only if different
-  // (Assuming single video for now, but keeping generic structure)
-  videoOverlay.classList.remove('hidden');
-  videoPlayer.play();
+/* ─── VIDEO PANEL LOGIC ────────────────────────────────────────── */
+function showVideoPanel() {
+  if (!videoPanel) return;
+  videoPanelDismissed = false;
+  videoPanel.classList.remove('hidden');
 }
 
-function closeVideo() {
-  if (!videoOverlay || !videoPlayer) return;
-  videoOverlay.classList.add('hidden');
+function hideVideoPanel() {
+  if (!videoPanel || !videoPlayer) return;
+  videoPanel.classList.add('hidden');
   videoPlayer.pause();
   videoPlayer.currentTime = 0;
 }
 
 if (btnCloseVideo) {
-  btnCloseVideo.addEventListener('click', closeVideo);
-}
-
-// Close on background click
-if (videoOverlay) {
-  videoOverlay.addEventListener('click', function (e) {
-    if (e.target === videoOverlay) closeVideo();
+  btnCloseVideo.addEventListener('click', function () {
+    videoPanelDismissed = true;
+    hideVideoPanel();
   });
 }
 
@@ -304,6 +299,13 @@ async function loadModel(id) {
     renderNav(section.id);
     renderActions(model.actions);
 
+    // Auto-show/hide video panel
+    if (model.showVideo && !videoPanelDismissed) {
+      showVideoPanel();
+    } else {
+      hideVideoPanel();
+    }
+
   } catch (err) {
     console.error('Errore caricamento modello:', err);
   }
@@ -353,15 +355,8 @@ function renderActions(actions) {
 actionRow.addEventListener('click', function (e) {
   var btn = e.target.closest('.action-btn');
   if (!btn) return;
-
-  var type = btn.getAttribute('data-type');
   var target = btn.getAttribute('data-target');
-
-  if (type === 'video') {
-    openVideo(target);
-  } else {
-    loadModel(target);
-  }
+  if (target) loadModel(target);
 });
 
 /* ─── BUTTON HANDLERS ──────────────────────────────────────────── */
