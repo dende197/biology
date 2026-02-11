@@ -377,6 +377,69 @@ canvas {
   letter-spacing: 0.02em;
 }
 
+/* ─────────── ECG OVERLAY ─────────── */
+.ecg-overlay {
+  position: absolute;
+  bottom: 80px;
+  left: 0;
+  width: 100%;
+  height: 140px;
+  z-index: 40;
+  pointer-events: none;
+  transition: opacity 0.5s var(--ease);
+}
+
+.ecg-overlay.hidden {
+  opacity: 0;
+}
+
+/* ECG Label */
+.ecg-label {
+  position: absolute;
+  bottom: 225px;
+  left: 24px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  z-index: 41;
+  pointer-events: none;
+  transition: opacity 0.5s var(--ease);
+}
+
+.ecg-label.hidden {
+  opacity: 0;
+}
+
+.ecg-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #ff3b30;
+  animation: ecg-pulse 1s ease-in-out infinite;
+}
+
+@keyframes ecg-pulse {
+
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+
+  50% {
+    opacity: 0.5;
+    transform: scale(0.8);
+  }
+}
+
+.ecg-label span {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(255, 59, 48, 0.8);
+}
+
 /* ─────────── RESPONSIVE ─────────── */
 @media (max-width: 768px) {
   .header {
