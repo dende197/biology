@@ -1,9 +1,8 @@
 /* ================================================================
-   BIOLOGIA 3D — ENGINE v17 (Bulletproof)
-   Fixes:
-   - v13: renderer.setSize() + camera.aspect on init
-   - v16: No Object.assign on readonly Three.js properties
-   - v17: Defensive wrapModel, safer init, loader always hides
+   BIOLOGIA 3D — ENGINE v18 (Video + Artificial Heart)
+   - Removed ECG
+   - Added Artificial Heart model
+   - Added Video Overlay support
    ================================================================ */
 
 import * as THREE from 'three';
@@ -21,7 +20,7 @@ const SECTIONS = [
         name: 'Neurone',
         desc: 'L\'unità fondamentale del pensiero. Osserva la complessità delle ramificazioni dendritiche e l\'assone mielinizzato.',
         cam: [0, 2, 9],
-        actions: [{ label: 'Esamina Sinapsi', target: 'synapse', icon: '⚡' }]
+        actions: [{ type: 'model', label: 'Esamina Sinapsi', target: 'synapse', icon: '⚡' }]
       },
       {
         id: 'synapse',
@@ -29,7 +28,7 @@ const SECTIONS = [
         name: 'Sinapsi',
         desc: 'Il ponte chimico tra i neuroni. Qui il segnale elettrico diventa neurotrasmettitore.',
         cam: [0, 2, 7],
-        actions: [{ label: 'Torna al Neurone', target: 'neuron', icon: '↩️' }]
+        actions: [{ type: 'model', label: 'Torna al Neurone', target: 'neuron', icon: '↩️' }]
       }
     ]
   },
@@ -43,8 +42,8 @@ const SECTIONS = [
         desc: 'Il centro di comando. Comprende cervello, cervelletto e tronco encefalico.',
         cam: [0, 1.5, 7],
         actions: [
-          { label: 'Midollo Spinale', target: 'spinal', icon: '🦴' },
-          { label: 'Cervelletto', target: 'cerebellum', icon: '🧠' }
+          { type: 'model', label: 'Midollo Spinale', target: 'spinal', icon: '🦴' },
+          { type: 'model', label: 'Cervelletto', target: 'cerebellum', icon: '🧠' }
         ]
       },
       {
@@ -53,7 +52,7 @@ const SECTIONS = [
         name: 'Midollo Spinale',
         desc: 'L\'autostrada delle informazioni sensoriali e motorie tra cervello e periferia.',
         cam: [0, 2, 7],
-        actions: [{ label: 'Torna all\'Encefalo', target: 'brain', icon: '↩️' }]
+        actions: [{ type: 'model', label: 'Torna all\'Encefalo', target: 'brain', icon: '↩️' }]
       },
       {
         id: 'cerebellum',
@@ -61,7 +60,7 @@ const SECTIONS = [
         name: 'Cervelletto',
         desc: 'Il maestro della coordinazione motoria e dell\'equilibrio posturale.',
         cam: [0, 1.5, 6],
-        actions: [{ label: 'Torna all\'Encefalo', target: 'brain', icon: '↩️' }]
+        actions: [{ type: 'model', label: 'Torna all\'Encefalo', target: 'brain', icon: '↩️' }]
       }
     ]
   },
@@ -75,7 +74,7 @@ const SECTIONS = [
         desc: 'Il cuore umano in battito continuo. Osserva la contrazione ritmica del miocardio.',
         cam: [0, 1.5, 6],
         animated: true,
-        actions: [{ label: 'Modello Anatomico', target: 'heart_model', icon: '❤️' }]
+        actions: [{ type: 'model', label: 'Modello Anatomico', target: 'heart_model', icon: '❤️' }]
       },
       {
         id: 'heart_model',
@@ -83,7 +82,19 @@ const SECTIONS = [
         name: 'Cuore — Anatomia',
         desc: 'Modello anatomico dettagliato. Ventricoli, atri, valvole e grandi vasi.',
         cam: [0, 1.5, 6],
-        actions: [{ label: 'Cuore Animato', target: 'heart_anim', icon: '💓' }]
+        actions: [
+          { type: 'model', label: 'Cuore Animato', target: 'heart_anim', icon: '💓' },
+          { type: 'model', label: 'Cuore Artificiale', target: 'heart_artificial', icon: '⚙️' },
+          { type: 'video', label: 'Video Esplicativo', target: 'videos/sanguenelcuore.mp4', icon: '🎥' }
+        ]
+      },
+      {
+        id: 'heart_artificial',
+        file: 'models/cuoreartificiale.glb',
+        name: 'Cuore Artificiale',
+        desc: 'Dispositivo meccanico progettato per sostituire le funzioni di pompaggio del cuore biologico.',
+        cam: [0, 1.5, 6],
+        actions: [{ type: 'model', label: 'Torna all\'Anatomia', target: 'heart_model', icon: '↩️' }]
       }
     ]
   }
@@ -99,8 +110,11 @@ const infoCard = document.getElementById('info-card');
 const infoTitle = document.getElementById('info-title');
 const infoDesc = document.getElementById('info-desc');
 const chapterInd = document.getElementById('chapter-indicator');
-const ecgCanvas = document.getElementById('ecg-canvas');
-const ecgCtx = ecgCanvas.getContext('2d');
+
+// Video DOM
+const videoOverlay = document.getElementById('video-overlay');
+const videoPlayer = document.getElementById('video-player');
+const btnCloseVideo = document.getElementById('btn-close-video');
 
 /* ─── THREE.JS ─────────────────────────────────────────────────── */
 const renderer = new THREE.WebGLRenderer({
@@ -130,7 +144,7 @@ controls.minDistance = 2;
 controls.maxDistance = 25;
 controls.autoRotateSpeed = 2;
 
-/* ─── LIGHTING (safe — no Object.assign) ───────────────────────── */
+/* ─── LIGHTING ─────────────────────────────────────────────────── */
 scene.add(new THREE.AmbientLight(0xffffff, 0.65));
 
 const keyLight = new THREE.DirectionalLight(0xffffff, 1.1);
@@ -155,7 +169,6 @@ const gltfLoader = new GLTFLoader();
 let currentModel = null;
 let currentModelId = null;
 let mixer = null;
-let ecgActive = false;
 
 function wrapModel(gltf) {
   const root = gltf.scene || gltf.scenes[0];
@@ -171,7 +184,7 @@ function wrapModel(gltf) {
   wrapper.add(root);
   wrapper.scale.setScalar(scale);
 
-  // Enhance textures (defensive — inside try/catch per mesh)
+  // Enhance textures (defensive)
   const maxAniso = renderer.capabilities.maxAnisotropy;
   root.traverse(child => {
     if (!child.isMesh) return;
@@ -185,9 +198,7 @@ function wrapModel(gltf) {
       if (mat && mat.normalMap && mat.normalMap.anisotropy !== undefined) {
         mat.normalMap.anisotropy = maxAniso;
       }
-    } catch (e) {
-      // Skip problematic meshes silently
-    }
+    } catch (e) { }
   });
 
   return wrapper;
@@ -212,70 +223,31 @@ function tweenCameraTo(target, duration) {
   tweenRaf = requestAnimationFrame(step);
 }
 
-/* ─── ECG WAVEFORM ─────────────────────────────────────────────── */
-let ecgX = 0;
-let ecgPhase = 0;
-const ECG_SPEED = 2.5;
-const ECG_BPM = 72;
-const ECG_PERIOD = 60 / ECG_BPM;
-
-function ecgValue(t) {
-  if (t < 0.10) return 0.15 * Math.sin(Math.PI * (t / 0.10));
-  if (t < 0.16) return 0;
-  if (t < 0.20) return -0.15 * Math.sin(Math.PI * ((t - 0.16) / 0.04));
-  if (t < 0.28) return 1.0 * Math.sin(Math.PI * ((t - 0.20) / 0.08));
-  if (t < 0.34) return -0.25 * Math.sin(Math.PI * ((t - 0.28) / 0.06));
-  if (t < 0.45) return 0.02;
-  if (t < 0.65) return 0.25 * Math.sin(Math.PI * ((t - 0.45) / 0.20));
-  return 0;
+/* ─── VIDEO LOGIC ──────────────────────────────────────────────── */
+function openVideo(src) {
+  if (!videoOverlay || !videoPlayer) return;
+  // Update src only if different
+  // (Assuming single video for now, but keeping generic structure)
+  videoOverlay.classList.remove('hidden');
+  videoPlayer.play();
 }
 
-function resizeECG() {
-  var dpr = window.devicePixelRatio || 1;
-  var w = ecgCanvas.parentElement.clientWidth;
-  var h = 140;
-  ecgCanvas.width = w * dpr;
-  ecgCanvas.height = h * dpr;
-  ecgCanvas.style.width = w + 'px';
-  ecgCanvas.style.height = h + 'px';
-  ecgCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
-  ecgX = 0;
+function closeVideo() {
+  if (!videoOverlay || !videoPlayer) return;
+  videoOverlay.classList.add('hidden');
+  videoPlayer.pause();
+  videoPlayer.currentTime = 0;
 }
 
-function drawECG(dt) {
-  if (!ecgActive) return;
-  var w = ecgCanvas.clientWidth;
-  var h = ecgCanvas.clientHeight;
-  var midY = h * 0.5;
-  var ampY = h * 0.35;
+if (btnCloseVideo) {
+  btnCloseVideo.addEventListener('click', closeVideo);
+}
 
-  ecgPhase += dt / ECG_PERIOD;
-  if (ecgPhase > 1) ecgPhase -= 1;
-
-  // Clear strip ahead
-  var dpr = window.devicePixelRatio || 1;
-  ecgCtx.save();
-  ecgCtx.setTransform(1, 0, 0, 1, 0, 0);
-  ecgCtx.clearRect(ecgX * dpr, 0, 40 * dpr, ecgCanvas.height);
-  ecgCtx.restore();
-
-  var val = ecgValue(ecgPhase);
-  var y = midY - val * ampY;
-
-  ecgCtx.strokeStyle = '#ff3b30';
-  ecgCtx.lineWidth = 2;
-  ecgCtx.shadowColor = 'rgba(255, 59, 48, 0.6)';
-  ecgCtx.shadowBlur = 8;
-  ecgCtx.beginPath();
-  ecgCtx.moveTo(ecgX, y);
-
-  ecgX += ECG_SPEED;
-  if (ecgX > w) ecgX = 0;
-
-  var nextPhase = (ecgPhase + 0.005) % 1;
-  var nextY = midY - ecgValue(nextPhase) * ampY;
-  ecgCtx.lineTo(ecgX, nextY);
-  ecgCtx.stroke();
+// Close on background click
+if (videoOverlay) {
+  videoOverlay.addEventListener('click', function (e) {
+    if (e.target === videoOverlay) closeVideo();
+  });
 }
 
 /* ─── LOAD MODEL ───────────────────────────────────────────────── */
@@ -298,7 +270,6 @@ async function loadModel(id) {
 
   loaderOverlay.classList.remove('hidden');
 
-  // Clean up previous
   if (currentModel) {
     scene.remove(currentModel);
     currentModel = null;
@@ -318,7 +289,6 @@ async function loadModel(id) {
     currentModelId = id;
     scene.add(wrapper);
 
-    // Setup animation if model has clips
     if (gltf.animations && gltf.animations.length > 0) {
       mixer = new THREE.AnimationMixer(wrapper);
       for (var k = 0; k < gltf.animations.length; k++) {
@@ -326,20 +296,8 @@ async function loadModel(id) {
       }
     }
 
-    // ECG
-    ecgActive = !!model.animated;
-    if (ecgActive) {
-      ecgCanvas.classList.remove('hidden');
-      resizeECG();
-      ecgPhase = 0;
-    } else {
-      ecgCanvas.classList.add('hidden');
-    }
-
-    // Camera
     tweenCameraTo(model.cam);
 
-    // UI
     infoTitle.textContent = model.name;
     infoDesc.textContent = model.desc;
     chapterInd.textContent = section.title;
@@ -350,7 +308,6 @@ async function loadModel(id) {
     console.error('Errore caricamento modello:', err);
   }
 
-  // ALWAYS hide loader (even on error)
   loaderOverlay.classList.add('hidden');
 }
 
@@ -369,7 +326,6 @@ function renderNav(activeSectionId) {
   }
 }
 
-// Use event delegation for nav (more reliable)
 navBar.addEventListener('click', function (e) {
   var btn = e.target.closest('.nav-btn');
   if (!btn) return;
@@ -385,17 +341,27 @@ function renderActions(actions) {
     var btn = document.createElement('button');
     btn.className = 'action-btn';
     btn.textContent = act.label + (act.icon ? ' ' + act.icon : '');
+
+    // Set type and target
+    btn.setAttribute('data-type', act.type || 'model'); // Default to model if undefined
     btn.setAttribute('data-target', act.target);
+
     actionRow.appendChild(btn);
   }
 }
 
-// Event delegation for actions
 actionRow.addEventListener('click', function (e) {
   var btn = e.target.closest('.action-btn');
   if (!btn) return;
+
+  var type = btn.getAttribute('data-type');
   var target = btn.getAttribute('data-target');
-  if (target) loadModel(target);
+
+  if (type === 'video') {
+    openVideo(target);
+  } else {
+    loadModel(target);
+  }
 });
 
 /* ─── BUTTON HANDLERS ──────────────────────────────────────────── */
@@ -439,7 +405,6 @@ function onResize() {
   camera.aspect = w / h;
   camera.updateProjectionMatrix();
   renderer.setSize(w, h);
-  if (ecgActive) resizeECG();
 }
 window.addEventListener('resize', onResize);
 
@@ -453,12 +418,10 @@ function animate() {
 
   if (mixer) mixer.update(dt);
 
-  // Gentle float (skip for animated models)
   if (currentModel && !mixer) {
     currentModel.position.y = Math.sin(clock.getElapsedTime() * 0.6) * 0.04;
   }
 
-  if (ecgActive) drawECG(dt);
   renderer.render(scene, camera);
 }
 
