@@ -85,7 +85,8 @@ const SECTIONS = [
         showVideo: true,
         actions: [
           { type: 'model', label: 'Cuore Animato', target: 'heart_anim', icon: '💓' },
-          { type: 'model', label: 'Cuore Artificiale', target: 'heart_artificial', icon: '⚙️' }
+          { type: 'model', label: 'Cuore Artificiale', target: 'heart_artificial', icon: '⚙️' },
+          { type: 'link', label: 'Centrifuga Sangue', target: 'centrifuga.html', icon: '🧪' }
         ]
       },
       {
@@ -355,8 +356,14 @@ function renderActions(actions) {
 actionRow.addEventListener('click', function (e) {
   var btn = e.target.closest('.action-btn');
   if (!btn) return;
+  var type = btn.getAttribute('data-type');
   var target = btn.getAttribute('data-target');
-  if (target) loadModel(target);
+
+  if (type === 'link') {
+    window.location.href = target;
+  } else if (target) {
+    loadModel(target);
+  }
 });
 
 /* ─── BUTTON HANDLERS ──────────────────────────────────────────── */

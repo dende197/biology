@@ -1,0 +1,850 @@
+<!DOCTYPE html>
+<html lang="it">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Centrifuga del Sangue — Biologia 3D</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+
+    <style>
+        /* ─── Design Tokens (same as main site) ─── */
+        :root {
+            --bg-canvas: #111113;
+            --bg-gradient: radial-gradient(ellipse at 50% 0%, #1a1a2e 0%, #111113 60%, #0a0a0c 100%);
+            --glass-bg: rgba(255, 255, 255, 0.08);
+            --glass-border: rgba(255, 255, 255, 0.12);
+            --glass-blur: blur(24px) saturate(180%);
+            --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+            --header-bg: rgba(28, 28, 30, 0.72);
+            --header-border: rgba(255, 255, 255, 0.08);
+            --text-primary: #f5f5f7;
+            --text-secondary: rgba(255, 255, 255, 0.65);
+            --text-tertiary: rgba(255, 255, 255, 0.4);
+            --accent: #0a84ff;
+            --accent-glow: rgba(10, 132, 255, 0.3);
+            --radius-sm: 10px;
+            --radius-md: 16px;
+            --radius-pill: 100px;
+            --font: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            --ease: cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        }
+
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body,
+        html {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background: var(--bg-canvas);
+            font-family: var(--font);
+            color: var(--text-primary);
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .app {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            background: var(--bg-gradient);
+        }
+
+        /* ─── Header ─── */
+        .header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 52px;
+            padding: 0 24px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background: var(--header-bg);
+            backdrop-filter: var(--glass-blur);
+            -webkit-backdrop-filter: var(--glass-blur);
+            border-bottom: 1px solid var(--header-border);
+            z-index: 100;
+        }
+
+        .header h1 {
+            font-size: 16px;
+            font-weight: 600;
+            letter-spacing: -0.01em;
+        }
+
+        .header-sep {
+            color: var(--text-tertiary);
+            font-size: 18px;
+        }
+
+        .header p {
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--accent);
+        }
+
+        .back-link {
+            margin-left: auto;
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--accent);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            transition: opacity 0.2s;
+        }
+
+        .back-link:hover {
+            opacity: 0.7;
+        }
+
+        /* ─── Main Stage ─── */
+        .stage {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding-top: 52px;
+            position: relative;
+        }
+
+        .scene-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 40px;
+        }
+
+        /* ─── Centrifuge Machine ─── */
+        .centrifuge {
+            position: relative;
+            width: 280px;
+            height: 280px;
+        }
+
+        .centrifuge-body {
+            width: 280px;
+            height: 280px;
+            border-radius: 50%;
+            background: radial-gradient(circle at 40% 35%, #3a3a44, #1c1c22 70%);
+            border: 3px solid rgba(255, 255, 255, 0.08);
+            box-shadow:
+                0 0 60px rgba(0, 0, 0, 0.6),
+                inset 0 2px 20px rgba(255, 255, 255, 0.04),
+                inset 0 -4px 20px rgba(0, 0, 0, 0.4);
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Metallic rim ring */
+        .centrifuge-body::before {
+            content: '';
+            position: absolute;
+            inset: 6px;
+            border-radius: 50%;
+            border: 2px solid rgba(255, 255, 255, 0.06);
+        }
+
+        /* Center hub */
+        .centrifuge-hub {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: radial-gradient(circle at 40% 35%, #555, #2a2a30);
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            z-index: 5;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+        }
+
+        /* Rotor (holds the tubes) */
+        .rotor {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 200px;
+            height: 200px;
+            transform: translate(-50%, -50%);
+            transition: none;
+            z-index: 2;
+        }
+
+        .rotor.spinning {
+            animation: rotor-spin 0.3s linear infinite;
+        }
+
+        .rotor.decelerating {
+            animation: rotor-spin 0.3s linear infinite;
+            animation-duration: 2s;
+            /* slows down via JS */
+        }
+
+        @keyframes rotor-spin {
+            to {
+                transform: translate(-50%, -50%) rotate(360deg);
+            }
+        }
+
+        /* Rotor arms */
+        .rotor-arm {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 90px;
+            height: 3px;
+            background: rgba(255, 255, 255, 0.1);
+            transform-origin: 0% 50%;
+            border-radius: 2px;
+        }
+
+        .rotor-arm:nth-child(1) {
+            transform: rotate(0deg);
+        }
+
+        .rotor-arm:nth-child(2) {
+            transform: rotate(90deg);
+        }
+
+        .rotor-arm:nth-child(3) {
+            transform: rotate(180deg);
+        }
+
+        .rotor-arm:nth-child(4) {
+            transform: rotate(270deg);
+        }
+
+        /* Test tubes in the rotor */
+        .tube-slot {
+            position: absolute;
+            width: 18px;
+            height: 52px;
+        }
+
+        .tube-slot:nth-child(5) {
+            top: 8px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .tube-slot:nth-child(6) {
+            bottom: 8px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .tube-slot:nth-child(7) {
+            top: 50%;
+            left: 8px;
+            transform: translateY(-50%);
+        }
+
+        .tube-slot:nth-child(8) {
+            top: 50%;
+            right: 8px;
+            transform: translateY(-50%);
+        }
+
+        .mini-tube {
+            width: 100%;
+            height: 100%;
+            border-radius: 3px 3px 9px 9px;
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.08) 0%, rgba(200, 40, 40, 0.6) 20%, #b22020 100%);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3);
+        }
+
+        /* LED indicator */
+        .led {
+            position: absolute;
+            bottom: 18px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #333;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.4s;
+            z-index: 10;
+        }
+
+        .led.active {
+            background: #34c759;
+            box-shadow: 0 0 12px rgba(52, 199, 89, 0.6);
+        }
+
+        .led.spinning-led {
+            background: #ff9f0a;
+            box-shadow: 0 0 12px rgba(255, 159, 10, 0.6);
+            animation: led-blink 0.6s ease-in-out infinite;
+        }
+
+        @keyframes led-blink {
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.4;
+            }
+        }
+
+        /* ─── Result Test Tube (Large, centered) ─── */
+        .result-area {
+            display: flex;
+            align-items: flex-end;
+            gap: 30px;
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 0.8s var(--ease);
+            pointer-events: none;
+        }
+
+        .result-area.visible {
+            opacity: 1;
+            transform: translateY(0);
+            pointer-events: auto;
+        }
+
+        .result-tube-wrapper {
+            display: flex;
+            align-items: stretch;
+            gap: 14px;
+        }
+
+        .result-tube {
+            position: relative;
+            width: 56px;
+            height: 220px;
+            border-radius: 8px 8px 28px 28px;
+            background: rgba(255, 255, 255, 0.04);
+            border: 2px solid rgba(255, 255, 255, 0.12);
+            overflow: hidden;
+            box-shadow:
+                0 8px 30px rgba(0, 0, 0, 0.4),
+                inset 0 0 30px rgba(255, 255, 255, 0.02);
+        }
+
+        /* Glass highlight */
+        .result-tube::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 6px;
+            width: 8px;
+            height: 100%;
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0.02));
+            border-radius: 4px;
+            z-index: 5;
+        }
+
+        /* Tube cap */
+        .tube-cap {
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            height: 18px;
+            background: linear-gradient(180deg, #c23030, #9a1e1e);
+            border-radius: 8px 8px 2px 2px;
+            border: 2px solid rgba(255, 255, 255, 0.15);
+            z-index: 10;
+        }
+
+        /* Blood layers */
+        .blood-layers {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 78%;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            border-radius: 0 0 26px 26px;
+        }
+
+        .layer {
+            transition: flex 2.5s var(--ease);
+            position: relative;
+        }
+
+        /* Initial state: all blood mixed */
+        .layer-plasma {
+            flex: 0;
+            background: linear-gradient(180deg, #f0d48a, #e8c55a);
+        }
+
+        .layer-buffy {
+            flex: 0;
+            background: linear-gradient(180deg, #e8e0d0, #d4c9b5);
+        }
+
+        .layer-rbc {
+            flex: 1;
+            background: linear-gradient(180deg, #c23030, #8b1a1a);
+        }
+
+        /* Separated state */
+        .blood-layers.separated .layer-plasma {
+            flex: 0.55;
+        }
+
+        .blood-layers.separated .layer-buffy {
+            flex: 0.02;
+        }
+
+        .blood-layers.separated .layer-rbc {
+            flex: 0.43;
+        }
+
+        /* Layer labels */
+        .layer-labels {
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            padding-top: 24px;
+            gap: 0;
+            min-width: 160px;
+        }
+
+        .label-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            opacity: 0;
+            transform: translateX(-10px);
+            transition: all 0.5s var(--ease);
+        }
+
+        .label-item.visible {
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        .label-line {
+            width: 30px;
+            height: 2px;
+            border-radius: 1px;
+        }
+
+        .label-text {
+            font-size: 12px;
+            font-weight: 600;
+            letter-spacing: 0.03em;
+            line-height: 1.4;
+        }
+
+        .label-sub {
+            display: block;
+            font-size: 11px;
+            font-weight: 400;
+            color: var(--text-tertiary);
+        }
+
+        .label-item.plasma .label-line {
+            background: #e8c55a;
+        }
+
+        .label-item.plasma .label-text {
+            color: #f0d48a;
+        }
+
+        .label-item.buffy .label-line {
+            background: #d4c9b5;
+        }
+
+        .label-item.buffy .label-text {
+            color: #e8e0d0;
+        }
+
+        .label-item.rbc .label-line {
+            background: #c23030;
+        }
+
+        .label-item.rbc .label-text {
+            color: #e06060;
+        }
+
+        /* ─── Status Display ─── */
+        .status-bar {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .status-phase {
+            font-size: 13px;
+            font-weight: 600;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+            color: var(--text-secondary);
+            transition: all 0.4s;
+        }
+
+        .status-detail {
+            font-size: 12px;
+            color: var(--text-tertiary);
+            font-weight: 400;
+        }
+
+        .progress-track {
+            width: 200px;
+            height: 3px;
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 2px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            width: 0%;
+            background: var(--accent);
+            border-radius: 2px;
+            transition: width 0.3s linear;
+            box-shadow: 0 0 8px var(--accent-glow);
+        }
+
+        /* ─── Start Button ─── */
+        .btn-start {
+            padding: 12px 32px;
+            background: var(--accent);
+            border: none;
+            border-radius: var(--radius-pill);
+            color: #fff;
+            font-family: var(--font);
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            letter-spacing: 0.02em;
+            transition: all 0.25s var(--ease);
+            box-shadow: 0 4px 18px var(--accent-glow);
+        }
+
+        .btn-start:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 24px var(--accent-glow);
+        }
+
+        .btn-start:active {
+            transform: translateY(0);
+        }
+
+        .btn-start:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* ─── Info Card (bottom-left) ─── */
+        .info-card {
+            position: fixed;
+            bottom: 24px;
+            left: 24px;
+            max-width: 340px;
+            padding: 18px 22px;
+            background: var(--glass-bg);
+            backdrop-filter: var(--glass-blur);
+            -webkit-backdrop-filter: var(--glass-blur);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-md);
+            box-shadow: var(--glass-shadow);
+            z-index: 50;
+            opacity: 0;
+            transform: translateY(10px);
+            transition: all 0.6s var(--ease);
+        }
+
+        .info-card.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .info-card h3 {
+            font-size: 14px;
+            font-weight: 700;
+            margin-bottom: 6px;
+            color: var(--text-primary);
+        }
+
+        .info-card p {
+            font-size: 12px;
+            line-height: 1.65;
+            color: var(--text-secondary);
+        }
+
+        /* ─── Responsive ─── */
+        @media (max-width: 768px) {
+            .header {
+                padding: 0 16px;
+                height: 48px;
+            }
+
+            .header h1 {
+                font-size: 14px;
+            }
+
+            .stage {
+                padding-top: 48px;
+            }
+
+            .centrifuge {
+                width: 220px;
+                height: 220px;
+            }
+
+            .centrifuge-body {
+                width: 220px;
+                height: 220px;
+            }
+
+            .result-tube {
+                width: 44px;
+                height: 170px;
+            }
+
+            .info-card {
+                left: 12px;
+                right: 12px;
+                bottom: 12px;
+                max-width: none;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="app">
+
+        <!-- Header -->
+        <header class="header">
+            <h1>🔬 Biologia 3D</h1>
+            <span class="header-sep">·</span>
+            <p>Centrifuga del Sangue</p>
+            <a class="back-link" href="index.html">← Modelli 3D</a>
+        </header>
+
+        <!-- Main Stage -->
+        <div class="stage">
+            <div class="scene-container">
+
+                <!-- Centrifuge Machine -->
+                <div class="centrifuge" id="centrifuge">
+                    <div class="centrifuge-body">
+                        <div class="rotor" id="rotor">
+                            <div class="rotor-arm"></div>
+                            <div class="rotor-arm"></div>
+                            <div class="rotor-arm"></div>
+                            <div class="rotor-arm"></div>
+                            <div class="tube-slot">
+                                <div class="mini-tube"></div>
+                            </div>
+                            <div class="tube-slot">
+                                <div class="mini-tube"></div>
+                            </div>
+                            <div class="tube-slot">
+                                <div class="mini-tube"></div>
+                            </div>
+                            <div class="tube-slot">
+                                <div class="mini-tube"></div>
+                            </div>
+                        </div>
+                        <div class="centrifuge-hub"></div>
+                        <div class="led" id="led"></div>
+                    </div>
+                </div>
+
+                <!-- Status Bar -->
+                <div class="status-bar" id="status-bar">
+                    <div class="status-phase" id="status-phase">Pronto</div>
+                    <div class="status-detail" id="status-detail">Premi Avvia per iniziare la centrifugazione</div>
+                    <div class="progress-track">
+                        <div class="progress-fill" id="progress-fill"></div>
+                    </div>
+                    <button class="btn-start" id="btn-start">▶ Avvia Centrifuga</button>
+                </div>
+
+                <!-- Result Area (appears after centrifugation) -->
+                <div class="result-area" id="result-area">
+                    <div class="result-tube-wrapper">
+                        <div class="result-tube" id="result-tube">
+                            <div class="tube-cap"></div>
+                            <div class="blood-layers" id="blood-layers">
+                                <div class="layer layer-plasma"></div>
+                                <div class="layer layer-buffy"></div>
+                                <div class="layer layer-rbc"></div>
+                            </div>
+                        </div>
+
+                        <div class="layer-labels" id="layer-labels">
+                            <div class="label-item plasma" style="margin-top: 28px;">
+                                <div class="label-line"></div>
+                                <div class="label-text">Plasma <span class="label-sub">~55% · Acqua, proteine,
+                                        anticorpi</span></div>
+                            </div>
+                            <div class="label-item buffy" style="margin-top: 52px;">
+                                <div class="label-line"></div>
+                                <div class="label-text">Buffy Coat <span class="label-sub">~1% · Leucociti,
+                                        piastrine</span></div>
+                            </div>
+                            <div class="label-item rbc" style="margin-top: 22px;">
+                                <div class="label-line"></div>
+                                <div class="label-text">Globuli Rossi <span class="label-sub">~44% · Eritrociti,
+                                        emoglobina</span></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- Info Card -->
+        <div class="info-card" id="info-card">
+            <h3>💡 Come funziona</h3>
+            <p>La centrifuga ruota a velocità elevate (3000+ RPM), separando i componenti del sangue per densità. I
+                globuli rossi, più pesanti, si depositano sul fondo. Il plasma, più leggero, rimane in superficie.</p>
+        </div>
+
+    </div>
+
+    <script>
+        /* ─── DOM refs ─── */
+        const rotor = document.getElementById('rotor');
+        const led = document.getElementById('led');
+        const btnStart = document.getElementById('btn-start');
+        const statusPhase = document.getElementById('status-phase');
+        const statusDetail = document.getElementById('status-detail');
+        const progressFill = document.getElementById('progress-fill');
+        const resultArea = document.getElementById('result-area');
+        const bloodLayers = document.getElementById('blood-layers');
+        const infoCard = document.getElementById('info-card');
+        const labelItems = document.querySelectorAll('.label-item');
+
+        let running = false;
+
+        /* ─── Animation Orchestrator ─── */
+        btnStart.addEventListener('click', async function () {
+            if (running) return;
+            running = true;
+            btnStart.disabled = true;
+
+            // Hide result if re-running
+            resultArea.classList.remove('visible');
+            bloodLayers.classList.remove('separated');
+            labelItems.forEach(l => l.classList.remove('visible'));
+            infoCard.classList.remove('visible');
+
+            // Phase 1: Preparazione
+            statusPhase.textContent = 'Preparazione';
+            statusDetail.textContent = 'Caricamento campione nel rotore…';
+            led.className = 'led active';
+            progressFill.style.width = '10%';
+            await wait(1500);
+
+            // Phase 2: Accelerazione
+            statusPhase.textContent = 'Accelerazione';
+            statusDetail.textContent = 'Raggiungimento velocità operativa…';
+            led.className = 'led spinning-led';
+            rotor.classList.add('spinning');
+            progressFill.style.width = '25%';
+
+            // Gradually speed up (from slow to fast)
+            rotor.style.animationDuration = '1s';
+            await wait(500);
+            rotor.style.animationDuration = '0.5s';
+            await wait(500);
+            rotor.style.animationDuration = '0.2s';
+            await wait(500);
+            rotor.style.animationDuration = '0.1s';
+            await wait(300);
+
+            // Phase 3: Centrifugazione
+            statusPhase.textContent = 'Centrifugazione';
+            statusDetail.textContent = '3200 RPM · Separazione in corso…';
+            progressFill.style.width = '40%';
+
+            // Spin for ~5 seconds with progress
+            for (let i = 40; i <= 85; i += 5) {
+                progressFill.style.width = i + '%';
+                await wait(500);
+            }
+
+            // Phase 4: Decelerazione
+            statusPhase.textContent = 'Decelerazione';
+            statusDetail.textContent = 'Riduzione velocità graduale…';
+            progressFill.style.width = '90%';
+
+            rotor.style.animationDuration = '0.3s';
+            await wait(500);
+            rotor.style.animationDuration = '0.6s';
+            await wait(600);
+            rotor.style.animationDuration = '1.2s';
+            await wait(800);
+            rotor.style.animationDuration = '2.5s';
+            await wait(1200);
+
+            // Stop
+            rotor.classList.remove('spinning');
+            rotor.style.animationDuration = '';
+            progressFill.style.width = '100%';
+
+            // Phase 5: Risultato
+            statusPhase.textContent = 'Completata ✓';
+            statusDetail.textContent = 'Campione separato con successo';
+            led.className = 'led active';
+
+            await wait(800);
+
+            // Show result tube
+            resultArea.classList.add('visible');
+            await wait(600);
+
+            // Trigger separation animation
+            bloodLayers.classList.add('separated');
+            await wait(1200);
+
+            // Show labels one by one
+            for (let i = 0; i < labelItems.length; i++) {
+                labelItems[i].classList.add('visible');
+                await wait(500);
+            }
+
+            // Show info card
+            await wait(300);
+            infoCard.classList.add('visible');
+
+            // Allow restart
+            await wait(1000);
+            btnStart.disabled = false;
+            btnStart.textContent = '🔄 Ripeti Centrifugazione';
+            running = false;
+        });
+
+        /* ─── Utility ─── */
+        function wait(ms) {
+            return new Promise(resolve => setTimeout(resolve, ms));
+        }
+    </script>
+</body>
+
+</html>
