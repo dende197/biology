@@ -85,8 +85,7 @@ const SECTIONS = [
         showVideo: true,
         actions: [
           { type: 'model', label: 'Cuore Animato', target: 'heart_anim', icon: '💓' },
-          { type: 'model', label: 'Cuore Artificiale', target: 'heart_artificial', icon: '⚙️' },
-          { type: 'link', label: 'Centrifuga Sangue', target: 'centrifuga.html', icon: '🧪' }
+          { type: 'model', label: 'Cuore Artificiale', target: 'heart_artificial', icon: '⚙️' }
         ]
       },
       {

@@ -114,6 +114,39 @@ html {
   white-space: nowrap;
 }
 
+.mode-switch {
+  margin-left: auto;
+  display: flex;
+  background: rgba(255, 255, 255, 0.08);
+  /* slightly visible bg */
+  padding: 3px;
+  border-radius: 8px;
+  gap: 2px;
+}
+
+.mode-btn {
+  display: block;
+  padding: 4px 12px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-decoration: none;
+  border-radius: 6px;
+  transition: all 0.2s;
+  cursor: pointer;
+}
+
+.mode-btn:hover {
+  color: var(--text-primary);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.mode-btn.active {
+  background: var(--accent);
+  color: #fff;
+  box-shadow: 0 2px 8px var(--accent-glow);
+}
+
 /* ─────────── 3D VIEWER ─────────── */
 .viewer {
   position: fixed;
