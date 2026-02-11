@@ -1,7 +1,9 @@
 /* ================================================================
-   BIOLOGIA 3D — ENGINE v14
-   + AnimationMixer for animated models
-   + ECG waveform overlay for heart section
+   BIOLOGIA 3D — ENGINE v17 (Bulletproof)
+   Fixes:
+   - v13: renderer.setSize() + camera.aspect on init
+   - v16: No Object.assign on readonly Three.js properties
+   - v17: Defensive wrapModel, safer init, loader always hides
    ================================================================ */
 
 import * as THREE from 'three';
@@ -25,7 +27,7 @@ const SECTIONS = [
         id: 'synapse',
         file: 'models/result.glb',
         name: 'Sinapsi',
-        desc: 'Il ponte chimico tra i neuroni. Qui il segnale elettrico diventa neurotrasmettitore e attraversa la fessura sinaptica.',
+        desc: 'Il ponte chimico tra i neuroni. Qui il segnale elettrico diventa neurotrasmettitore.',
         cam: [0, 2, 7],
         actions: [{ label: 'Torna al Neurone', target: 'neuron', icon: '↩️' }]
       }
@@ -38,7 +40,7 @@ const SECTIONS = [
         id: 'brain',
         file: 'models/result-2.glb',
         name: 'Encefalo',
-        desc: 'Il centro di comando. Comprende cervello (corteccia, lobi), cervelletto e tronco encefalico.',
+        desc: 'Il centro di comando. Comprende cervello, cervelletto e tronco encefalico.',
         cam: [0, 1.5, 7],
         actions: [
           { label: 'Midollo Spinale', target: 'spinal', icon: '🦴' },
@@ -70,16 +72,16 @@ const SECTIONS = [
         id: 'heart_anim',
         file: 'models/realistic_heart_animated.glb',
         name: 'Cuore Animato',
-        desc: 'Il cuore umano in battito continuo. Osserva la contrazione ritmica del miocardio — sistole e diastole.',
+        desc: 'Il cuore umano in battito continuo. Osserva la contrazione ritmica del miocardio.',
         cam: [0, 1.5, 6],
-        animated: true, // ← flag per AnimationMixer + ECG
+        animated: true,
         actions: [{ label: 'Modello Anatomico', target: 'heart_model', icon: '❤️' }]
       },
       {
         id: 'heart_model',
         file: 'models/human_heart_3d_model.glb',
         name: 'Cuore — Anatomia',
-        desc: 'Modello anatomico dettagliato del cuore umano. Ventricoli, atri, valvole e grandi vasi.',
+        desc: 'Modello anatomico dettagliato. Ventricoli, atri, valvole e grandi vasi.',
         cam: [0, 1.5, 6],
         actions: [{ label: 'Cuore Animato', target: 'heart_anim', icon: '💓' }]
       }
@@ -128,29 +130,31 @@ controls.minDistance = 2;
 controls.maxDistance = 25;
 controls.autoRotateSpeed = 2;
 
-/* ─── LIGHTING ─────────────────────────────────────────────────── */
+/* ─── LIGHTING (safe — no Object.assign) ───────────────────────── */
 scene.add(new THREE.AmbientLight(0xffffff, 0.65));
 
-const key = new THREE.DirectionalLight(0xffffff, 1.1);
-key.position.set(5, 10, 7);
-key.castShadow = true;
-key.shadow.mapSize.set(2048, 2048);
-scene.add(key);
+const keyLight = new THREE.DirectionalLight(0xffffff, 1.1);
+keyLight.position.set(5, 10, 7);
+keyLight.castShadow = true;
+keyLight.shadow.mapSize.width = 2048;
+keyLight.shadow.mapSize.height = 2048;
+scene.add(keyLight);
 
-const rim = new THREE.DirectionalLight(0x667fff, 0.5);
-rim.position.set(-5, 4, -5);
-scene.add(rim);
+const rimLight = new THREE.DirectionalLight(0x667fff, 0.5);
+rimLight.position.set(-5, 4, -5);
+scene.add(rimLight);
 
-const fill = new THREE.DirectionalLight(0xffffff, 0.35);
-fill.position.set(-2, 0, 6);
-scene.add(fill);
+const fillLight = new THREE.DirectionalLight(0xffffff, 0.35);
+fillLight.position.set(-2, 0, 6);
+scene.add(fillLight);
+
 scene.add(new THREE.HemisphereLight(0xeef0ff, 0x222233, 0.35));
 
 /* ─── GLTF LOADER ──────────────────────────────────────────────── */
 const gltfLoader = new GLTFLoader();
 let currentModel = null;
 let currentModelId = null;
-let mixer = null; // AnimationMixer
+let mixer = null;
 let ecgActive = false;
 
 function wrapModel(gltf) {
@@ -167,14 +171,23 @@ function wrapModel(gltf) {
   wrapper.add(root);
   wrapper.scale.setScalar(scale);
 
+  // Enhance textures (defensive — inside try/catch per mesh)
   const maxAniso = renderer.capabilities.maxAnisotropy;
-  root.traverse(c => {
-    if (!c.isMesh) return;
-    c.castShadow = true;
-    c.receiveShadow = true;
-    const m = c.material;
-    ['map', 'normalMap', 'roughnessMap', 'metalnessMap', 'emissiveMap']
-      .forEach(k => { if (m[k]) m[k].anisotropy = maxAniso; });
+  root.traverse(child => {
+    if (!child.isMesh) return;
+    try {
+      child.castShadow = true;
+      child.receiveShadow = true;
+      const mat = child.material;
+      if (mat && mat.map && mat.map.anisotropy !== undefined) {
+        mat.map.anisotropy = maxAniso;
+      }
+      if (mat && mat.normalMap && mat.normalMap.anisotropy !== undefined) {
+        mat.normalMap.anisotropy = maxAniso;
+      }
+    } catch (e) {
+      // Skip problematic meshes silently
+    }
   });
 
   return wrapper;
@@ -183,98 +196,71 @@ function wrapModel(gltf) {
 /* ─── CAMERA TWEEN ─────────────────────────────────────────────── */
 let tweenRaf = null;
 
-function tweenCameraTo(target, duration = 900) {
+function tweenCameraTo(target, duration) {
+  duration = duration || 900;
   if (tweenRaf) cancelAnimationFrame(tweenRaf);
   const s = camera.position.clone();
-  const e = new THREE.Vector3(...target);
+  const e = new THREE.Vector3(target[0], target[1], target[2]);
   const t0 = performance.now();
   function step(now) {
     const p = Math.min((now - t0) / duration, 1);
-    camera.position.lerpVectors(s, e, 1 - Math.pow(1 - p, 3));
+    const ease = 1 - Math.pow(1 - p, 3);
+    camera.position.lerpVectors(s, e, ease);
     if (p < 1) tweenRaf = requestAnimationFrame(step);
     else tweenRaf = null;
   }
   tweenRaf = requestAnimationFrame(step);
 }
 
-/* ─── ECG WAVEFORM ENGINE ──────────────────────────────────────── */
+/* ─── ECG WAVEFORM ─────────────────────────────────────────────── */
 let ecgX = 0;
 let ecgPhase = 0;
-const ECG_SPEED = 2.5; // pixels per frame
+const ECG_SPEED = 2.5;
 const ECG_BPM = 72;
-const ECG_PERIOD = 60 / ECG_BPM; // seconds per beat
+const ECG_PERIOD = 60 / ECG_BPM;
 
-// Realistic ECG waveform shape: P-QRS-T
 function ecgValue(t) {
-  // t = 0..1 within one heartbeat cycle
-  // P wave (small bump)
-  if (t < 0.10) {
-    const s = t / 0.10;
-    return 0.15 * Math.sin(Math.PI * s);
-  }
-  // PR segment (flat baseline)
+  if (t < 0.10) return 0.15 * Math.sin(Math.PI * (t / 0.10));
   if (t < 0.16) return 0;
-  // Q dip
-  if (t < 0.20) {
-    const s = (t - 0.16) / 0.04;
-    return -0.15 * Math.sin(Math.PI * s);
-  }
-  // R spike (tall)
-  if (t < 0.28) {
-    const s = (t - 0.20) / 0.08;
-    return 1.0 * Math.sin(Math.PI * s);
-  }
-  // S dip
-  if (t < 0.34) {
-    const s = (t - 0.28) / 0.06;
-    return -0.25 * Math.sin(Math.PI * s);
-  }
-  // ST segment (flat, slight elevation)
+  if (t < 0.20) return -0.15 * Math.sin(Math.PI * ((t - 0.16) / 0.04));
+  if (t < 0.28) return 1.0 * Math.sin(Math.PI * ((t - 0.20) / 0.08));
+  if (t < 0.34) return -0.25 * Math.sin(Math.PI * ((t - 0.28) / 0.06));
   if (t < 0.45) return 0.02;
-  // T wave (broad bump)
-  if (t < 0.65) {
-    const s = (t - 0.45) / 0.20;
-    return 0.25 * Math.sin(Math.PI * s);
-  }
-  // Baseline
+  if (t < 0.65) return 0.25 * Math.sin(Math.PI * ((t - 0.45) / 0.20));
   return 0;
 }
 
 function resizeECG() {
-  const dpr = window.devicePixelRatio || 1;
-  const w = ecgCanvas.parentElement.clientWidth;
-  const h = 140;
+  var dpr = window.devicePixelRatio || 1;
+  var w = ecgCanvas.parentElement.clientWidth;
+  var h = 140;
   ecgCanvas.width = w * dpr;
   ecgCanvas.height = h * dpr;
   ecgCanvas.style.width = w + 'px';
   ecgCanvas.style.height = h + 'px';
-  ecgCtx.scale(dpr, dpr);
+  ecgCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
   ecgX = 0;
 }
 
 function drawECG(dt) {
   if (!ecgActive) return;
+  var w = ecgCanvas.clientWidth;
+  var h = ecgCanvas.clientHeight;
+  var midY = h * 0.5;
+  var ampY = h * 0.35;
 
-  const w = ecgCanvas.clientWidth;
-  const h = ecgCanvas.clientHeight;
-  const midY = h * 0.5;
-  const ampY = h * 0.35;
-
-  // Advance phase
   ecgPhase += dt / ECG_PERIOD;
   if (ecgPhase > 1) ecgPhase -= 1;
 
-  // Clear a strip ahead for sweep effect
-  const clearW = 40;
-  const dpr = window.devicePixelRatio || 1;
+  // Clear strip ahead
+  var dpr = window.devicePixelRatio || 1;
   ecgCtx.save();
-  ecgCtx.setTransform(1, 0, 0, 1, 0, 0); // reset transform
-  ecgCtx.clearRect(ecgX * dpr, 0, clearW * dpr, ecgCanvas.height);
+  ecgCtx.setTransform(1, 0, 0, 1, 0, 0);
+  ecgCtx.clearRect(ecgX * dpr, 0, 40 * dpr, ecgCanvas.height);
   ecgCtx.restore();
 
-  // Draw the line segment
-  const val = ecgValue(ecgPhase);
-  const y = midY - val * ampY;
+  var val = ecgValue(ecgPhase);
+  var y = midY - val * ampY;
 
   ecgCtx.strokeStyle = '#ff3b30';
   ecgCtx.lineWidth = 2;
@@ -286,42 +272,48 @@ function drawECG(dt) {
   ecgX += ECG_SPEED;
   if (ecgX > w) ecgX = 0;
 
-  const nextPhase = ecgPhase + (ECG_SPEED / w) * (dt / ECG_PERIOD) * 30;
-  const nextVal = ecgValue(nextPhase % 1);
-  const nextY = midY - nextVal * ampY;
+  var nextPhase = (ecgPhase + 0.005) % 1;
+  var nextY = midY - ecgValue(nextPhase) * ampY;
   ecgCtx.lineTo(ecgX, nextY);
   ecgCtx.stroke();
-
-  // Fading trail: apply a dim overlay on the whole canvas
-  // (done infrequently to avoid blur buildup)
 }
 
 /* ─── LOAD MODEL ───────────────────────────────────────────────── */
 function findModel(id) {
-  for (const s of SECTIONS)
-    for (const m of s.models)
-      if (m.id === id) return { model: m, section: s };
+  for (var i = 0; i < SECTIONS.length; i++) {
+    var sec = SECTIONS[i];
+    for (var j = 0; j < sec.models.length; j++) {
+      if (sec.models[j].id === id) return { model: sec.models[j], section: sec };
+    }
+  }
   return null;
 }
 
 async function loadModel(id) {
   if (id === currentModelId) return;
-  const data = findModel(id);
+  var data = findModel(id);
   if (!data) return;
-  const { model, section } = data;
+  var model = data.model;
+  var section = data.section;
 
   loaderOverlay.classList.remove('hidden');
 
   // Clean up previous
-  if (currentModel) { scene.remove(currentModel); currentModel = null; }
-  if (mixer) { mixer.stopAllAction(); mixer = null; }
+  if (currentModel) {
+    scene.remove(currentModel);
+    currentModel = null;
+  }
+  if (mixer) {
+    mixer.stopAllAction();
+    mixer = null;
+  }
 
   try {
-    const gltf = await new Promise((resolve, reject) =>
-      gltfLoader.load(model.file, resolve, undefined, reject)
-    );
+    var gltf = await new Promise(function (resolve, reject) {
+      gltfLoader.load(model.file, resolve, undefined, reject);
+    });
 
-    const wrapper = wrapModel(gltf);
+    var wrapper = wrapModel(gltf);
     currentModel = wrapper;
     currentModelId = id;
     scene.add(wrapper);
@@ -329,18 +321,19 @@ async function loadModel(id) {
     // Setup animation if model has clips
     if (gltf.animations && gltf.animations.length > 0) {
       mixer = new THREE.AnimationMixer(wrapper);
-      gltf.animations.forEach(clip => {
-        const action = mixer.clipAction(clip);
-        action.play();
-      });
+      for (var k = 0; k < gltf.animations.length; k++) {
+        mixer.clipAction(gltf.animations[k]).play();
+      }
     }
 
-    // ECG: show only for animated heart
+    // ECG
     ecgActive = !!model.animated;
-    ecgCanvas.classList.toggle('hidden', !ecgActive);
     if (ecgActive) {
+      ecgCanvas.classList.remove('hidden');
       resizeECG();
       ecgPhase = 0;
+    } else {
+      ecgCanvas.classList.add('hidden');
     }
 
     // Camera
@@ -354,67 +347,95 @@ async function loadModel(id) {
     renderActions(model.actions);
 
   } catch (err) {
-    console.error('Errore caricamento:', err);
+    console.error('Errore caricamento modello:', err);
   }
 
+  // ALWAYS hide loader (even on error)
   loaderOverlay.classList.add('hidden');
 }
 
 /* ─── NAV & ACTIONS ────────────────────────────────────────────── */
 function renderNav(activeSectionId) {
   navBar.innerHTML = '';
-  SECTIONS.forEach(sec => {
-    const btn = document.createElement('button');
-    btn.className = 'nav-btn' + (sec.id === activeSectionId ? ' active' : '');
+  for (var i = 0; i < SECTIONS.length; i++) {
+    var sec = SECTIONS[i];
+    var btn = document.createElement('button');
+    btn.className = 'nav-btn';
+    if (sec.id === activeSectionId) btn.className += ' active';
     btn.textContent = sec.title;
-    btn.addEventListener('click', () => loadModel(sec.models[0].id));
+    btn.setAttribute('data-section', sec.id);
+    btn.setAttribute('data-first-model', sec.models[0].id);
     navBar.appendChild(btn);
-  });
+  }
 }
+
+// Use event delegation for nav (more reliable)
+navBar.addEventListener('click', function (e) {
+  var btn = e.target.closest('.nav-btn');
+  if (!btn) return;
+  var modelId = btn.getAttribute('data-first-model');
+  if (modelId) loadModel(modelId);
+});
 
 function renderActions(actions) {
   actionRow.innerHTML = '';
-  if (!actions || !actions.length) return;
-  actions.forEach(act => {
-    const btn = document.createElement('button');
+  if (!actions || actions.length === 0) return;
+  for (var i = 0; i < actions.length; i++) {
+    var act = actions[i];
+    var btn = document.createElement('button');
     btn.className = 'action-btn';
     btn.textContent = act.label + (act.icon ? ' ' + act.icon : '');
-    btn.addEventListener('click', () => loadModel(act.target));
+    btn.setAttribute('data-target', act.target);
     actionRow.appendChild(btn);
+  }
+}
+
+// Event delegation for actions
+actionRow.addEventListener('click', function (e) {
+  var btn = e.target.closest('.action-btn');
+  if (!btn) return;
+  var target = btn.getAttribute('data-target');
+  if (target) loadModel(target);
+});
+
+/* ─── BUTTON HANDLERS ──────────────────────────────────────────── */
+var btnFocus = document.getElementById('btn-focus');
+var iconOpen = document.getElementById('icon-eye-open');
+var iconClosed = document.getElementById('icon-eye-closed');
+
+if (btnFocus) {
+  btnFocus.addEventListener('click', function () {
+    var hidden = infoCard.classList.toggle('text-hidden');
+    iconOpen.style.display = hidden ? 'none' : 'block';
+    iconClosed.style.display = hidden ? 'block' : 'none';
+    btnFocus.classList.toggle('active', hidden);
   });
 }
 
-/* ─── BUTTON HANDLERS ──────────────────────────────────────────── */
-const btnFocus = document.getElementById('btn-focus');
-const iconOpen = document.getElementById('icon-eye-open');
-const iconClosed = document.getElementById('icon-eye-closed');
+var btnRotate = document.getElementById('btn-rotate');
+if (btnRotate) {
+  btnRotate.addEventListener('click', function () {
+    controls.autoRotate = !controls.autoRotate;
+    btnRotate.classList.toggle('active', controls.autoRotate);
+  });
+}
 
-btnFocus.addEventListener('click', () => {
-  const hidden = infoCard.classList.toggle('text-hidden');
-  iconOpen.style.display = hidden ? 'none' : 'block';
-  iconClosed.style.display = hidden ? 'block' : 'none';
-  btnFocus.classList.toggle('active', hidden);
-});
-
-const btnRotate = document.getElementById('btn-rotate');
-btnRotate.addEventListener('click', () => {
-  controls.autoRotate = !controls.autoRotate;
-  btnRotate.classList.toggle('active', controls.autoRotate);
-});
-
-const btnReset = document.getElementById('btn-reset');
-btnReset.addEventListener('click', () => {
-  if (currentModelId) {
-    const d = findModel(currentModelId);
-    if (d) tweenCameraTo(d.model.cam, 600);
-  }
-  controls.autoRotate = false;
-  btnRotate.classList.remove('active');
-});
+var btnReset = document.getElementById('btn-reset');
+if (btnReset) {
+  btnReset.addEventListener('click', function () {
+    if (currentModelId) {
+      var d = findModel(currentModelId);
+      if (d) tweenCameraTo(d.model.cam, 600);
+    }
+    controls.autoRotate = false;
+    if (btnRotate) btnRotate.classList.remove('active');
+  });
+}
 
 /* ─── RESIZE ───────────────────────────────────────────────────── */
 function onResize() {
-  const w = viewer.clientWidth, h = viewer.clientHeight;
+  var w = viewer.clientWidth;
+  var h = viewer.clientHeight;
   camera.aspect = w / h;
   camera.updateProjectionMatrix();
   renderer.setSize(w, h);
@@ -423,24 +444,21 @@ function onResize() {
 window.addEventListener('resize', onResize);
 
 /* ─── RENDER LOOP ──────────────────────────────────────────────── */
-const clock = new THREE.Clock();
+var clock = new THREE.Clock();
 
 function animate() {
   requestAnimationFrame(animate);
-  const dt = clock.getDelta();
+  var dt = clock.getDelta();
   controls.update();
 
-  // Animation mixer
   if (mixer) mixer.update(dt);
 
-  // Gentle float (no float if animated)
+  // Gentle float (skip for animated models)
   if (currentModel && !mixer) {
-    currentModel.position.y = Math.sin(clock.elapsedTime * 0.6) * 0.04;
+    currentModel.position.y = Math.sin(clock.getElapsedTime() * 0.6) * 0.04;
   }
 
-  // ECG
   if (ecgActive) drawECG(dt);
-
   renderer.render(scene, camera);
 }
 
