@@ -3,14 +3,17 @@
 
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
-  <meta name="description" content="Presentazione 3D interattiva — Biologia." />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description"
+    content="Presentazione 3D interattiva per la scuola — Biologia. Modelli anatomici in alta fedeltà." />
   <title>Biologia 3D</title>
 
-  <!-- Foglio di stile -->
-  <link rel="stylesheet" href="style.css?v=12" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
 
-  <!-- Three.js Import Map -->
+  <link rel="stylesheet" href="style.css?v=13" />
+
   <script type="importmap">
     {
       "imports": {
@@ -23,46 +26,62 @@
 
 <body>
   <div class="app">
-    <!-- ─── LAYOUT CLASSICO v1 ─── -->
 
-    <!-- Header -->
+    <!-- ─── HEADER ─── -->
     <header class="header" id="header">
-      <h1>🔬 Presentazione 3D — Biologia</h1>
+      <h1>🔬 Biologia 3D</h1>
+      <span class="header-sep">·</span>
       <p id="chapter-indicator">Microstruttura</p>
     </header>
 
-    <!-- Viewer 3D -->
-    <div class="viewer-container">
+    <!-- ─── VIEWER 3D ─── -->
+    <div class="viewer" id="viewer">
       <canvas id="canvas3d"></canvas>
 
-      <!-- Loader Legacy -->
+      <!-- Loader Overlay -->
       <div class="loader-overlay" id="loader">
         <div class="spinner"></div>
-        <div class="loader-text">Caricamento modello...</div>
+        <p class="loader-text">Caricamento modello…</p>
       </div>
 
-      <!-- Info Panel (Card) -->
-      <div class="info-panel" id="info-panel">
-        <h2 id="info-title">Modello</h2>
-        <div class="info-line"></div>
-        <p id="info-desc">Descrizione...</p>
+      <!-- Info Card -->
+      <div class="info-card" id="info-card">
+        <div class="info-card-header">
+          <h2 id="info-title">Modello</h2>
+          <button id="btn-focus" class="btn-icon" title="Nascondi testo">
+            <svg id="icon-eye-open" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+              stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+              <circle cx="12" cy="12" r="3" />
+            </svg>
+            <svg id="icon-eye-closed" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+              stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none">
+              <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94" />
+              <path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19" />
+              <line x1="1" y1="1" x2="23" y2="23" />
+            </svg>
+          </button>
+        </div>
+        <div class="info-accent-line"></div>
+        <p id="info-desc">Seleziona un modello dalla barra in basso.</p>
       </div>
 
-      <!-- Controls -->
-      <div class="controls-group">
-        <button id="btn-toggle-text" class="ctrl-btn" title="Mostra/Nascondi Testo">👁️</button>
-        <button id="btn-rotate" class="ctrl-btn" title="Rotazione">🔄</button>
+      <!-- Controls (Top Right) -->
+      <div class="controls-tr">
+        <button id="btn-rotate" class="btn-icon" title="Auto-rotazione">🔄</button>
+        <button id="btn-reset" class="btn-icon" title="Reset vista">🎯</button>
       </div>
     </div>
 
-    <!-- Navigation (Simple Bar) -->
-    <div class="nav-bar" id="nav-bar"></div>
+    <!-- ─── BOTTOM BAR (Nav + Actions) ─── -->
+    <div class="bottom-bar">
+      <nav class="nav-pills" id="nav-bar"></nav>
+      <div class="action-row" id="context-actions"></div>
+    </div>
 
-    <!-- Context Actions -->
-    <div class="context-actions" id="context-actions"></div>
   </div>
 
-  <script type="module" src="script.js?v=12"></script>
+  <script type="module" src="script.js?v=13"></script>
 </body>
 
 </html>
