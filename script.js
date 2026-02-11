@@ -137,14 +137,13 @@ key.castShadow = true;
 key.shadow.mapSize.set(2048, 2048);
 scene.add(key);
 
-scene.add(Object.assign(
-  new THREE.DirectionalLight(0x667fff, 0.5),
-  { position: new THREE.Vector3(-5, 4, -5) }
-));
-scene.add(Object.assign(
-  new THREE.DirectionalLight(0xffffff, 0.35),
-  { position: new THREE.Vector3(-2, 0, 6) }
-));
+const rim = new THREE.DirectionalLight(0x667fff, 0.5);
+rim.position.set(-5, 4, -5);
+scene.add(rim);
+
+const fill = new THREE.DirectionalLight(0xffffff, 0.35);
+fill.position.set(-2, 0, 6);
+scene.add(fill);
 scene.add(new THREE.HemisphereLight(0xeef0ff, 0x222233, 0.35));
 
 /* ─── GLTF LOADER ──────────────────────────────────────────────── */
