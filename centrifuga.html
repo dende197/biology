@@ -4,7 +4,7 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Centrifuga del Sangue — Simulazione 2D</title>
+    <title>Simulazione Centrifuga — Biologia 3D</title>
 
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -12,43 +12,38 @@
     <link rel="stylesheet" href="style.css?v=21" />
 
     <style>
-        /* ─── Page Specific Layout ─── */
+        /* ─── Layout Refinement (v21) ─── */
+        .app {
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
         .split-layout {
+            flex: 1;
             display: grid;
             grid-template-columns: 1fr 1fr;
-            height: 100vh;
             padding-top: 52px;
-            /* Header height */
             overflow: hidden;
         }
 
-        /* ─── Left Column: Centrifuge ─── */
+        /* ─── Centrifuge Column (Left) ─── */
         .col-left {
-            position: relative;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
             background: radial-gradient(circle at 50% 50%, #2a2a35 0%, #111113 70%);
             border-right: 1px solid var(--glass-border);
+            position: relative;
         }
 
-        /* ─── Right Column: Results & Info ─── */
-        .col-right {
-            position: relative;
-            background: rgba(17, 17, 19, 0.6);
-            backdrop-filter: blur(20px);
-            overflow-y: auto;
-            padding: 40px;
+        .centrifuge-wrapper {
+            transform: scale(0.95);
             display: flex;
             flex-direction: column;
-            gap: 30px;
-        }
-
-        /* ─── Centrifuge Machine (Optimized) ─── */
-        .centrifuge-container {
-            position: relative;
-            transform: scale(1.1);
+            align-items: center;
+            gap: 40px;
         }
 
         .centrifuge {
@@ -79,7 +74,7 @@
         }
 
         .rotor.spinning {
-            animation: rotor-spin 0.3s linear infinite;
+            animation: rotor-spin 0.2s linear infinite;
         }
 
         @keyframes rotor-spin {
@@ -167,129 +162,124 @@
             z-index: 5;
         }
 
-        /* Controls Overlay on Left */
-        .controls-overlay {
-            position: absolute;
-            bottom: 40px;
+        /* ─── Info & Results Column (Right) ─── */
+        .col-right {
+            background: rgba(17, 17, 19, 0.4);
+            padding: 40px;
+            overflow-y: auto;
             display: flex;
             flex-direction: column;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .status-text {
-            font-size: 14px;
-            color: var(--text-secondary);
-            font-weight: 500;
-            font-variant-numeric: tabular-nums;
-        }
-
-        /* ─── Result Section (Right Column) ─── */
-        .result-section {
-            opacity: 0;
-            transform: translateY(20px);
-            transition: all 0.5s var(--ease);
-            pointer-events: none;
-        }
-
-        .result-section.visible {
-            opacity: 1;
-            transform: translateY(0);
-            pointer-events: auto;
+            gap: 32px;
         }
 
         .section-title {
             font-size: 20px;
             font-weight: 700;
             color: var(--text-primary);
-            margin-bottom: 24px;
-            padding-bottom: 12px;
             border-bottom: 1px solid var(--glass-border);
+            padding-bottom: 12px;
+            margin-bottom: 8px;
         }
 
-        .tube-display {
+        /* ─── Result Tube Visualization ─── */
+        .result-container {
             display: flex;
-            gap: 30px;
-            margin-bottom: 40px;
+            gap: 24px;
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 24px;
+            opacity: 0.3;
+            transition: opacity 0.4s var(--ease);
         }
 
-        .big-tube {
-            width: 60px;
-            height: 240px;
-            background: rgba(255, 255, 255, 0.02);
+        .result-container.active {
+            opacity: 1;
+        }
+
+        .tube-vis {
+            width: 50px;
+            height: 200px;
+            background: rgba(255, 255, 255, 0.05);
             border: 2px solid rgba(255, 255, 255, 0.15);
-            border-radius: 8px 8px 28px 28px;
+            border-radius: 8px 8px 25px 25px;
             position: relative;
             overflow: hidden;
             flex-shrink: 0;
         }
 
-        .big-tube-cap {
-            height: 20px;
+        .tube-vis-cap {
+            height: 16px;
             background: #a02020;
             border-bottom: 2px solid rgba(255, 255, 255, 0.15);
         }
 
-        .blood-stack {
-            height: calc(100% - 20px);
+        .blood-layers {
+            height: calc(100% - 16px);
             display: flex;
             flex-direction: column;
         }
 
-        .stack-plasma {
-            flex: 55;
+        .layer {
+            transition: flex 1s var(--ease);
+        }
+
+        .layer-plasma {
+            flex: 0;
             background: #e8c55a;
-            position: relative;
         }
 
-        .stack-buffy {
-            flex: 1;
+        .layer-buffy {
+            flex: 0;
             background: #fff;
-            position: relative;
+            box-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
             z-index: 2;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
         }
 
-        .stack-rbc {
-            flex: 44;
+        .layer-rbc {
+            flex: 1;
             background: #8b1a1a;
-            position: relative;
         }
 
-        /* Animated reveal for stack */
-        .blood-stack>div {
-            transform: scaleY(1);
-            transition: flex 0.8s ease-out;
+        .result-container.active .layer-plasma {
+            flex: 55;
         }
 
-        .stack-labels {
+        .result-container.active .layer-buffy {
+            flex: 2;
+        }
+
+        .result-container.active .layer-rbc {
+            flex: 43;
+        }
+
+        .layer-labels {
             display: flex;
             flex-direction: column;
-            justify-content: center;
-            gap: 20px;
+            justify-content: space-between;
+            padding: 10px 0;
             flex: 1;
         }
 
-        .stack-label {
+        .label-pill {
             font-size: 13px;
-            color: var(--text-secondary);
-            padding: 8px 12px;
-            background: var(--glass-bg);
-            border: 1px solid var(--glass-border);
+            padding: 6px 12px;
             border-radius: 8px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--glass-border);
+            color: var(--text-secondary);
         }
 
-        .stack-label strong {
+        .label-pill strong {
             color: var(--text-primary);
             display: block;
-            margin-bottom: 2px;
         }
 
-        /* ─── White Blood Cells Grid ─── */
-        .wbc-grid {
+        /* ─── Leucociti Analysis ─── */
+        .wbc-analysis {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-            gap: 16px;
+            grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+            gap: 12px;
         }
 
         .wbc-card {
@@ -298,31 +288,29 @@
             border-radius: 12px;
             padding: 16px;
             text-align: center;
-            transition: transform 0.2s;
+            transition: all 0.3s var(--ease);
         }
 
         .wbc-card:hover {
+            background: rgba(255, 255, 255, 0.12);
             transform: translateY(-4px);
-            background: rgba(255, 255, 255, 0.1);
         }
 
         .wbc-icon {
-            width: 48px;
-            height: 48px;
-            margin: 0 auto 12px;
+            width: 44px;
+            height: 44px;
             border-radius: 50%;
+            margin: 0 auto 12px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 24px;
-            background: rgba(0, 0, 0, 0.2);
+            font-size: 20px;
+            font-weight: 700;
         }
 
         .wbc-card h4 {
             font-size: 13px;
-            font-weight: 600;
             margin-bottom: 4px;
-            color: var(--text-primary);
         }
 
         .wbc-card p {
@@ -331,56 +319,62 @@
             line-height: 1.4;
         }
 
-        /* WBC Colors/Shapes via CSS */
-        .icon-neutrophil {
-            background: radial-gradient(circle, #d8b4e2 30%, #e2d4e8 100%);
-            color: #6a4c93;
+        .icon-n {
+            background: radial-gradient(circle, #f5d0fe, #a855f7);
+            color: #fff;
         }
 
-        .icon-lymphocyte {
-            background: radial-gradient(circle, #b4c6e2 30%, #d4e0e8 100%);
-            color: #4c6a93;
+        .icon-l {
+            background: radial-gradient(circle, #dcfce7, #22c55e);
+            color: #fff;
         }
 
-        .icon-monocyte {
-            background: radial-gradient(circle, #b4e2d8 30%, #d4e8e2 100%);
-            color: #4c9386;
+        .icon-m {
+            background: radial-gradient(circle, #dbeafe, #3b82f6);
+            color: #fff;
         }
 
-        .icon-eosinophil {
-            background: radial-gradient(circle, #e2b4b4 30%, #e8d4d4 100%);
-            color: #934c4c;
+        .icon-e {
+            background: radial-gradient(circle, #fee2e2, #ef4444);
+            color: #fff;
         }
 
-        .icon-basophil {
-            background: radial-gradient(circle, #b4b8e2 30%, #d4d6e8 100%);
-            color: #5a4c93;
+        .icon-b {
+            background: radial-gradient(circle, #fef9c3, #eab308);
+            color: #fff;
         }
 
-        /* ─── Utilities ─── */
-        .btn-primary {
-            padding: 12px 32px;
+        /* ─── Controls ─── */
+        .btn-start {
+            padding: 14px 40px;
             background: var(--accent);
             color: #fff;
             border: none;
             border-radius: var(--radius-pill);
-            font-weight: 600;
-            font-size: 15px;
+            font-weight: 700;
+            font-size: 16px;
             cursor: pointer;
-            box-shadow: 0 4px 16px var(--accent-glow);
-            transition: all 0.2s;
+            box-shadow: 0 4px 20px var(--accent-glow);
+            transition: all 0.2s var(--ease);
         }
 
-        .btn-primary:active {
+        .btn-start:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 24px var(--accent-glow);
+        }
+
+        .btn-start:active {
             transform: scale(0.96);
         }
 
-        .btn-primary:disabled {
+        .btn-start:disabled {
             opacity: 0.5;
-            cursor: wait;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
         }
 
-        @media (max-width: 900px) {
+        @media (max-width: 1024px) {
             .split-layout {
                 grid-template-columns: 1fr;
                 overflow-y: auto;
@@ -388,14 +382,13 @@
             }
 
             .col-left {
-                height: 400px;
+                height: 450px;
                 border-right: none;
                 border-bottom: 1px solid var(--glass-border);
             }
 
             .col-right {
                 height: auto;
-                padding: 24px;
             }
         }
     </style>
@@ -403,34 +396,30 @@
 
 <body>
     <div class="app">
-
-        <!-- Header (Shared) -->
+        <!-- Header -->
         <header class="header">
             <h1>🔬 Biologia 3D</h1>
             <span class="header-sep">·</span>
             <p>Laboratory Calc</p>
-
             <div class="mode-switch">
                 <a href="index.html" class="mode-btn">3D</a>
                 <span class="mode-btn active">2D</span>
             </div>
         </header>
 
-        <!-- Split Layout -->
+        <!-- Main Content -->
         <div class="split-layout">
 
-            <!-- Left: Centrifuge -->
+            <!-- Centrifuge Machine -->
             <div class="col-left">
-                <div class="centrifuge-container">
+                <div class="centrifuge-wrapper">
                     <div class="centrifuge">
                         <div class="centrifuge-body">
                             <div class="rotor" id="rotor">
-                                <!-- Arms -->
                                 <div class="rotor-arm"></div>
                                 <div class="rotor-arm"></div>
                                 <div class="rotor-arm"></div>
                                 <div class="rotor-arm"></div>
-                                <!-- Tubes -->
                                 <div class="tube-slot">
                                     <div class="mini-tube"></div>
                                 </div>
@@ -447,132 +436,108 @@
                             <div class="centrifuge-hub"></div>
                         </div>
                     </div>
-                </div>
-
-                <div class="controls-overlay">
-                    <div class="status-text" id="status-text">Pronto</div>
-                    <button class="btn-primary" id="btn-start">Avvia Centrifuga</button>
+                    <div style="display: flex; flex-direction: column; align-items: center; gap: 16px;">
+                        <div class="status-text" id="status-text"
+                            style="font-weight: 600; color: var(--text-secondary);">Pronto per il Test</div>
+                        <button class="btn-start" id="btn-start">Inizia Analisi</button>
+                    </div>
                 </div>
             </div>
 
-            <!-- Right: Results -->
+            <!-- Analysis & Results -->
             <div class="col-right">
 
-                <!-- Results Container -->
-                <div class="result-section" id="result-section">
-                    <h2 class="section-title">Risultato Separazione</h2>
-
-                    <div class="tube-display">
-                        <!-- Result Tube -->
-                        <div class="big-tube">
-                            <div class="big-tube-cap"></div>
-                            <div class="blood-stack">
-                                <div class="stack-plasma"></div>
-                                <div class="stack-buffy"></div>
-                                <div class="stack-rbc"></div>
+                <div id="results-panel">
+                    <h2 class="section-title">Ematocrito</h2>
+                    <div class="result-container" id="result-container">
+                        <div class="tube-vis">
+                            <div class="tube-vis-cap"></div>
+                            <div class="blood-layers">
+                                <div class="layer layer-plasma"></div>
+                                <div class="layer layer-buffy"></div>
+                                <div class="layer layer-rbc"></div>
                             </div>
                         </div>
-
-                        <!-- Labels -->
-                        <div class="stack-labels">
-                            <div class="stack-label" style="border-left: 4px solid #e8c55a;">
-                                <strong>Plasma (55%)</strong>
-                                Acqua, proteine, nutrienti
-                            </div>
-                            <div class="stack-label" style="border-left: 4px solid #e0e0e0;">
-                                <strong>Buffy Coat (<1%)< /strong>
-                                        Leucociti e Piastrine
-                            </div>
-                            <div class="stack-label" style="border-left: 4px solid #8b1a1a;">
-                                <strong>Eritrociti (45%)</strong>
-                                Globuli Rossi (Trasporto O₂)
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- White Blood Cells Detail -->
-                    <h2 class="section-title">Analisi Leucociti (Buffy Coat)</h2>
-                    <div class="wbc-grid">
-                        <div class="wbc-card">
-                            <div class="wbc-icon icon-neutrophil">N</div>
-                            <h4>Neutrofili</h4>
-                            <p>Prima linea di difesa contro batteri.</p>
-                        </div>
-                        <div class="wbc-card">
-                            <div class="wbc-icon icon-lymphocyte">L</div>
-                            <h4>Linfociti</h4>
-                            <p>Risposta immunitaria specifica (T e B).</p>
-                        </div>
-                        <div class="wbc-card">
-                            <div class="wbc-icon icon-monocyte">M</div>
-                            <h4>Monociti</h4>
-                            <p>Fagocitosi di patogeni e detriti.</p>
-                        </div>
-                        <div class="wbc-card">
-                            <div class="wbc-icon icon-eosinophil">E</div>
-                            <h4>Eosinofili</h4>
-                            <p>Combattimento parassiti e allergie.</p>
-                        </div>
-                        <div class="wbc-card">
-                            <div class="wbc-icon icon-basophil">B</div>
-                            <h4>Basofili</h4>
-                            <p>Rilascio istamina (infiammazione).</p>
+                        <div class="layer-labels">
+                            <div class="label-pill"><strong>Plasma (55%)</strong>Acqua, Elettroliti</div>
+                            <div class="label-pill"><strong>Leucociti (<1%)< /strong>Sistema Immunitario</div>
+                            <div class="label-pill"><strong>Eritrociti (44%)</strong>Trasporto O₂</div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Instructions (Initial) -->
-                <div id="instruction-panel" style="margin-top: auto; color: var(--text-tertiary); font-size: 13px;">
-                    Premi "Avvia Centrifuga" per separare il campione di sague intero nei suoi componenti costitutivi.
+                <div>
+                    <h2 class="section-title">Tipologie di Leucociti</h2>
+                    <div class="wbc-analysis">
+                        <div class="wbc-card">
+                            <div class="wbc-icon icon-n">N</div>
+                            <h4>Neutrofili</h4>
+                            <p>Distruggono i batteri.</p>
+                        </div>
+                        <div class="wbc-card">
+                            <div class="wbc-icon icon-l">L</div>
+                            <h4>Linfociti</h4>
+                            <p>Anticorpi e virus.</p>
+                        </div>
+                        <div class="wbc-card">
+                            <div class="wbc-icon icon-m">M</div>
+                            <h4>Monociti</h4>
+                            <p>Fagociti giganti.</p>
+                        </div>
+                        <div class="wbc-card">
+                            <div class="wbc-icon icon-e">E</div>
+                            <h4>Eosinofili</h4>
+                            <p>Allergie e parassiti.</p>
+                        </div>
+                        <div class="wbc-card">
+                            <div class="wbc-icon icon-b">B</div>
+                            <h4>Basofili</h4>
+                            <p>Istatina e eparina.</p>
+                        </div>
+                    </div>
                 </div>
 
             </div>
         </div>
-
     </div>
 
     <script>
-        const btnStart = document.getElementById('btn-start');
+        const btn = document.getElementById('btn-start');
         const rotor = document.getElementById('rotor');
-        const statusText = document.getElementById('status-text');
-        const resultSection = document.getElementById('result-section');
-        const instructionPanel = document.getElementById('instruction-panel');
+        const status = document.getElementById('status-text');
+        const result = document.getElementById('result-container');
 
-        function wait(ms) { return new Promise(r => setTimeout(r, ms)); }
+        const wait = ms => new Promise(r => setTimeout(r, ms));
 
-        btnStart.addEventListener('click', async () => {
-            // Reset
-            btnStart.disabled = true;
-            resultSection.classList.remove('visible');
-            instructionPanel.style.opacity = 0;
+        btn.addEventListener('click', async () => {
+            btn.disabled = true;
+            result.classList.remove('active');
 
-            // Phase 1: Spin Up (0.5s)
-            statusText.textContent = "Accelerazione...";
-            rotor.style.animation = "rotor-spin 0.5s linear infinite"; // slow start
-            await wait(500);
+            // Total sequence in ~2.5s
 
-            // Phase 2: Max Speed (1.5s)
-            statusText.textContent = "Centrifugazione (3500 RPM)";
-            rotor.style.animationDuration = "0.1s"; // fast
-            await wait(1500);
-
-            // Phase 3: Spin Down (0.8s)
-            statusText.textContent = "Decelerazione...";
-            rotor.style.animationDuration = "0.5s";
-            await wait(400);
-            rotor.style.animationDuration = "1.0s";
+            // 1. Start (0.4s)
+            status.textContent = "Avvio...";
+            rotor.style.animation = "rotor-spin 0.4s linear infinite";
             await wait(400);
 
-            // Finish
+            // 2. High Speed (1.2s)
+            status.textContent = "Analisi in corso (4000 RPM)";
+            rotor.style.animationDuration = "0.08s";
+            await wait(1200);
+
+            // 3. Stop (0.4s)
+            status.textContent = "Frenata...";
+            rotor.style.animationDuration = "0.4s";
+            await wait(400);
+
+            // 4. Result
             rotor.style.animation = "none";
-            statusText.textContent = "Completato";
+            status.textContent = "Analisi Completa";
+            result.classList.add('active');
 
-            // Show Results
-            instructionPanel.style.display = 'none';
-            resultSection.classList.add('visible');
-
-            btnStart.disabled = false;
-            btnStart.textContent = "Riavvia Centrifugazione";
+            await wait(1000);
+            btn.disabled = false;
+            btn.textContent = "Ricomincia";
         });
     </script>
 </body>
