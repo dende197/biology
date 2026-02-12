@@ -8,40 +8,48 @@
 
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
-    <link rel="stylesheet" href="style.css?v=26" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;700;800&display=swap"
+        rel="stylesheet" />
+    <link rel="stylesheet" href="style.css?v=27" />
 
     <style>
-        /* ─── Apple Liquid Glass UI (v26 Ematologia Page) ─── */
+        /* ─── Apple Liquid Glass UI (v27 Ematologia) ─── */
         :root {
             --bg-deep: #000000;
-            --glass-panel: rgba(30, 30, 35, 0.7);
+            --glass-panel: rgba(28, 28, 32, 0.8);
             --glass-border: rgba(255, 255, 255, 0.12);
             --text-primary: #ffffff;
-            --text-secondary: rgba(255, 255, 255, 0.5);
-            --accent-blue: #0a84ff;
+            --text-secondary: rgba(255, 255, 255, 0.55);
+            --accent-blue: #0071e3;
+            --accent-green: #30d158;
+            --accent-red: #ff3b30;
             --font: 'Inter', -apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif;
         }
 
         body {
             background-color: var(--bg-deep);
-            background-image: radial-gradient(circle at 50% 0%, #1a1a2e, #000 80%);
+            background-image:
+                radial-gradient(circle at 20% 20%, rgba(0, 113, 227, 0.05), transparent 40%),
+                radial-gradient(circle at 80% 80%, rgba(48, 209, 88, 0.05), transparent 40%);
             margin: 0;
             font-family: var(--font);
             color: var(--text-primary);
+            overflow-y: auto;
+            /* Fix scroll */
             overflow-x: hidden;
             -webkit-font-smoothing: antialiased;
+            min-height: 100vh;
         }
 
         .app {
-            min-height: 100vh;
             display: flex;
             flex-direction: column;
+            width: 100%;
         }
 
         header.header {
-            background: rgba(0, 0, 0, 0.7);
-            backdrop-filter: blur(20px) saturate(180%);
+            background: rgba(0, 0, 0, 0.75);
+            backdrop-filter: blur(25px) saturate(200%);
             border-bottom: 1px solid var(--glass-border);
             z-index: 1000;
             position: fixed;
@@ -51,7 +59,7 @@
         }
 
         .main-content {
-            padding: 120px 40px 60px;
+            padding: 140px 40px 100px;
             max-width: 1200px;
             margin: 0 auto;
             width: 100%;
@@ -60,132 +68,165 @@
 
         .hero-section {
             text-align: center;
-            margin-bottom: 80px;
+            margin-bottom: 100px;
         }
 
         .hero-section h2 {
-            font-size: 56px;
-            font-weight: 300;
+            font-size: 64px;
+            font-weight: 800;
             margin: 0;
-            letter-spacing: -0.04em;
+            letter-spacing: -0.05em;
+            background: linear-gradient(to bottom, #fff, #888);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
         }
 
         .hero-section p {
             color: var(--text-secondary);
-            font-size: 20px;
-            margin-top: 16px;
+            font-size: 22px;
+            margin-top: 20px;
             font-weight: 300;
         }
 
-        .blood-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 24px;
-            margin-bottom: 80px;
-        }
-
-        .blood-card {
+        /* BRANCHOID SCHEME */
+        .scheme-container {
+            position: relative;
             background: var(--glass-panel);
             border: 1px solid var(--glass-border);
-            border-radius: 24px;
-            padding: 40px;
-            transition: all 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
-            position: relative;
+            border-radius: 40px;
+            padding: 60px;
+            margin-bottom: 80px;
+            box-shadow: 0 40px 100px rgba(0, 0, 0, 0.6);
             overflow: hidden;
         }
 
-        .blood-card:hover {
-            border-color: rgba(255, 255, 255, 0.3);
-            transform: translateY(-8px);
-            background: rgba(255, 255, 255, 0.08);
+        .scheme-header {
+            margin-bottom: 40px;
+            text-align: left;
         }
 
-        .b-type {
-            font-size: 64px;
-            font-weight: 700;
-            color: var(--accent-blue);
-            margin-bottom: 20px;
-            display: block;
-            line-height: 1;
-        }
-
-        .b-title {
-            font-size: 20px;
+        .scheme-header h3 {
+            font-size: 28px;
             font-weight: 600;
-            margin-bottom: 16px;
-        }
-
-        .b-desc {
-            font-size: 15px;
-            color: var(--text-secondary);
-            line-height: 1.6;
-        }
-
-        .comp-table {
-            margin-top: 32px;
-            border-top: 1px solid rgba(255, 255, 255, 0.08);
-            padding-top: 24px;
-        }
-
-        .comp-row {
-            display: flex;
-            justify-content: space-between;
-            font-size: 13px;
-            margin-bottom: 10px;
-        }
-
-        .comp-row span {
-            color: var(--text-secondary);
-        }
-
-        .comp-row strong {
-            color: #fff;
-            font-weight: 500;
-        }
-
-        .rh-info {
-            background: rgba(255, 255, 255, 0.03);
-            border: 1px solid var(--glass-border);
-            border-radius: 32px;
-            padding: 60px;
-            text-align: center;
-            margin-top: 40px;
-        }
-
-        .rh-info h3 {
-            font-size: 32px;
-            font-weight: 300;
             margin: 0;
         }
 
-        .rh-info p {
+        .scheme-header p {
             color: var(--text-secondary);
-            max-width: 800px;
-            margin: 24px auto;
-            line-height: 1.7;
             font-size: 16px;
+            margin-top: 8px;
         }
 
-        /* Typography consistency */
-        h1,
-        h2,
-        h3,
-        h4,
-        .mode-btn {
-            font-family: var(--font);
+        .scheme-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 60px;
         }
 
-        @media (max-width: 768px) {
+        .donor-box,
+        .receiver-box {
+            display: flex;
+            flex-direction: column;
+            gap: 30px;
+        }
+
+        .branch-node {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            padding: 20px 30px;
+            border-radius: 20px;
+            transition: all 0.3s ease;
+        }
+
+        .branch-node:hover {
+            border-color: var(--accent-blue);
+            transform: translateX(10px);
+            background: rgba(0, 113, 227, 0.1);
+        }
+
+        .blood-tag {
+            width: 50px;
+            height: 50px;
+            background: #fff;
+            color: #000;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            font-weight: 800;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .node-info {
+            flex: 1;
+        }
+
+        .node-info span {
+            display: block;
+            font-size: 14px;
+            font-weight: 700;
+            color: #fff;
+        }
+
+        .node-info small {
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+
+        .arrow-line {
+            position: relative;
+            padding: 40px 0;
+            text-align: center;
+        }
+
+        .arrow-line::before {
+            content: '';
+            position: absolute;
+            left: 50%;
+            top: 0;
+            bottom: 0;
+            width: 1px;
+            background: linear-gradient(to bottom, transparent, var(--accent-blue), transparent);
+        }
+
+        .rh-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--glass-border);
+            border-radius: 30px;
+            padding: 50px;
+            text-align: center;
+            margin-top: 60px;
+        }
+
+        .rh-card h3 {
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 20px;
+        }
+
+        .rh-card p {
+            color: var(--text-secondary);
+            line-height: 1.8;
+            max-width: 800px;
+            margin: 0 auto;
+            font-size: 18px;
+        }
+
+        @media (max-width: 900px) {
+            .scheme-grid {
+                grid-template-columns: 1fr;
+            }
+
             .main-content {
-                padding: 100px 20px 40px;
+                padding: 120px 20px 60px;
             }
 
             .hero-section h2 {
-                font-size: 40px;
-            }
-
-            .blood-card {
-                padding: 32px;
+                font-size: 44px;
             }
         }
     </style>
@@ -207,64 +248,92 @@
         <main class="main-content">
             <section class="hero-section">
                 <h2>I Gruppi Sanguigni</h2>
-                <p>La classificazione degli antigeni eritrocitari e la compatibilità trasfusionale.</p>
+                <p>Mappa delle interazioni sierologiche e compatibilità trasfusionale.</p>
             </section>
 
-            <div class="blood-grid">
-                <!-- Group A -->
-                <div class="blood-card">
-                    <span class="b-type">A</span>
-                    <div class="b-title">Antigene A</div>
-                    <p class="b-desc">Caratterizzato dalla presenza dell'antigene A sui globuli rossi e anticorpi anti-B
-                        nel plasma. Fondamentale per la risposta immunitaria.</p>
-                    <div class="comp-table">
-                        <div class="comp-row"><span>Dona a:</span><strong>A, AB</strong></div>
-                        <div class="comp-row"><span>Riceve da:</span><strong>A, 0</strong></div>
-                    </div>
+            <div class="scheme-container">
+                <div class="scheme-header">
+                    <h3>Schema di Compatibilità</h3>
+                    <p>La logica immunologica degli antigeni A, B e 0.</p>
                 </div>
 
-                <!-- Group B -->
-                <div class="blood-card">
-                    <span class="b-type">B</span>
-                    <div class="b-title">Antigene B</div>
-                    <p class="b-desc">Presenta l'antigene B sui globuli rossi e anticorpi anti-A nel plasma. La sua
-                        frequenza variabile è oggetto di studi genetici approfonditi.</p>
-                    <div class="comp-table">
-                        <div class="comp-row"><span>Dona a:</span><strong>B, AB</strong></div>
-                        <div class="comp-row"><span>Riceve da:</span><strong>B, 0</strong></div>
+                <div class="scheme-grid">
+                    <div class="donor-box">
+                        <h4
+                            style="color: var(--accent-green); text-transform: uppercase; font-size: 13px; letter-spacing: 0.1em; margin-bottom: 20px;">
+                            Donatore</h4>
+                        <div class="branch-node">
+                            <div class="blood-tag">0</div>
+                            <div class="node-info">
+                                <span>Donatore Universale</span>
+                                <small>Dona a TUTTI (0, A, B, AB)</small>
+                            </div>
+                        </div>
+                        <div class="branch-node">
+                            <div class="blood-tag">A</div>
+                            <div class="node-info">
+                                <span>Tipo A</span>
+                                <small>Dona ad A e AB</small>
+                            </div>
+                        </div>
+                        <div class="branch-node">
+                            <div class="blood-tag">B</div>
+                            <div class="node-info">
+                                <span>Tipo B</span>
+                                <small>Dona a B e AB</small>
+                            </div>
+                        </div>
+                        <div class="branch-node">
+                            <div class="blood-tag">AB</div>
+                            <div class="node-info">
+                                <span>Dona solo ad AB</span>
+                                <small>Restrizione Antigenica Doppia</small>
+                            </div>
+                        </div>
                     </div>
-                </div>
 
-                <!-- Group AB -->
-                <div class="blood-card">
-                    <span class="b-type">AB</span>
-                    <div class="b-title">Ricevitore Universale</div>
-                    <p class="b-desc">Esprime entrambi gli antigeni A e B. Poiché non possiede anticorpi anti-A o
-                        anti-B, può ricevere sangue da ogni gruppo del sistema AB0.</p>
-                    <div class="comp-table">
-                        <div class="comp-row"><span>Dona a:</span><strong>Solo AB</strong></div>
-                        <div class="comp-row"><span>Riceve da:</span><strong>TUTTI (A, B, AB, 0)</strong></div>
-                    </div>
-                </div>
-
-                <!-- Group 0 -->
-                <div class="blood-card">
-                    <span class="b-type">0</span>
-                    <div class="b-title">Donatore Universale</div>
-                    <p class="b-desc">Privo di antigeni A e B sulla superficie cellulare. Può essere trasfuso a
-                        chiunque, rendendolo vitale nelle emergenze mediche.</p>
-                    <div class="comp-table">
-                        <div class="comp-row"><span>Dona a:</span><strong>TUTTI (A, B, AB, 0)</strong></div>
-                        <div class="comp-row"><span>Riceve da:</span><strong>Solo 0</strong></div>
+                    <div class="receiver-box">
+                        <h4
+                            style="color: var(--accent-blue); text-transform: uppercase; font-size: 13px; letter-spacing: 0.1em; margin-bottom: 20px;">
+                            Ricevente</h4>
+                        <div class="branch-node">
+                            <div class="blood-tag">AB</div>
+                            <div class="node-info">
+                                <span>Ricevitore Universale</span>
+                                <small>Riceve da TUTTI (AB, A, B, 0)</small>
+                            </div>
+                        </div>
+                        <div class="branch-node">
+                            <div class="blood-tag">A</div>
+                            <div class="node-info">
+                                <span>Riceve da A e 0</span>
+                                <small>Anticorpi anti-B nel plasma</small>
+                            </div>
+                        </div>
+                        <div class="branch-node">
+                            <div class="blood-tag">B</div>
+                            <div class="node-info">
+                                <span>Riceve da B e 0</span>
+                                <small>Anticorpi anti-A nel plasma</small>
+                            </div>
+                        </div>
+                        <div class="branch-node">
+                            <div class="blood-tag">0</div>
+                            <div class="node-info">
+                                <span>Riceve solo da 0</span>
+                                <small>Anticorpi anti-A e anti-B</small>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
 
-            <section class="rh-info">
-                <h3>Il Sistema Rhesus (Rh)</h3>
-                <p>Indipendente dal sistema AB0, il fattore Rh indica la presenza (+) o l'assenza (-) dell'antigene D.
-                    Questa distinzione è critica nelle trasfusioni e durante la gravidanza, completando il profilo di
-                    compatibilità ematica di ogni individuo.</p>
+            <section class="rh-card">
+                <h3>Il Fattore Rh (Rhesus)</h3>
+                <p>Il sistema Rh completa il profilo immunologico. La presenza dell'antigene D rende il sangue
+                    <strong>Rh Positivo</strong>, mentre la sua assenza lo rende <strong>Rh Negativo</strong>. Questa
+                    distinzione è fondamentale per prevenire crisi emolitiche, specialmente nelle trasfusioni
+                    d'emergenza.</p>
             </section>
         </main>
     </div>

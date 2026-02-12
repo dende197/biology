@@ -9,7 +9,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
-    <link rel="stylesheet" href="style.css?v=26" />
+    <link rel="stylesheet" href="style.css?v=27" />
 
     <style>
         /* ─── Apple Liquid Glass UI (v26 Centrifuge Only) ─── */
@@ -69,9 +69,9 @@
             position: absolute;
             inset: 8px;
             border-radius: 50%;
-            background: linear-gradient(135deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.01));
-            border: 1px solid rgba(255, 255, 255, 0.05);
-            backdrop-filter: blur(4px);
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.02));
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(2px);
             z-index: 10;
         }
 
@@ -287,6 +287,7 @@
             background: #e8c55a;
             opacity: 0.9;
             border-bottom: 2px solid rgba(255, 255, 255, 0.2);
+            position: relative;
         }
 
         .l-buffy {
@@ -301,6 +302,51 @@
             flex: 43.5;
             background: #8b1a1a;
             opacity: 0.95;
+            position: relative;
+        }
+
+        /* Labels for layers */
+        .layer-label {
+            position: absolute;
+            left: 100px;
+            top: 50%;
+            transform: translateY(-50%);
+            white-space: nowrap;
+            font-size: 14px;
+            font-weight: 700;
+            text-transform: uppercase;
+            color: rgba(255, 255, 255, 0.8);
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            font-family: var(--font);
+            letter-spacing: 0.05em;
+        }
+
+        .layer-label::before {
+            content: '';
+            width: 30px;
+            height: 1px;
+            background: rgba(255, 255, 255, 0.4);
+        }
+
+        .l-buffy .layer-label {
+            left: 120px;
+            color: #fff;
+        }
+
+        .wbc-sublist {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            font-size: 11px;
+            color: #fff;
+            padding-left: 15px;
+            border-left: 1px solid rgba(255, 255, 255, 0.3);
+            margin-left: 15px;
+            font-weight: 500;
+            text-transform: none;
+            letter-spacing: 0;
         }
 
         .info-panel {
@@ -435,9 +481,24 @@
                 <div class="tube-hero">
                     <div class="tube-glass">
                         <div class="liquid-fill" id="liquid-fill">
-                            <div class="l-plasma"></div>
-                            <div class="l-buffy"></div>
-                            <div class="l-rbc"></div>
+                            <div class="l-plasma">
+                                <div class="layer-label">Plasma</div>
+                            </div>
+                            <div class="l-buffy">
+                                <div class="layer-label">
+                                    Buffy Coat
+                                    <div class="wbc-sublist">
+                                        <span>• Neutrofili</span>
+                                        <span>• Linfociti</span>
+                                        <span>• Monociti</span>
+                                        <span>• Eosinofili</span>
+                                        <span>• Basofili</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="l-rbc">
+                                <div class="layer-label">Eritrociti (RBC)</div>
+                            </div>
                         </div>
                     </div>
                 </div>
