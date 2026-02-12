@@ -12,21 +12,22 @@
     <link rel="stylesheet" href="style.css?v=27" />
 
     <style>
-        /* ─── Modern Light 2D Centrifuge (v31) ─── */
+        /* ─── High-Contrast Hybrid Centrifuge (v32) ─── */
         :root {
-            --bg-light: #f5f5f7;
-            --surface-white: #ffffff;
-            --text-primary: #1d1d1f;
-            --text-secondary: #86868b;
-            --accent-blue: #0071e3;
-            --border-light: #d2d2d7;
+            --bg-deep: #050505;
+            --surface-white: #e6e6ec;
+            /* Technical White */
+            --text-primary: #ffffff;
+            --text-dark: #1d1d1f;
+            --accent-blue: #2997ff;
+            --danger-red: #ff3b30;
+            --border-tech: #d1d1d6;
             --font: 'Inter', -apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif;
         }
 
         body {
-            background-color: var(--bg-light);
-            background-image: none;
-            /* No dark gradient */
+            background-color: var(--bg-deep);
+            background-image: radial-gradient(circle at 50% 50%, #1a1a20, #000 80%);
             margin: 0;
             font-family: var(--font);
             color: var(--text-primary);
@@ -41,9 +42,9 @@
         }
 
         header.header {
-            background: rgba(255, 255, 255, 0.8);
+            background: rgba(10, 10, 12, 0.7);
             backdrop-filter: blur(20px) saturate(180%);
-            border-bottom: 1px solid var(--border-light);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
             z-index: 1000;
         }
 
@@ -58,7 +59,7 @@
             overflow: hidden;
         }
 
-        /* ─── Top-Down Symmetrical Centrifuge (v31 Modern Light) ─── */
+        /* ─── Hybrid Centrifuge (Dark Room, Light Machine) ─── */
 
         .section-sim {
             flex: 1;
@@ -67,42 +68,124 @@
             justify-content: center;
             perspective: none;
             overflow: hidden;
-            background: var(--bg-light);
-            /* Light background */
+            background: transparent;
+            /* Allows body radial gradient */
         }
 
         .centrifuge-top {
             width: 380px;
             height: 380px;
             border-radius: 50%;
-            background: #ffffff;
+            background: #e0e0e0;
             position: relative;
             box-shadow:
-                0 10px 40px rgba(0, 0, 0, 0.1),
-                inset 0 0 0 1px rgba(0, 0, 0, 0.05);
-            /* Subtle border */
+                0 0 0 1px #000,
+                0 0 100px rgba(255, 255, 255, 0.05);
+            /* Glow effect */
             display: flex;
             align-items: center;
             justify-content: center;
-            border: 8px solid #f0f0f2;
-            /* Light grey rim */
+            border: 12px solid #d4d4d8;
+            /* Technical Grey Rim */
         }
 
-        /* Inner Bowl - Clean White/Light Grey */
+        /* Screw Details */
+        .centrifuge-top::before {
+            content: '';
+            position: absolute;
+            inset: 8px;
+            border-radius: 50%;
+            border: 1px dashed #999;
+            opacity: 0.5;
+            pointer-events: none;
+        }
+
+        .screw {
+            position: absolute;
+            width: 8px;
+            height: 8px;
+            background: linear-gradient(135deg, #ccc, #999);
+            border-radius: 50%;
+            box-shadow: inset 1px 1px 1px #fff, 1px 1px 2px rgba(0, 0, 0, 0.3);
+            z-index: 5;
+        }
+
+        .screw::after {
+            content: '';
+            position: absolute;
+            top: 3px;
+            left: 1px;
+            width: 6px;
+            height: 2px;
+            background: #666;
+            transform: rotate(45deg);
+        }
+
+        .s1 {
+            top: 15px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .s2 {
+            bottom: 15px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .s3 {
+            top: 50%;
+            left: 15px;
+            transform: translateY(-50%);
+        }
+
+        .s4 {
+            top: 50%;
+            right: 15px;
+            transform: translateY(-50%);
+        }
+
+        /* Warning Label */
+        .warning-label {
+            position: absolute;
+            bottom: 40px;
+            right: 50px;
+            width: 40px;
+            height: 40px;
+            border: 2px solid #fecaca;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transform: rotate(-15deg);
+            opacity: 0.8;
+            pointer-events: none;
+        }
+
+        .warning-icon {
+            width: 0;
+            height: 0;
+            border-left: 10px solid transparent;
+            border-right: 10px solid transparent;
+            border-bottom: 18px solid #ef4444;
+            /* Danger Red */
+        }
+
+        /* Inner Bowl - Clean White */
         .bowl {
             width: 320px;
             height: 320px;
             border-radius: 50%;
-            background: #fbfbfd;
-            box-shadow: inset 0 2px 10px rgba(0, 0, 0, 0.05);
+            background: #ffffff;
+            box-shadow: inset 0 2px 10px rgba(0, 0, 0, 0.1);
             position: relative;
             display: flex;
             align-items: center;
             justify-content: center;
             overflow: hidden;
+            border: 1px solid #ccc;
         }
 
-        /* Cross Rotor - Flat Solid Color */
+        /* Cross Rotor - Technical Grey */
         .rotor-cross {
             width: 280px;
             height: 280px;
@@ -117,52 +200,63 @@
 
         .section-sim.spinning .rotor-cross {
             filter: blur(0.5px);
-            /* Minimal blur */
         }
 
-        /* Central Axis - Flat */
+        /* Central Axis */
         .axis {
             position: absolute;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            width: 60px;
-            height: 60px;
+            width: 64px;
+            height: 64px;
             border-radius: 50%;
-            background: #e5e5ea;
-            border: 2px solid #d1d1d6;
+            background: #f4f4f5;
+            border: 1px solid #a1a1aa;
             z-index: 10;
             display: flex;
             align-items: center;
             justify-content: center;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         }
 
         .axis::after {
             content: '';
             width: 14px;
             height: 14px;
-            background: #ff3b30;
-            /* Flat Red */
+            background: #ef4444;
             border-radius: 50%;
+            box-shadow: 0 0 0 2px #fff, 0 0 0 4px #ef4444;
+            /* Tech Detail */
         }
 
-        /* Cross Arms - Flat */
+        /* Cross Arms */
         .arm {
             position: absolute;
             top: 50%;
             left: 50%;
             width: 120px;
             height: 36px;
-            /* Slightly thinner */
-            background: #e5e5ea;
-            /* Flat Light Grey */
+            background: #f4f4f5;
             transform-origin: 0 50%;
             border-radius: 18px;
-            /* High radius for smooth look */
             display: flex;
             align-items: center;
             justify-content: flex-end;
             padding-right: 8px;
+            border: 1px solid #e4e4e7;
+            /* Panel lines */
+            box-shadow: inset 0 0 0 1px #fff;
+        }
+
+        /* Panel line detail on arm */
+        .arm::before {
+            content: '';
+            position: absolute;
+            left: 40px;
+            width: 2px;
+            height: 100%;
+            background: #e4e4e7;
         }
 
         .arm:nth-child(1) {
@@ -181,44 +275,48 @@
             transform: translateY(-50%) rotate(270deg);
         }
 
-        /* Tube Holder - Flat White capsule */
+        /* Tube Holder - Capsule */
         .holder-top {
-            width: 40px;
-            height: 20px;
-            background: #ffffff;
-            border: 2px solid #d1d1d6;
-            border-radius: 10px;
+            width: 44px;
+            height: 24px;
+            background: #fff;
+            border: 2px solid #d4d4d8;
+            border-radius: 12px;
             position: relative;
             display: flex;
             align-items: center;
             justify-content: center;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
         }
 
-        /* Blood Tube - Flat Red indicator */
+        /* Blood Tube Indicator */
         .holder-top::after {
             content: '';
-            width: 12px;
-            height: 12px;
-            background: #ff3b30;
+            width: 14px;
+            height: 14px;
+            background: #ef4444;
             border-radius: 50%;
+            border: 2px solid #fff;
+            box-shadow: 0 0 0 1px #fca5a5;
         }
 
-        /* Display Panel - Clean text */
+        /* Display Panel - Tech Style */
         .status-display {
             position: absolute;
-            bottom: -60px;
+            bottom: -70px;
             left: 50%;
             transform: translateX(-50%);
-            background: #ffffff;
-            padding: 8px 16px;
-            border-radius: 20px;
-            border: 1px solid #e5e5ea;
-            color: #1d1d1f;
-            font-family: var(--font);
-            font-size: 14px;
-            font-weight: 500;
-            letter-spacing: normal;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            background: #18181b;
+            /* Dark Panel again */
+            padding: 10px 24px;
+            border-radius: 4px;
+            border: 1px solid #3f3f46;
+            color: #0f0;
+            /* Green Matrix */
+            font-family: monospace;
+            font-size: 16px;
+            letter-spacing: 0.1em;
+            box-shadow: 0 0 20px rgba(0, 255, 0, 0.1);
         }
 
         @keyframes spin {
@@ -231,7 +329,7 @@
             }
         }
 
-        /* Controls Overlay (Light) */
+        /* Controls Overlay (Back to Dark context) */
         .controls-overlay {
             position: absolute;
             bottom: 80px;
@@ -244,34 +342,35 @@
         }
 
         .btn-main {
-            background: #0071e3;
-            color: #fff;
+            background: #ffffff;
+            color: #000;
             border: none;
             padding: 14px 40px;
             font-size: 15px;
-            font-weight: 500;
+            font-weight: 600;
             border-radius: 30px;
             cursor: pointer;
             transition: all 0.3s;
-            box-shadow: 0 4px 10px rgba(0, 113, 227, 0.2);
+            box-shadow: 0 0 20px rgba(255, 255, 255, 0.1);
         }
 
         .btn-main:hover {
-            background: #0077ed;
-            transform: scale(1.02);
+            transform: scale(1.05);
+            box-shadow: 0 0 30px rgba(255, 255, 255, 0.2);
         }
 
         .btn-main:disabled {
-            background: #e5e5ea;
-            color: #999;
+            background: #333;
+            color: #666;
             box-shadow: none;
         }
 
-        /* Results Overlay (Light) */
+        /* Results Overlay (Dark Glass) */
         .results-overlay {
             position: fixed;
             inset: 0;
-            background: rgba(255, 255, 255, 0.9);
+            background: rgba(0, 0, 0, 0.85);
+            /* Dark */
             backdrop-filter: blur(40px) saturate(180%);
             z-index: 500;
             display: flex;
@@ -307,15 +406,14 @@
         .tube-glass {
             width: 80px;
             height: 450px;
-            background: rgba(255, 255, 255, 0.4);
-            border: 1px solid rgba(0, 0, 0, 0.1);
-            /* Subtle dark border */
+            background: rgba(255, 255, 255, 0.05);
+            /* Dark context glass */
+            border: 1px solid rgba(255, 255, 255, 0.2);
             border-top: none;
             border-radius: 0 0 40px 40px;
             position: relative;
-            /* OVERFLOW VISIBLE FIX for labels */
             overflow: visible;
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
         }
 
         .tube-glass::after {
@@ -378,18 +476,16 @@
             transform: translateY(-50%);
             white-space: nowrap;
             font-size: 14px;
-            font-weight: 600;
-            /* Less bold for clean look */
+            font-weight: 700;
             text-transform: uppercase;
-            color: #1d1d1f;
-            /* Dark text */
+            color: rgba(255, 255, 255, 0.9);
+            /* White text */
             display: flex;
             align-items: center;
             gap: 15px;
             font-family: var(--font);
             letter-spacing: 0.02em;
-            text-shadow: none;
-            /* No shadow */
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
             pointer-events: none;
             z-index: 100;
         }
@@ -398,32 +494,33 @@
             content: '';
             width: 50px;
             height: 1px;
-            /* Thinner line */
-            background: #86868b;
-            /* Grey line */
-            box-shadow: none;
+            background: rgba(255, 255, 255, 0.5);
+            box-shadow: 0 0 5px rgba(255, 255, 255, 0.3);
         }
 
         .l-buffy .layer-label {
             left: 120px;
-            color: #000;
-            font-weight: 700;
+            color: #fff;
+            font-weight: 800;
         }
 
         .wbc-sublist {
             display: flex;
             flex-direction: column;
-            gap: 4px;
-            font-size: 12px;
-            color: #424245;
-            /* Dark grey */
+            gap: 6px;
+            /* Increased gap */
+            font-size: 13px;
+            color: rgba(255, 255, 255, 0.85);
+            /* White text */
             padding-left: 15px;
-            border-left: 2px solid #d2d2d7;
+            border-left: 2px solid rgba(255, 255, 255, 0.3);
             margin-left: 15px;
+            margin-top: 5px;
             font-weight: 500;
             text-transform: none;
             letter-spacing: 0;
             text-shadow: none;
+            padding-bottom: 5px;
         }
 
         .info-panel {
@@ -434,31 +531,41 @@
 
         .info-panel h2 {
             font-size: 48px;
-            font-weight: 700;
+            font-weight: 800;
             margin: 0;
-            letter-spacing: -0.02em;
+            letter-spacing: -0.04em;
             font-family: var(--font);
-            color: #1d1d1f;
+            color: #fff;
         }
 
         .info-panel p.sub {
-            color: #86868b;
+            color: rgba(255, 255, 255, 0.6);
             font-weight: 400;
         }
 
-        /* Grid cards Light */
+        /* Grid cards Dark */
         .st-card {
-            background: #f5f5f7;
-            border: 1px solid #e5e5ea;
-            color: #1d1d1f;
+            background: rgba(255, 255, 255, 0.08);
+            /* Dark Glass */
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: #fff;
+            /* Prevent overlap with labels: ensure height is contained or flex */
+            z-index: 1;
+            /* Below labels */
         }
 
         .st-card h4 {
-            color: #86868b;
+            color: rgba(255, 255, 255, 0.5);
         }
 
         .st-card div {
-            color: #1d1d1f;
+            color: #fff;
+        }
+
+        /* Fix overlap: Move right column away from labels */
+        .st-grid {
+            margin-left: 20px;
+            /* Shift content right */
         }
 
         .btn-close {
@@ -517,6 +624,13 @@
 
         <section class="section-sim">
             <div class="centrifuge-top">
+                <div class="screw s1"></div>
+                <div class="screw s2"></div>
+                <div class="screw s3"></div>
+                <div class="screw s4"></div>
+                <div class="warning-label">
+                    <div class="warning-icon"></div>
+                </div>
                 <div class="bowl">
                     <div class="rotor-cross" id="rotor">
                         <div class="arm">
@@ -552,9 +666,8 @@
                             <div class="l-plasma">
                                 <div class="layer-label">Plasma</div>
                             </div>
-                            <div class="l-buffy">
-                                <div class="layer-label">
-                                    Buffy Coat
+                            <div class="l-buffy" style="height: 2%;">
+                                <div class="layer-label">Strato Leucocitario
                                     <div class="wbc-sublist">
                                         <span>• Neutrofili</span>
                                         <span>• Linfociti</span>
@@ -570,12 +683,12 @@
                         </div>
                     </div>
                 </div>
-                <div class="info-panel">
+                <div class="info-panel" style="max-width: 450px;">
                     <div>
                         <h2>Analisi Completata</h2>
                         <p class="sub">Report ematologico basato sul gradiente di densità.</p>
                     </div>
-                    <div class="st-grid">
+                    <div class="st-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
                         <div class="st-card">
                             <h4>Ematocrito</h4>
                             <div>44.2 %</div>
@@ -585,22 +698,24 @@
                             <div>55.1 %</div>
                         </div>
                         <div class="st-card">
-                            <h4>Buffy Coat</h4>
-                            <div>0.7 %</div>
+                            <h4>Strato Leucocitario</h4>
+                            <div style="font-size: 18px;">0.7 %</div>
                         </div>
                         <div class="st-card">
                             <h4>Stato</h4>
                             <div style="color: #22c55e;">Normale</div>
                         </div>
                     </div>
+                    <!-- Moved down and adjusted for gap -->
                     <div
-                        style="background: rgba(255,255,255,0.03); padding: 32px; border-radius: 24px; border: 1px solid var(--glass-border);">
+                        style="background: rgba(255,255,255,0.03); padding: 24px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.1); margin-top: 10px;">
                         <h4
-                            style="margin: 0; font-size: 14px; text-transform: uppercase; color: var(--text-secondary);">
+                            style="margin: 0; font-size: 13px; text-transform: uppercase; color: var(--text-secondary);">
                             Focus: Globuli Bianchi</h4>
-                        <p style="margin: 16px 0 0; line-height: 1.6; font-size: 14px;">Il <strong>Buffy Coat</strong>
+                        <p style="margin: 12px 0 0; line-height: 1.6; font-size: 14px; color: rgba(255,255,255,0.8);">
+                            Lo <strong>Strato Leucocitario</strong> (Buffy Coat)
                             contiene la frazione leucocitaria e le piastrine. Qui si concentrano Neutrofili, Linfociti,
-                            Monociti e le altre cellule sentinella del sistema immunitario.</p>
+                            Monociti e le altre cellule sentinella.</p>
                     </div>
                 </div>
             </div>
@@ -625,9 +740,9 @@
 
             // Text feedback
             displayPanel.innerText = 'R: 3500 RPM';
-            displayPanel.style.color = '#0071e3';
-            /* Blue text */
-            displayPanel.style.boxShadow = '0 0 10px rgba(0,113,227,0.2)';
+            displayPanel.style.color = '#0f0';
+            /* Matrix Green */
+            displayPanel.style.boxShadow = '0 0 10px rgba(0,255,0,0.3)';
 
             // Simulate 4s spin
             setTimeout(() => {
@@ -657,7 +772,7 @@
             btnStart.disabled = false;
             btnStart.innerText = 'AVVIA CENTRIFUGA';
             displayPanel.innerText = 'READY';
-            displayPanel.style.color = '#1d1d1f';
+            displayPanel.style.color = '#0f0';
             displayPanel.style.boxShadow = 'none';
         });
     </script>
