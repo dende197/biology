@@ -164,16 +164,22 @@
         }
 
         .top-wall {
-            border-bottom: 2px solid rgba(0, 0, 0, 0.5);
-            /* Clipping: No protrusion UPWARDS, allow lumen side */
-            clip-path: inset(0 0 -300px 0);
+            border-bottom: 2px solid rgba(0, 0, 0, 0.6);
+            /* Clipping STRICTLY at the wall boundary. 
+               No movement of the outer wall allowed. 
+            */
+            clip-path: inset(0 0 -500px 0);
+            overflow: hidden;
+            /* Lock internal layers from escaping top */
         }
 
         .bottom-wall {
-            border-top: 2px solid rgba(0, 0, 0, 0.5);
+            border-top: 2px solid rgba(0, 0, 0, 0.6);
             flex-direction: column-reverse;
-            /* Clipping: No protrusion DOWNWARDS, allow lumen side */
-            clip-path: inset(-300px 0 0 0);
+            /* Clipping STRICTLY at the wall boundary. */
+            clip-path: inset(-500px 0 0 0);
+            overflow: hidden;
+            /* Lock internal layers from escaping bottom */
         }
 
         /* Histological layers textures */
@@ -221,25 +227,26 @@
             will-change: transform, left;
         }
 
-        /* Organic Plaque mastery - Designer Grade */
+        /* Organic Plaque mastery - Inscribed Designer Grade */
         .plaque-container {
             position: absolute;
             left: 50%;
-            width: 440px;
-            height: 200px;
+            width: 340px;
+            /* Surgical accumulation */
+            height: 140px;
             transform: translateX(-50%) scale(0);
             pointer-events: none;
             transition: all 1.2s cubic-bezier(0.2, 1, 0.3, 1);
             opacity: 0;
             filter: url('#organic-morph');
-            z-index: 150;
-            /* MUST BE VISIBLE OVER THE INTIMA */
-            pointer-events: none;
+            z-index: 50;
+            /* Inside the wall hierarchy */
         }
 
-        /* Eccentric Positioning (Bottom ONLY for peak realism) */
+        /* Eccentric Positioning (Bottom ONLY - Inscribed in Wall) */
         .bottom-wall .plaque-container {
-            top: -140px;
+            top: -70px;
+            /* Perfectly seated inside the wall */
             transform-origin: bottom center;
         }
 
@@ -248,19 +255,20 @@
             height: 100%;
             background:
                 url("data:image/svg+xml,%3Csvg viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='f'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100' height='100' filter='url(%23f)' opacity='.2'/%3E%3C/svg%3E"),
-                radial-gradient(ellipse at center, #fff4cc 0%, #d4ac0d 60%, #997a0a 100%);
+                radial-gradient(ellipse at center, #bf9c10 0%, #7d6706 70%, #403503 100%);
+            /* Matte Lipid Core - Low Exposure */
             border-radius: 50%;
-            box-shadow: 0 0 50px rgba(0, 0, 0, 0.8);
+            box-shadow: inset 0 0 30px rgba(0, 0, 0, 0.5), 0 0 30px rgba(0, 0, 0, 0.4);
         }
 
         /* State triggers */
         /* State triggers - Refined for ECCENTRIC pathology (bottom-wall only) */
 
-        /* Displacement of Intima: Only the bottom wall with the plaque bulges */
+        /* Displacement of Intima: Only the bottom wall with the plaque bulges into lumen */
         [data-state="aterosclerosi"] .bottom-wall .intima,
         [data-state="trombosi"] .bottom-wall .intima {
-            transform: translateY(-80px);
-            /* Deep eccentric stenosis */
+            transform: translateY(-50px);
+            /* Contained stenosis */
         }
 
         /* Top wall stays healthy in eccentric model */
@@ -273,9 +281,9 @@
         [data-state="aterosclerosi"] .bottom-wall .plaque-container,
         [data-state="trombosi"] .bottom-wall .plaque-container {
             opacity: 1;
-            top: -110px;
-            /* Aligned with deep stenosis */
-            transform: translateX(-50%) scale(1.2);
+            top: -90px;
+            /* Precision alignment with stenosis */
+            transform: translateX(-50%) scale(1.1);
         }
 
         /* Experimental: Only show plaque in correct states to avoid ghosting */
@@ -283,14 +291,14 @@
             display: none;
         }
 
-        /* Biological Thrombus - Anchored to the eccentric plaque */
+        /* Biological Thrombus - Anchored to the inscribed plaque */
         .thrombus-mass {
             position: absolute;
-            top: 72%;
-            /* Aligned with bottom bulge */
+            top: 65%;
+            /* Seated on the stenosis */
             left: 50%;
-            width: 190px;
-            height: 190px;
+            width: 180px;
+            height: 180px;
             background:
                 url("data:image/svg+xml,%3Csvg viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='fibrin'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.5' numOctaves='5'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100' height='100' filter='url(%23fibrin)' opacity='0.3'/%3E%3C/svg%3E"),
                 radial-gradient(circle at 30% 30%, #6b0000 0%, #2a0000 70%, #000000 100%);
