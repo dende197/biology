@@ -300,19 +300,21 @@
             box-shadow: 0 0 0 1px #fca5a5;
         }
 
-        /* Display Panel - Tech Style */
+        /* DIGITAL DISPLAY POLISH */
         .status-display {
             position: absolute;
             bottom: -70px;
             left: 50%;
             transform: translateX(-50%);
             background: #18181b;
-            /* Dark Panel again */
-            padding: 10px 24px;
+            width: 120px;
+            height: 44px;
             border-radius: 4px;
             border: 1px solid #3f3f46;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             color: #0f0;
-            /* Green Matrix */
             font-family: monospace;
             font-size: 16px;
             letter-spacing: 0.1em;
@@ -365,12 +367,11 @@
             box-shadow: none;
         }
 
-        /* Results Overlay (Dark Glass) */
+        /* Results Overlay (Centered & Polished) */
         .results-overlay {
             position: fixed;
             inset: 0;
-            background: rgba(0, 0, 0, 0.85);
-            /* Dark */
+            background: rgba(0, 0, 0, 0.9);
             backdrop-filter: blur(40px) saturate(180%);
             z-index: 500;
             display: flex;
@@ -380,6 +381,7 @@
             pointer-events: none;
             transition: opacity 1s cubic-bezier(0.2, 0.8, 0.2, 1);
             padding: 40px;
+            text-align: center;
         }
 
         .results-overlay.active {
@@ -388,19 +390,20 @@
         }
 
         .results-grid {
-            max-width: 1100px;
-            width: 100%;
-            display: grid;
-            grid-template-columns: 350px 1fr;
-            gap: 80px;
+            display: flex;
+            flex-direction: column;
             align-items: center;
+            gap: 60px;
+            max-width: 800px;
+            width: 100%;
+            margin: 0 auto;
         }
 
         .tube-hero {
             position: relative;
             display: flex;
-            flex-direction: column;
-            align-items: center;
+            justify-content: center;
+            width: 100%;
         }
 
         .tube-glass {
@@ -469,17 +472,25 @@
         }
 
         /* Labels for layers */
+        /* Center Analysis Content */
+        .info-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 40px;
+            align-items: center;
+        }
+
         .layer-label {
             position: absolute;
-            left: 100px;
+            left: 110px;
+            /* Right of tube */
             top: 50%;
             transform: translateY(-50%);
             white-space: nowrap;
             font-size: 14px;
             font-weight: 700;
             text-transform: uppercase;
-            color: rgba(255, 255, 255, 0.9);
-            /* White text */
+            color: rgba(255, 255, 255, 0.95);
             display: flex;
             align-items: center;
             gap: 15px;
@@ -492,41 +503,50 @@
 
         .layer-label::before {
             content: '';
-            width: 50px;
+            width: 30px;
             height: 1px;
-            background: rgba(255, 255, 255, 0.5);
-            box-shadow: 0 0 5px rgba(255, 255, 255, 0.3);
+            background: rgba(255, 255, 255, 0.6);
+        }
+
+        /* Level adjustments with correct classes */
+        .l-plasma .layer-label {
+            top: 50%;
         }
 
         .l-buffy .layer-label {
+            top: 50%;
             left: 120px;
             color: #fff;
             font-weight: 800;
         }
 
-        .wbc-sublist {
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
-            /* Increased gap */
-            font-size: 13px;
-            color: rgba(255, 255, 255, 0.85);
-            /* White text */
-            padding-left: 15px;
-            border-left: 2px solid rgba(255, 255, 255, 0.3);
-            margin-left: 15px;
-            margin-top: 5px;
-            font-weight: 500;
-            text-transform: none;
-            letter-spacing: 0;
-            text-shadow: none;
-            padding-bottom: 5px;
+        .l-rbc .layer-label {
+            top: 50%;
         }
 
+        .wbc-sublist {
+            display: flex;
+            flex-direction: row;
+            /* Horizontal for more space */
+            flex-wrap: wrap;
+            gap: 12px;
+            font-size: 11px;
+            color: rgba(255, 255, 255, 0.7);
+            padding: 8px 12px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            margin-left: 15px;
+            font-weight: 500;
+            text-transform: none;
+        }
+
+        /* Center Analysis Content */
         .info-panel {
             display: flex;
             flex-direction: column;
             gap: 40px;
+            align-items: center;
+            width: 100%;
         }
 
         .info-panel h2 {
@@ -536,36 +556,42 @@
             letter-spacing: -0.04em;
             font-family: var(--font);
             color: #fff;
+            text-align: center;
         }
 
         .info-panel p.sub {
             color: rgba(255, 255, 255, 0.6);
             font-weight: 400;
+            margin: 8px 0 0;
+            text-align: center;
         }
 
-        /* Grid cards Dark */
+        .st-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 16px;
+            width: 100%;
+        }
+
         .st-card {
             background: rgba(255, 255, 255, 0.08);
-            /* Dark Glass */
             border: 1px solid rgba(255, 255, 255, 0.1);
-            color: #fff;
-            /* Prevent overlap with labels: ensure height is contained or flex */
-            z-index: 1;
-            /* Below labels */
+            padding: 24px;
+            border-radius: 20px;
+            text-align: center;
         }
 
         .st-card h4 {
+            font-size: 12px;
+            text-transform: uppercase;
             color: rgba(255, 255, 255, 0.5);
+            margin: 0 0 8px 0;
         }
 
         .st-card div {
+            font-size: 24px;
+            font-weight: 600;
             color: #fff;
-        }
-
-        /* Fix overlap: Move right column away from labels */
-        .st-grid {
-            margin-left: 20px;
-            /* Shift content right */
         }
 
         .btn-close {
@@ -574,15 +600,17 @@
             right: 40px;
             background: rgba(255, 255, 255, 0.1);
             border: none;
-            color: #fff;
             width: 44px;
             height: 44px;
             border-radius: 50%;
+            color: #fff;
+            font-size: 24px;
             cursor: pointer;
-            font-size: 20px;
             display: flex;
             align-items: center;
             justify-content: center;
+            transition: all 0.3s;
+            z-index: 1000;
         }
 
         @media (max-width: 1000px) {
@@ -648,11 +676,11 @@
                         <div class="axis"></div>
                     </div>
                 </div>
-                <div class="status-display" id="display-panel">READY</div>
+                <div class="status-display" id="display-panel"></div>
             </div>
 
             <div class="controls-overlay">
-                <div class="status-badge" id="status-badge">READY</div>
+                <div class="status-badge" id="status-badge"></div>
                 <button class="btn-main" id="btn-start">Inizia Centrifugazione</button>
             </div>
         </section>
@@ -683,12 +711,12 @@
                         </div>
                     </div>
                 </div>
-                <div class="info-panel" style="max-width: 450px;">
+                <div class="info-panel">
                     <div>
                         <h2>Analisi Completata</h2>
                         <p class="sub">Report ematologico basato sul gradiente di densità.</p>
                     </div>
-                    <div class="st-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                    <div class="st-grid">
                         <div class="st-card">
                             <h4>Ematocrito</h4>
                             <div>44.2 %</div>
@@ -699,7 +727,7 @@
                         </div>
                         <div class="st-card">
                             <h4>Strato Leucocitario</h4>
-                            <div style="font-size: 18px;">0.7 %</div>
+                            <div>0.7 %</div>
                         </div>
                         <div class="st-card">
                             <h4>Stato</h4>
@@ -708,11 +736,12 @@
                     </div>
                     <!-- Moved down and adjusted for gap -->
                     <div
-                        style="background: rgba(255,255,255,0.03); padding: 24px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.1); margin-top: 10px;">
+                        style="background: rgba(255,255,255,0.03); padding: 24px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.1); margin-top: 10px; width: 100%;">
                         <h4
-                            style="margin: 0; font-size: 13px; text-transform: uppercase; color: var(--text-secondary);">
+                            style="margin: 0; font-size: 13px; text-transform: uppercase; color: var(--text-secondary); text-align: center;">
                             Focus: Globuli Bianchi</h4>
-                        <p style="margin: 12px 0 0; line-height: 1.6; font-size: 14px; color: rgba(255,255,255,0.8);">
+                        <p
+                            style="margin: 12px 0 0; line-height: 1.6; font-size: 14px; color: rgba(255,255,255,0.8); text-align: center;">
                             Lo <strong>Strato Leucocitario</strong> (Buffy Coat)
                             contiene la frazione leucocitaria e le piastrine. Qui si concentrano Neutrofili, Linfociti,
                             Monociti e le altre cellule sentinella.</p>
@@ -771,7 +800,9 @@
             // Reset UI
             btnStart.disabled = false;
             btnStart.innerText = 'AVVIA CENTRIFUGA';
-            displayPanel.innerText = 'READY';
+            displayPanel.innerText = '';
+            const statusBadge = document.getElementById('status-badge');
+            if (statusBadge) statusBadge.innerText = '';
             displayPanel.style.color = '#0f0';
             displayPanel.style.boxShadow = 'none';
         });
