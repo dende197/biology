@@ -228,28 +228,24 @@
         }
 
         /* Organic Plaque mastery - LUMENAL OBSTRUCTION (Visible in blood flow) */
-
-        /* Small Surgical Plaque - Lumenal Integration (v46) */
         .plaque-container {
             position: absolute;
             left: 50%;
-            width: 220px;
-            /* Small surgical mass */
-            height: 80px;
-            transform: translateX(-50%) scale(0) rotate(180deg);
+            width: 150px;
+            /* Slightly smaller than thrombus (180px) */
+            height: 150px;
+            transform: translate(-50%, -50%) scale(0) rotate(180deg);
             pointer-events: none;
             transition: all 1s cubic-bezier(0.2, 1, 0.3, 1);
             opacity: 0;
             filter: url('#organic-morph');
             z-index: 150;
-            /* Visible in lumen flow */
         }
 
         .bottom-wall .plaque-container {
-            top: auto;
-            bottom: 85px;
-            /* Sitting on the internal wall surface */
-            transform-origin: bottom center;
+            top: -20px;
+            /* Aligned with thrombus */
+            transform-origin: center center;
         }
 
         .plaque-mass {
