@@ -199,11 +199,12 @@
 
         .layer.intima {
             height: 20%;
-            background: linear-gradient(to bottom, #d64545, #a82222);
+            background: linear-gradient(to bottom, rgba(214, 69, 69, 0.95), rgba(168, 34, 34, 0.9));
             position: relative;
-            z-index: 120;
-            /* High, but we will put plaque above for visibility */
+            z-index: 100;
+            /* Stays ON TOP of plaque (z50) */
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.4);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
             transition: transform 1s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
@@ -227,26 +228,32 @@
             will-change: transform, left;
         }
 
-        /* Organic Plaque mastery - Inscribed Designer Grade */
+        /* Organic Plaque mastery - Inscribed & Internal */
         .plaque-container {
             position: absolute;
             left: 50%;
-            width: 340px;
-            /* Surgical accumulation */
-            height: 140px;
+            width: 280px;
+            /* More compact/surgical */
+            height: 100px;
+            /* Reduced height to fit INSIDE */
             transform: translateX(-50%) scale(0);
             pointer-events: none;
             transition: all 1.2s cubic-bezier(0.2, 1, 0.3, 1);
             opacity: 0;
             filter: url('#organic-morph');
             z-index: 50;
-            /* Inside the wall hierarchy */
+            /* Strictly BEHIND the Intima */
         }
 
         /* Eccentric Positioning (Bottom ONLY - Inscribed in Wall) */
+        /* Eccentric Positioning (Bottom Wall) 
+           Positioned relative to the BOTTOM of the wall (Adventitia)
+           So it sits ON the Media and grows UP towards Lumen.
+        */
         .bottom-wall .plaque-container {
-            top: -70px;
-            /* Perfectly seated inside the wall */
+            top: auto;
+            bottom: 35%;
+            /* Sits on Media layer */
             transform-origin: bottom center;
         }
 
@@ -278,12 +285,13 @@
         }
 
         /* Plaque Container Visibility - Bottom only */
+        /* Plaque Container Visibility - Grows from within */
         [data-state="aterosclerosi"] .bottom-wall .plaque-container,
         [data-state="trombosi"] .bottom-wall .plaque-container {
             opacity: 1;
-            top: -90px;
-            /* Precision alignment with stenosis */
-            transform: translateX(-50%) scale(1.1);
+            /* No 'top' adjustment needed, it grows from bottom: 35% */
+            transform: translateX(-50%) scale(1.4);
+            /* Bulge up */
         }
 
         /* Experimental: Only show plaque in correct states to avoid ghosting */
@@ -291,11 +299,11 @@
             display: none;
         }
 
-        /* Biological Thrombus - Anchored to the inscribed plaque */
+        /* Biological Thrombus - Anchored to the sub-intimal bulge */
         .thrombus-mass {
             position: absolute;
-            top: 65%;
-            /* Seated on the stenosis */
+            top: 78%;
+            /* Sitting on the elevated Intima */
             left: 50%;
             width: 180px;
             height: 180px;
