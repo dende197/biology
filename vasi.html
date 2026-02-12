@@ -286,8 +286,8 @@
         [data-state="aterosclerosi"] .bottom-wall .plaque-container,
         [data-state="trombosi"] .bottom-wall .plaque-container {
             opacity: 1;
-            /* Grow UP into the lumen space */
-            transform: translateX(-50%) scale(1.0);
+            /* Grow UP into the lumen space - Rotated 180deg as requested */
+            transform: translateX(-50%) scale(1.0) rotate(180deg);
         }
 
         /* Experimental: Only show plaque in correct states to avoid ghosting */
