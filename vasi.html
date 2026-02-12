@@ -228,32 +228,28 @@
             will-change: transform, left;
         }
 
-        /* Organic Plaque mastery - Inscribed & Internal */
+        /* Organic Plaque mastery - LUMENAL OBSTRUCTION (Visible in blood flow) */
         .plaque-container {
             position: absolute;
             left: 50%;
-            width: 280px;
-            /* More compact/surgical */
-            height: 100px;
-            /* Reduced height to fit INSIDE */
+            width: 380px;
+            height: 160px;
             transform: translateX(-50%) scale(0);
             pointer-events: none;
             transition: all 1.2s cubic-bezier(0.2, 1, 0.3, 1);
             opacity: 0;
             filter: url('#organic-morph');
-            z-index: 50;
-            /* Strictly BEHIND the Intima */
+            z-index: 200;
+            /* STRICTLY ABOVE INTIMA (100) - visible in lumen */
         }
 
-        /* Eccentric Positioning (Bottom ONLY - Inscribed in Wall) */
         /* Eccentric Positioning (Bottom Wall) 
-           Positioned relative to the BOTTOM of the wall (Adventitia)
-           So it sits ON the Media and grows UP towards Lumen.
+           Positioned to protrude INTO the lumen from the bottom wall.
         */
         .bottom-wall .plaque-container {
             top: auto;
-            bottom: 35%;
-            /* Sits on Media layer */
+            bottom: 15px;
+            /* Sits ON the Intima surface, extending up */
             transform-origin: bottom center;
         }
 
@@ -262,10 +258,11 @@
             height: 100%;
             background:
                 url("data:image/svg+xml,%3Csvg viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='f'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100' height='100' filter='url(%23f)' opacity='.2'/%3E%3C/svg%3E"),
-                radial-gradient(ellipse at center, #bf9c10 0%, #7d6706 70%, #403503 100%);
-            /* Matte Lipid Core - Low Exposure */
+                radial-gradient(ellipse at center, #ffd700 0%, #e6b800 60%, #b38f00 100%);
+            /* Brighter "Danger" Yellow */
             border-radius: 50%;
-            box-shadow: inset 0 0 30px rgba(0, 0, 0, 0.5), 0 0 30px rgba(0, 0, 0, 0.4);
+            box-shadow: 0 -5px 20px rgba(0, 0, 0, 0.6);
+            /* Drop shadow into lumen */
         }
 
         /* State triggers */
@@ -285,13 +282,12 @@
         }
 
         /* Plaque Container Visibility - Bottom only */
-        /* Plaque Container Visibility - Grows from within */
+        /* Plaque Container Visibility - OBSTRUCTIVE */
         [data-state="aterosclerosi"] .bottom-wall .plaque-container,
         [data-state="trombosi"] .bottom-wall .plaque-container {
             opacity: 1;
-            /* No 'top' adjustment needed, it grows from bottom: 35% */
-            transform: translateX(-50%) scale(1.4);
-            /* Bulge up */
+            /* Grow UP into the lumen space */
+            transform: translateX(-50%) scale(1.0);
         }
 
         /* Experimental: Only show plaque in correct states to avoid ghosting */
@@ -299,11 +295,11 @@
             display: none;
         }
 
-        /* Biological Thrombus - Anchored to the sub-intimal bulge */
+        /* Biological Thrombus - Sitting ON TOP of the protrusive plaque */
         .thrombus-mass {
             position: absolute;
-            top: 78%;
-            /* Sitting on the elevated Intima */
+            top: 60%;
+            /* Adjusted higher because plaque is protruding */
             left: 50%;
             width: 180px;
             height: 180px;
