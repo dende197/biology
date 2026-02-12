@@ -53,26 +53,41 @@
             align-items: center;
             justify-content: center;
             position: relative;
+            perspective: 1200px;
+            /* Enable 3D space */
+            overflow: hidden;
         }
 
         .centrifuge-ring {
-            width: 280px;
-            height: 280px;
+            width: 320px;
+            height: 320px;
             border-radius: 50%;
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            border: 4px solid rgba(255, 255, 255, 0.15);
+            /* Thicker metallic rim */
             position: relative;
-            background: rgba(255, 255, 255, 0.02);
-            box-shadow: 0 0 60px rgba(0, 0, 0, 0.5);
+            background: linear-gradient(145deg, rgba(30, 30, 35, 0.9), rgba(10, 10, 12, 0.95));
+            box-shadow:
+                0 20px 50px rgba(0, 0, 0, 0.6),
+                inset 0 10px 30px rgba(0, 0, 0, 0.8);
+            transform: rotateX(45deg);
+            /* Tilted 3D view */
+            transform-style: preserve-3d;
+            transition: transform 0.5s ease;
         }
 
         .centrifuge-lid {
+            display: none;
+            /* Remove lid for clearer 3D view, or re-implement as proper glass layer if needed via ::before */
+        }
+
+        /* Inner drum shadow */
+        .centrifuge-ring::after {
+            content: '';
             position: absolute;
-            inset: 8px;
+            inset: 0;
             border-radius: 50%;
-            background: linear-gradient(135deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.02));
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(2px);
-            z-index: 10;
+            box-shadow: inset 0 0 60px rgba(0, 0, 0, 0.9);
+            pointer-events: none;
         }
 
         .rotor {
@@ -80,45 +95,77 @@
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            width: 200px;
-            height: 200px;
+            /* Base position, rotation handled by JS */
+            width: 220px;
+            height: 220px;
             will-change: transform;
             z-index: 5;
+            /* No perspective here, handled by parent */
         }
 
+        /* 3D Rotor Center */
         .rotor-center {
             position: absolute;
             top: 50%;
             left: 50%;
-            transform: translate(-50%, -50%);
-            width: 44px;
-            height: 44px;
-            background: conic-gradient(from 0deg, #333, #555, #333);
+            transform: translate(-50%, -50%) translateZ(20px);
+            /* Lifted up */
+            width: 50px;
+            height: 50px;
+            background: radial-gradient(circle at 30% 30%, #555, #222);
             border-radius: 50%;
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
             z-index: 6;
             display: flex;
             align-items: center;
             justify-content: center;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.5);
         }
 
         .rotor-center::after {
             content: '';
-            width: 10px;
-            height: 10px;
-            background: radial-gradient(circle at 30% 30%, #888, #222);
+            width: 12px;
+            height: 12px;
+            background: #900;
+            /* Axis bolt */
             border-radius: 50%;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            box-shadow: 0 0 10px rgba(255, 0, 0, 0.5);
         }
 
         .arm {
             position: absolute;
             top: 50%;
             left: 50%;
-            width: 90px;
-            height: 18px;
-            background: linear-gradient(to bottom, #444, #222);
+            width: 100px;
+            height: 24px;
+            background: linear-gradient(to bottom, #444, #1a1a1a);
             transform-origin: 0% 50%;
             border-radius: 4px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.6);
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .holder {
+            position: absolute;
+            right: 4px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 40px;
+            height: 16px;
+            background: #000;
+            border: 1px solid #333;
+            border-radius: 3px;
+            box-shadow: inset 0 0 5px #000;
+        }
+
+        /* Liquid inside holder */
+        .holder::after {
+            content: '';
+            position: absolute;
+            inset: 2px;
+            background: linear-gradient(90deg, #900 60%, transparent 60%);
+            opacity: 0.9;
         }
 
         .arm:nth-child(1) {
@@ -252,7 +299,8 @@
             border-top: none;
             border-radius: 0 0 40px 40px;
             position: relative;
-            overflow: hidden;
+            /* OVERFLOW VISIBLE FIX for labels */
+            overflow: visible;
             box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5), inset 20px 0 30px -15px rgba(255, 255, 255, 0.05);
         }
 
@@ -265,6 +313,7 @@
             height: 80%;
             background: linear-gradient(to bottom, rgba(255, 255, 255, 0.1), transparent);
             filter: blur(2px);
+            pointer-events: none;
         }
 
         .liquid-fill {
@@ -284,69 +333,77 @@
 
         .l-plasma {
             flex: 55;
-            background: #e8c55a;
-            opacity: 0.9;
+            background: rgba(232, 197, 90, 0.9);
             border-bottom: 2px solid rgba(255, 255, 255, 0.2);
             position: relative;
+            border-radius: 0;
+            /* Top is flat */
         }
 
         .l-buffy {
             flex: 1.5;
             background: #fff;
             box-shadow: 0 0 20px #fff;
-            z-index: 2;
+            z-index: 10;
             position: relative;
         }
 
         .l-rbc {
             flex: 43.5;
-            background: #8b1a1a;
-            opacity: 0.95;
+            background: rgba(139, 26, 26, 0.95);
             position: relative;
+            /* Border radius for bottom of tube */
+            border-radius: 0 0 38px 38px;
         }
 
         /* Labels for layers */
         .layer-label {
             position: absolute;
-            left: 100px;
+            left: 90px;
+            /* Shifted out */
             top: 50%;
             transform: translateY(-50%);
             white-space: nowrap;
             font-size: 14px;
             font-weight: 700;
             text-transform: uppercase;
-            color: rgba(255, 255, 255, 0.8);
+            color: rgba(255, 255, 255, 0.9);
             display: flex;
             align-items: center;
             gap: 15px;
             font-family: var(--font);
-            letter-spacing: 0.05em;
+            letter-spacing: 0.02em;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+            pointer-events: none;
         }
 
         .layer-label::before {
             content: '';
-            width: 30px;
+            width: 40px;
             height: 1px;
-            background: rgba(255, 255, 255, 0.4);
+            background: rgba(255, 255, 255, 0.5);
+            box-shadow: 0 0 5px rgba(255, 255, 255, 0.3);
         }
 
         .l-buffy .layer-label {
-            left: 120px;
+            left: 110px;
             color: #fff;
+            font-weight: 800;
         }
 
         .wbc-sublist {
             display: flex;
             flex-direction: column;
-            gap: 6px;
-            font-size: 11px;
-            color: #fff;
+            gap: 4px;
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.85);
             padding-left: 15px;
-            border-left: 1px solid rgba(255, 255, 255, 0.3);
+            border-left: 2px solid rgba(255, 255, 255, 0.3);
             margin-left: 15px;
             font-weight: 500;
             text-transform: none;
             letter-spacing: 0;
+            text-shadow: none;
         }
 
         .info-panel {
@@ -356,16 +413,22 @@
         }
 
         .info-panel h2 {
-            font-size: 44px;
-            font-weight: 300;
+            font-size: 48px;
+            font-weight: 800;
             margin: 0;
-            letter-spacing: -0.03em;
+            letter-spacing: -0.04em;
+            font-family: var(--font);
+            /* Gradient Text */
+            background: linear-gradient(to bottom, #fff, #aaa);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
         }
 
         .info-panel p.sub {
             font-size: 18px;
             color: var(--text-secondary);
             margin: 8px 0 0;
+            font-weight: 400;
         }
 
         .st-grid {
