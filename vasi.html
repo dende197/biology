@@ -176,10 +176,9 @@
         .bottom-wall {
             border-top: 2px solid rgba(0, 0, 0, 0.6);
             flex-direction: column-reverse;
-            /* Clipping STRICTLY at the wall boundary. */
-            clip-path: inset(-500px 0 0 0);
-            overflow: hidden;
-            /* Lock internal layers from escaping bottom */
+            /* Allow internal plaque to protrude upwards INTO the lumen */
+            position: relative;
+            z-index: 100;
         }
 
         /* Histological layers textures */
@@ -248,8 +247,8 @@
         */
         .bottom-wall .plaque-container {
             top: auto;
-            bottom: 15px;
-            /* Sits ON the Intima surface, extending up */
+            bottom: 45px;
+            /* RAISED: Pushes the plaque further into the lumen flow */
             transform-origin: bottom center;
         }
 
