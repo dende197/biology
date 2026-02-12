@@ -342,40 +342,56 @@
             <div class="stage-container" id="sim-stage" data-state="normale">
                 <div class="sim-nav">
                     <button class="sim-btn active" onclick="setState('normale')">Arteria Normale</button>
-                    <button class="sim-btn" onclick="setState('aterosclerosi')">Aterosclerosi</button>
+                    <button class="sim-btn" onclick="setState('aterosclerosi')">Aterosclerosi (Placca)</button>
                     <button class="sim-btn" onclick="setState('trombosi')">Infarto (Trombosi)</button>
                 </div>
 
-                <div class="artery-canvas">
-                    <div class="artery">
-                        <div class="blood-stream" id="blood-stream"></div>
-                        <div class="plaque p-top" style="left: 40%"></div>
-                        <div class="plaque p-bottom" style="left: 45%"></div>
-                        <div class="plaque p-top" style="left: 70%; width: 100px; height: 30px;"></div>
-                        <div class="thrombus"></div>
+                <div class="artery-viewport">
+                    <div class="artery-wall top-wall">
+                        <div class="layer adventitia"></div>
+                        <div class="layer media"></div>
+                        <div class="layer intima"></div>
+                        <div class="plaque-container">
+                            <div class="plaque-mass"></div>
+                        </div>
                     </div>
+
+                    <div class="lumen" id="lumen">
+                        <div class="blood-particles" id="blood-particles"></div>
+                        <div class="thrombus-mass"></div>
+                    </div>
+
+                    <div class="artery-wall bottom-wall">
+                        <div class="layer intima"></div>
+                        <div class="layer media"></div>
+                        <div class="layer adventitia"></div>
+                        <div class="plaque-container">
+                            <div class="plaque-mass"></div>
+                        </div>
+                    </div>
+
+                    <div class="vignette-overlay"></div>
                 </div>
 
                 <div class="desc-container">
                     <div class="desc-card active" id="desc-normale">
-                        <h3>Arteria Sana</h3>
-                        <p>Le pareti sono elastiche e la superficie interna (endotelio) è liscia. Il sangue scorre
-                            liberamente, garantendo l'apporto di ossigeno e nutrienti a tutti i tessuti.</p>
+                        <h3>Lume Arterioso Sano</h3>
+                        <p>L'endotelio è integro e liscio. I globuli rossi scorrono in un flusso laminare, più veloci al
+                            centro e più lenti vicino alle pareti (shear stress fisiologico).</p>
                     </div>
 
                     <div class="desc-card" id="desc-aterosclerosi">
-                        <h3>Formazione di Placche</h3>
-                        <p>L'accumulo di colesterolo, grassi e detriti cellulari crea placche aterosclerotiche. Il lume
-                            del vaso si restringe, aumentando la pressione e riducendo il flusso ematico.</p>
-                        <div class="warning-tag">Rischio Ipertensione</div>
+                        <h3>Stenosi da Placca Aterosclerotica</h3>
+                        <p>Accumulo sub-endoteliale di lipidi ossidati, calcio e tessuto fibroso. La parete si deforma
+                            verso l'interno, creando turbolenza ematica e rischio di rottura.</p>
+                        <div class="warning-tag">Rischio Ischemico</div>
                     </div>
 
                     <div class="desc-card" id="desc-trombosi">
-                        <h3>Trombosi Coronarica</h3>
-                        <p>La rottura di una placca può innescare la formazione di un trombo (coagulo). Se questo
-                            avviene nelle coronarie, il blocco totale del flusso impedisce al muscolo cardiaco di
-                            ricevere ossigeno, causando l'<strong>infarto miocardico</strong>.</p>
-                        <div class="warning-tag" style="background: rgba(255, 59, 48, 0.2);">Emergenza Medica</div>
+                        <h3>Occlusione Trombotica (Infarto)</h3>
+                        <p>La rottura della placca espone il nucleo lipidico, attivando le piastrine. Si forma un trombo
+                            di fibrina che occlude il vaso, causando necrosi del tessuto a valle (Infarto).</p>
+                        <div class="warning-tag" style="background: rgba(255, 59, 48, 0.2);">Necrosi Tissutale</div>
                     </div>
                 </div>
             </div>
@@ -383,47 +399,98 @@
     </div>
 
     <script>
-        // Init Blood Stream
-        const stream = document.getElementById('blood-stream');
-        function createRBC() {
-            const rbc = document.createElement('div');
-            rbc.className = 'rbc-particle';
-            rbc.style.top = Math.random() * 80 + 10 + '%';
-            rbc.style.left = '-20px';
-            rbc.style.animationDuration = (Math.random() * 2 + 2) + 's';
-            rbc.style.animationDelay = (Math.random() * 3) + 's';
-            stream.appendChild(rbc);
+        const lumen = document.getElementById('blood-particles');
+        const RBC_COUNT = 40;
+        const rbcs = [];
 
-            rbc.addEventListener('animationiteration', () => {
-                rbc.style.top = Math.random() * 80 + 10 + '%';
-            });
+        // Generate RBCs with physical properties
+        for (let i = 0; i < RBC_COUNT; i++) {
+            const el = document.createElement('div');
+            el.className = 'rbc';
+
+            // Random initial position
+            const y = Math.random() * 80 + 10; // 10% to 90% vertical
+            const depth = Math.random(); // 0 (back) to 1 (front)
+
+            // Stats for animation
+            const rbc = {
+                el: el,
+                x: Math.random() * 120, // %
+                y: y,
+                z: depth,
+                speed: 0,
+                baseSpeed: 0,
+                rotX: Math.random() * 360,
+                rotY: Math.random() * 360,
+                rotSpeedX: (Math.random() - 0.5) * 5,
+                rotSpeedY: (Math.random() - 0.5) * 5
+            };
+
+            // Physics driven scale/blur based on Z-depth
+            const scale = 0.6 + (depth * 0.6); // 0.6x to 1.2x
+            const blur = (1 - depth) * 2; // Blur background cells
+            el.style.width = (24 * scale) + 'px';
+            el.style.height = (24 * scale) + 'px';
+            el.style.filter = `blur(${blur}px)`;
+            el.style.zIndex = Math.floor(depth * 100);
+
+            // Flow profile: Parabolic (center = faster) (approximated)
+            // Center is Y=50. Distance from center: abs(50-y)
+            const distFromCenter = Math.abs(50 - y);
+            const flowFactor = 1 - (distFromCenter / 50); // 1.0 at center, 0.0 at walls
+            rbc.baseSpeed = 0.5 + (flowFactor * 1.5); // Min 0.5, Max 2.0
+
+            lumen.appendChild(el);
+            rbcs.push(rbc);
         }
 
-        for (let i = 0; i < 30; i++) createRBC();
+        let currentState = 'normale';
+        let animationFrame;
+
+        function animate() {
+            // Global speed multiplier based on state
+            let globalSpeed = 1.0;
+            if (currentState === 'aterosclerosi') globalSpeed = 1.8; // Turbolenza/Venturi effect
+            if (currentState === 'trombosi') globalSpeed = 0.05; // Stasis
+
+            // Animate each cell
+            rbcs.forEach(rbc => {
+                // Update Pos
+                rbc.x += rbc.baseSpeed * globalSpeed;
+                if (rbc.x > 110) rbc.x = -10;
+
+                // Update Rotation (Tumbling)
+                rbc.rotX += rbc.rotSpeedX * (globalSpeed > 0.1 ? 1 : 0.2);
+                rbc.rotY += rbc.rotSpeedY * (globalSpeed > 0.1 ? 1 : 0.2);
+
+                // Apply Transforms
+                // Use 3D rotate to show biconcave disc nature
+                rbc.el.style.left = rbc.x + '%';
+                rbc.el.style.top = rbc.y + '%';
+                rbc.el.style.transform = `rotateX(${rbc.rotX}deg) rotateY(${rbc.rotY}deg)`;
+            });
+
+            animationFrame = requestAnimationFrame(animate);
+        }
+
+        // Start loop
+        animate();
 
         function setState(state) {
+            currentState = state;
             const stage = document.getElementById('sim-stage');
             stage.setAttribute('data-state', state);
 
-            // Buttons
+            // UI Updates
             document.querySelectorAll('.sim-btn').forEach(btn => {
                 btn.classList.toggle('active', btn.innerText.toLowerCase().includes(state.substring(0, 4)));
             });
-
-            // Descriptions
             document.querySelectorAll('.desc-card').forEach(card => {
                 card.classList.toggle('active', card.id === 'desc-' + state);
-            });
-
-            // Adjust flow speed
-            const particles = document.querySelectorAll('.rbc-particle');
-            particles.forEach(p => {
-                if (state === 'normale') p.style.animationDuration = '3s';
-                else if (state === 'aterosclerosi') p.style.animationDuration = '1.5s'; // Faster due to pressure
-                else p.style.animationDuration = '10s'; // Stalled
             });
         }
     </script>
 </body>
 
 </html>
+```
