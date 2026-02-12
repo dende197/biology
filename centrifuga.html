@@ -58,150 +58,223 @@
             overflow: hidden;
         }
 
-        .centrifuge-ring {
-            width: 320px;
-            height: 320px;
-            border-radius: 50%;
-            border: 4px solid rgba(255, 255, 255, 0.15);
-            /* Thicker metallic rim */
+        /* ─── Isometric Centrifuge (User Provided & Adapted) ─── */
+        :root {
+            --iso-body: #ececec;
+            --iso-shadow: #d2d2d2;
+            --iso-dark: #4b4b4b;
+            --iso-accent: #f2d45c;
+            --iso-ring: #bfbfbf;
+        }
+
+        .centrifuga {
             position: relative;
-            background: linear-gradient(145deg, rgba(30, 30, 35, 0.9), rgba(10, 10, 12, 0.95));
-            box-shadow:
-                0 20px 50px rgba(0, 0, 0, 0.6),
-                inset 0 10px 30px rgba(0, 0, 0, 0.8);
-            transform: rotateX(45deg);
-            /* Tilted 3D view */
-            transform-style: preserve-3d;
-            transition: transform 0.5s ease;
+            width: 320px;
+            height: 260px;
+            /* margin: 40px auto; removed for flex centering */
+            perspective: 900px;
+            font-family: sans-serif;
+            transform: scale(1.2);
+            /* Slight scale up for visibility */
         }
 
-        .centrifuge-lid {
-            display: none;
-            /* Remove lid for clearer 3D view, or re-implement as proper glass layer if needed via ::before */
-        }
-
-        /* Inner drum shadow */
-        .centrifuge-ring::after {
-            content: '';
+        /* Corpo principale */
+        .centrifuga__base {
             position: absolute;
-            inset: 0;
-            border-radius: 50%;
-            box-shadow: inset 0 0 60px rgba(0, 0, 0, 0.9);
-            pointer-events: none;
+            inset: 80px 0 0 0;
+            background: var(--iso-body);
+            border-radius: 8px;
+            box-shadow: 0 16px 0 var(--iso-shadow);
+            transform: skewY(-2deg);
         }
 
-        .rotor {
+        /* Coperchio */
+        .centrifuga__lid {
             position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            /* Base position, rotation handled by JS */
             width: 220px;
-            height: 220px;
-            will-change: transform;
-            z-index: 5;
-            /* No perspective here, handled by parent */
+            height: 180px;
+            background: rgba(236, 236, 236, 0.4);
+            /* Glassy opacity */
+            border-radius: 8px;
+            left: 24px;
+            top: -60px;
+            /* Open position */
+            transform: rotateX(70deg);
+            box-shadow: inset 0 0 0 4px rgba(255, 255, 255, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            backdrop-filter: blur(2px);
+            transition: all 1s ease;
+            transform-origin: bottom center;
         }
 
-        /* 3D Rotor Center */
-        .rotor-center {
+        /* Coperchio chiuso durante spin */
+        .section-sim.spinning .centrifuga__lid {
+            transform: rotateX(0deg) translateY(120px) translateZ(20px);
+            top: -20px;
+        }
+
+        /* Piatto superiore con foro */
+        .centrifuga__top {
             position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%) translateZ(20px);
-            /* Lifted up */
-            width: 50px;
-            height: 50px;
-            background: radial-gradient(circle at 30% 30%, #555, #222);
+            width: 240px;
+            height: 160px;
+            left: 40px;
+            top: 90px;
+            background: #f5f5f5;
+            border-radius: 12px;
+            box-shadow: inset 0 -6px 0 #e4e4e4;
+        }
+
+        /* Camera circolare */
+        .centrifuga__bowl {
+            position: absolute;
+            width: 140px;
+            height: 90px;
+            left: 50px;
+            /* Centered in top */
+            top: 35px;
+            /* Centered in top */
+            background: #ededed;
             border-radius: 50%;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            z-index: 6;
+            box-shadow: inset 0 0 0 10px var(--iso-dark);
+            overflow: visible;
+        }
+
+        /* Sezione interna rotante */
+        .centrifuga__rotor {
+            position: absolute;
+            width: 110px;
+            height: 110px;
+            left: 15px;
+            /* Adjusted to center in bowl */
+            top: -10px;
+            /* Adjusted to center in bowl */
+            background: #f0f0f0;
+            border-radius: 50%;
+            box-shadow: inset 0 0 0 6px var(--iso-ring);
+            transform-origin: 50% 50%;
+            /* No default animation, applied via class */
+        }
+
+        .section-sim.spinning .centrifuga__rotor {
+            animation: spin 0.8s linear infinite;
+        }
+
+        /* Foro centrale */
+        .centrifuga__rotor::after {
+            content: "";
+            position: absolute;
+            width: 16px;
+            height: 16px;
+            border: 3px solid #666;
+            border-radius: 50%;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        /* Provette di sangue */
+        .centrifuga__tube {
+            position: absolute;
+            width: 12px;
+            height: 24px;
+            background: linear-gradient(#f7f7f7 40%, #d13b3b 40%);
+            border-radius: 6px 6px 3px 3px;
+            box-shadow: inset 0 -2px 0 rgba(0, 0, 0, 0.1);
+        }
+
+        /* Posizioni provette attorno al rotore */
+        .ct-1 {
+            left: 50px;
+            top: 10px;
+            transform: rotate(0deg) translateY(-25px);
+        }
+
+        .ct-2 {
+            left: 80px;
+            top: 30px;
+            transform: rotate(45deg) translateY(-25px);
+        }
+
+        .ct-3 {
+            left: 80px;
+            top: 70px;
+            transform: rotate(135deg) translateY(-25px);
+        }
+
+        .ct-4 {
+            left: 50px;
+            top: 90px;
+            transform: rotate(180deg) translateY(-25px);
+        }
+
+        .ct-5 {
+            left: 20px;
+            top: 70px;
+            transform: rotate(225deg) translateY(-25px);
+        }
+
+        .ct-6 {
+            left: 20px;
+            top: 30px;
+            transform: rotate(315deg) translateY(-25px);
+        }
+
+        /* Display e bottoni */
+        .centrifuga__panel {
+            position: absolute;
+            width: 120px;
+            height: 40px;
+            right: 30px;
+            bottom: 30px;
+            background: #5c5c5c;
+            border-radius: 4px;
+            box-shadow: inset 0 0 0 6px #3b3b3b;
             display: flex;
             align-items: center;
             justify-content: center;
-            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.5);
+            font-family: monospace;
+            color: #0f0;
+            font-size: 16px;
         }
 
-        .rotor-center::after {
-            content: '';
-            width: 12px;
-            height: 12px;
-            background: #900;
-            /* Axis bolt */
-            border-radius: 50%;
-            border: 1px solid rgba(255, 255, 255, 0.3);
-            box-shadow: 0 0 10px rgba(255, 0, 0, 0.5);
-        }
-
-        .arm {
+        .centrifuga__buttons {
             position: absolute;
-            top: 50%;
-            left: 50%;
-            width: 100px;
-            height: 24px;
-            background: linear-gradient(to bottom, #444, #1a1a1a);
-            transform-origin: 0% 50%;
-            border-radius: 4px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.6);
-            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            width: 80px;
+            height: 40px;
+            right: 30px;
+            bottom: 80px;
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 6px;
         }
 
-        .holder {
+        .centrifuga__buttons span {
+            background: var(--iso-accent);
+            border-radius: 6px;
+            box-shadow: inset 0 -2px 0 rgba(0, 0, 0, 0.15);
+        }
+
+        /* Ombra */
+        .centrifuga__shadow {
             position: absolute;
-            right: 4px;
-            top: 50%;
-            transform: translateY(-50%);
-            width: 40px;
-            height: 16px;
-            background: #000;
-            border: 1px solid #333;
-            border-radius: 3px;
-            box-shadow: inset 0 0 5px #000;
+            width: 240px;
+            height: 40px;
+            left: 40px;
+            bottom: -10px;
+            background: radial-gradient(ellipse at center, rgba(0, 0, 0, 0.4), transparent 70%);
+            filter: blur(8px);
         }
 
-        /* Liquid inside holder */
-        .holder::after {
-            content: '';
-            position: absolute;
-            inset: 2px;
-            background: linear-gradient(90deg, #900 60%, transparent 60%);
-            opacity: 0.9;
-        }
+        /* Animazione rotazione */
+        @keyframes spin {
+            from {
+                transform: rotate(0deg);
+            }
 
-        .arm:nth-child(1) {
-            transform: translateY(-50%) rotate(0deg);
-        }
-
-        .arm:nth-child(2) {
-            transform: translateY(-50%) rotate(90deg);
-        }
-
-        .arm:nth-child(3) {
-            transform: translateY(-50%) rotate(180deg);
-        }
-
-        .arm:nth-child(4) {
-            transform: translateY(-50%) rotate(270deg);
-        }
-
-        .holder {
-            position: absolute;
-            right: 5px;
-            top: 50%;
-            transform: translateY(-50%);
-            width: 34px;
-            height: 12px;
-            background: #111;
-            border: 1px solid #444;
-            border-radius: 2px;
-        }
-
-        .holder::after {
-            content: '';
-            position: absolute;
-            inset: 1px;
-            background: #900;
-            opacity: 0.8;
+            to {
+                transform: rotate(360deg);
+            }
         }
 
         .controls-overlay {
@@ -359,34 +432,40 @@
         /* Labels for layers */
         .layer-label {
             position: absolute;
-            left: 90px;
-            /* Shifted out */
+            left: 100px;
+            /* Moved further out */
             top: 50%;
             transform: translateY(-50%);
             white-space: nowrap;
             font-size: 14px;
             font-weight: 700;
             text-transform: uppercase;
-            color: rgba(255, 255, 255, 0.9);
+            color: rgba(255, 255, 255, 0.95);
+            /* Brighter white */
             display: flex;
             align-items: center;
             gap: 15px;
             font-family: var(--font);
             letter-spacing: 0.02em;
-            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+            text-shadow: 0 2px 8px rgba(0, 0, 0, 0.8);
+            /* Stronger shadow */
             pointer-events: none;
+            z-index: 100;
+            /* Ensure on top */
         }
 
         .layer-label::before {
             content: '';
-            width: 40px;
-            height: 1px;
-            background: rgba(255, 255, 255, 0.5);
+            width: 50px;
+            /* Longer connector */
+            height: 2px;
+            /* Thicker line */
+            background: rgba(255, 255, 255, 0.6);
             box-shadow: 0 0 5px rgba(255, 255, 255, 0.3);
         }
 
         .l-buffy .layer-label {
-            left: 110px;
+            left: 120px;
             color: #fff;
             font-weight: 800;
         }
@@ -418,10 +497,8 @@
             margin: 0;
             letter-spacing: -0.04em;
             font-family: var(--font);
-            /* Gradient Text */
-            background: linear-gradient(to bottom, #fff, #aaa);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
+            color: #fff;
+            /* Gradient Text removed for pure white Apple style or matches Ematologia */
         }
 
         .info-panel p.sub {
@@ -513,23 +590,26 @@
         </header>
 
         <section class="section-sim">
-            <div class="centrifuge-ring">
-                <div class="centrifuge-lid"></div>
-                <div class="rotor" id="rotor">
-                    <div class="rotor-center"></div>
-                    <div class="arm">
-                        <div class="holder"></div>
+            <div class="centrifuga">
+                <div class="centrifuga__shadow"></div>
+                <div class="centrifuga__base"></div>
+                <div class="centrifuga__top">
+                    <div class="centrifuga__buttons">
+                        <span></span><span></span>
                     </div>
-                    <div class="arm">
-                        <div class="holder"></div>
-                    </div>
-                    <div class="arm">
-                        <div class="holder"></div>
-                    </div>
-                    <div class="arm">
-                        <div class="holder"></div>
+                    <div class="centrifuga__panel" id="display-panel">READY</div>
+                    <div class="centrifuga__bowl">
+                        <div class="centrifuga__rotor" id="rotor">
+                            <div class="centrifuga__tube ct-1"></div>
+                            <div class="centrifuga__tube ct-2"></div>
+                            <div class="centrifuga__tube ct-3"></div>
+                            <div class="centrifuga__tube ct-4"></div>
+                            <div class="centrifuga__tube ct-5"></div>
+                            <div class="centrifuga__tube ct-6"></div>
+                        </div>
                     </div>
                 </div>
+                <div class="centrifuga__lid"></div>
             </div>
 
             <div class="controls-overlay">
@@ -605,56 +685,50 @@
     <script>
         const btnStart = document.getElementById('btn-start');
         const btnClose = document.getElementById('btn-close');
-        const rotor = document.getElementById('rotor');
-        const status = document.getElementById('status-badge');
+        const sectionSim = document.querySelector('.section-sim');
+        const displayPanel = document.getElementById('display-panel');
         const overlay = document.getElementById('results-overlay');
-        const fill = document.getElementById('liquid-fill');
-
-        let currentRot = 0;
-        let isAnimating = false;
+        const liquidFill = document.getElementById('liquid-fill');
 
         btnStart.addEventListener('click', () => {
-            if (isAnimating) return;
-            startCentrifuge();
+            // Simulation Start
+            btnStart.disabled = true;
+            btnStart.innerText = 'CENTRIFUGAZIONE...';
+
+            // Add spinning class for CSS animation
+            sectionSim.classList.add('spinning');
+            displayPanel.innerText = 'SPIN...';
+            displayPanel.style.color = '#ff0';
+
+            // Simulate 4s spin
+            setTimeout(() => {
+                sectionSim.classList.remove('spinning');
+                displayPanel.innerText = 'DONE';
+                displayPanel.style.color = '#0f0';
+                btnStart.innerText = 'COMPLETATO';
+
+                setTimeout(showResults, 800);
+            }, 4000);
         });
+
+        function showResults() {
+            overlay.classList.add('active');
+            // Trigger liquid animation
+            setTimeout(() => {
+                liquidFill.style.height = '90%';
+            }, 100);
+        }
 
         btnClose.addEventListener('click', () => {
             overlay.classList.remove('active');
-            fill.style.height = '0%';
+            liquidFill.style.height = '0%';
+
+            // Reset UI
             btnStart.disabled = false;
+            btnStart.innerText = 'AVVIA CENTRIFUGA';
+            displayPanel.innerText = 'READY';
+            displayPanel.style.color = '#0f0';
         });
-
-        function startCentrifuge() {
-            isAnimating = true;
-            btnStart.disabled = true;
-            status.classList.add('visible');
-            const duration = 3000;
-            const startTime = performance.now();
-
-            function update(now) {
-                const elapsed = now - startTime;
-                const progress = elapsed / duration;
-                if (progress < 1) {
-                    let speed = (progress < 0.2) ? (progress / 0.2) * 50 : (progress > 0.8) ? ((1 - progress) / 0.2) * 50 : 50;
-                    status.textContent = (progress < 0.2) ? "ACCEL..." : (progress > 0.8) ? "FRENO..." : "3200 RPM";
-                    currentRot += speed;
-                    rotor.style.transform = `translate(-50%, -50%) rotate(${currentRot}deg)`;
-                    requestAnimationFrame(update);
-                } else {
-                    currentRot = 0;
-                    rotor.style.transform = `translate(-50%, -50%) rotate(0deg)`;
-                    showResults();
-                }
-            }
-            requestAnimationFrame(update);
-        }
-
-        function showResults() {
-            isAnimating = false;
-            status.classList.remove('visible');
-            overlay.classList.add('active');
-            setTimeout(() => { fill.style.height = '90%'; }, 500);
-        }
     </script>
 </body>
 
