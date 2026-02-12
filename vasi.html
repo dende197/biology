@@ -24,15 +24,37 @@
             --font: 'Inter', -apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif;
         }
 
+        /* HARD OVERRIDE FOR SCROLLING */
+        html,
         body {
-            background-color: var(--bg-deep);
+            height: auto !important;
+            overflow: visible !important;
+            overflow-y: auto !important;
+            background: var(--bg-deep);
+        }
+
+        body {
             background-image: radial-gradient(circle at 50% 50%, #1a1a20, #000 80%);
             margin: 0;
             font-family: var(--font);
             color: var(--text-primary);
-            overflow-x: hidden;
             -webkit-font-smoothing: antialiased;
             min-height: 100vh;
+        }
+
+        /* Custom Scrollbar Visibility */
+        ::-webkit-scrollbar {
+            width: 8px;
+            display: block !important;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.2);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 4px;
         }
 
         .app {
@@ -42,8 +64,8 @@
         }
 
         header.header {
-            background: rgba(0, 0, 0, 0.7);
-            backdrop-filter: blur(20px) saturate(180%);
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(20px);
             border-bottom: 1px solid var(--glass-border);
             z-index: 1000;
             position: sticky;
@@ -51,7 +73,7 @@
         }
 
         .main-content {
-            padding: 60px 20px;
+            padding: 60px 20px 100px;
             max-width: 1200px;
             margin: 0 auto;
             width: 100%;
@@ -125,60 +147,58 @@
             background: #000;
             border-radius: 30px;
             overflow: hidden;
+            /* Clips EVERYTHING to the viewport */
             display: flex;
             flex-direction: column;
-            box-shadow: inset 0 0 100px #000, 0 20px 60px rgba(0, 0, 0, 0.8);
+            box-shadow: inset 0 0 100px #000;
         }
 
-        /* Anatomical Wall Correction */
+        /* Anatomical Wall Master */
         .artery-wall {
             height: 85px;
             position: relative;
-            z-index: 10;
+            z-index: 100;
             display: flex;
             flex-direction: column;
+            background: #2a0000;
         }
 
         .top-wall {
-            border-bottom: 2px solid rgba(0, 0, 0, 0.4);
+            border-bottom: 2px solid rgba(0, 0, 0, 0.5);
+            /* Clipping: No protrusion UPWARDS, allow lumen side */
+            clip-path: inset(0 0 -300px 0);
         }
 
         .bottom-wall {
-            border-top: 2px solid rgba(0, 0, 0, 0.4);
+            border-top: 2px solid rgba(0, 0, 0, 0.5);
             flex-direction: column-reverse;
+            /* Clipping: No protrusion DOWNWARDS, allow lumen side */
+            clip-path: inset(-300px 0 0 0);
         }
 
         /* Histological layers textures */
         .layer.adventitia {
             height: 35%;
-            background:
-                url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.15'/%3E%3C/svg%3E"),
-                #3d0808;
-            opacity: 0.9;
+            background: #3d0808;
+            opacity: 0.95;
+            z-index: 1;
         }
 
         .layer.media {
             height: 45%;
             background: linear-gradient(to bottom, #7a1010, #4d0a0a);
             box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.8);
+            z-index: 2;
         }
 
         .layer.intima {
             height: 20%;
             background: linear-gradient(to bottom, #c23030, #8a1c1c);
             position: relative;
-            z-index: 20;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+            z-index: 100;
+            /* Must be ABOVE the plaque */
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.4);
             transition: transform 1s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-
-        /* Wet Specularity */
-        .layer.intima::after {
-            content: '';
-            position: absolute;
-            inset: 0;
-            background: linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.15) 30%, rgba(255, 255, 255, 0.2) 50%, rgba(255, 255, 255, 0.15) 70%, transparent 100%);
-            opacity: 0.6;
         }
 
         .lumen {
@@ -187,6 +207,7 @@
             position: relative;
             perspective: 1200px;
             overflow: hidden;
+            z-index: 10;
         }
 
         .rbc {
@@ -204,25 +225,29 @@
         .plaque-container {
             position: absolute;
             left: 50%;
-            width: 280px;
-            height: 120px;
-            transform: translateX(-50%);
+            width: 400px;
+            height: 180px;
+            transform: translateX(-50%) scale(0);
             pointer-events: none;
             transition: all 1.2s cubic-bezier(0.2, 1, 0.3, 1);
             opacity: 0;
             filter: url('#organic-morph');
-            /* SVG Magic */
-            z-index: 15;
+            z-index: 50;
+            /* BETWEEN Media and Intima visually? NO, Intima is 100 */
         }
 
+        /* Wall clipping logic: 
+           We want to permit the plaque to GROW INTO THE LUMEN 
+           but be clipped by the wall's OUTER boundary.
+        */
         .top-wall .plaque-container {
-            bottom: -25px;
-            transform-origin: bottom center;
+            bottom: -120px;
+            transform-origin: top center;
         }
 
         .bottom-wall .plaque-container {
-            top: -25px;
-            transform-origin: top center;
+            top: -120px;
+            transform-origin: bottom center;
         }
 
         .plaque-mass {
@@ -231,65 +256,78 @@
             background:
                 url("data:image/svg+xml,%3Csvg viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='f'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100' height='100' filter='url(%23f)' opacity='.2'/%3E%3C/svg%3E"),
                 radial-gradient(ellipse at center, #fff4cc 0%, #d4ac0d 60%, #997a0a 100%);
-            border-radius: 50% 50% 20% 20% / 100% 100% 0 0;
-            box-shadow: 0 0 30px rgba(0, 0, 0, 0.6);
+            border-radius: 50%;
+            box-shadow: 0 0 50px rgba(0, 0, 0, 0.8);
         }
 
-        .bottom-wall .plaque-mass {
-            border-radius: 20% 20% 50% 50% / 0 0 100% 100%;
-        }
-
-        [data-state="aterosclerosi"] .plaque-container,
-        [data-state="trombosi"] .plaque-container {
-            opacity: 1;
-        }
-
-        /* Displacement of Intima */
+        /* State triggers */
+        /* Displacement of Intima (Lumen쪽) */
         [data-state="aterosclerosi"] .top-wall .intima,
         [data-state="trombosi"] .top-wall .intima {
-            transform: translateY(45px);
+            transform: translateY(50px);
         }
 
         [data-state="aterosclerosi"] .bottom-wall .intima,
         [data-state="trombosi"] .bottom-wall .intima {
-            transform: translateY(-45px);
+            transform: translateY(-50px);
         }
 
+        /* Plaque Container Positioning */
         [data-state="aterosclerosi"] .top-wall .plaque-container,
         [data-state="trombosi"] .top-wall .plaque-container {
-            bottom: -65px;
-            transform: translateX(-50%) scale(1.1);
+            bottom: -90px;
+            transform: translateX(-50%) scale(1.15);
         }
 
         [data-state="aterosclerosi"] .bottom-wall .plaque-container,
         [data-state="trombosi"] .bottom-wall .plaque-container {
-            top: -65px;
-            transform: translateX(-50%) scale(1.1);
+            top: -90px;
+            transform: translateX(-50%) scale(1.15);
         }
 
-        /* Biological Thrombus */
+        /* Experimental: Only show plaque in correct states to avoid ghosting */
+        [data-state="normale"] .plaque-container {
+            display: none;
+        }
+
+        /* Biological Thrombus - Realistic Fibrin/Clot engine */
         .thrombus-mass {
             position: absolute;
             top: 50%;
             left: 52%;
-            width: 160px;
-            height: 160px;
+            width: 180px;
+            height: 180px;
             background:
-                url("data:image/svg+xml,%3Csvg viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='f'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.7' numOctaves='5'/%3E%3C/filter%3E%3Crect width='100' height='100' filter='url(%23f)' opacity='.4'/%3E%3C/svg%3E"),
-                radial-gradient(circle, #3d0000 20%, #1a0000 100%);
-            border-radius: 40% 70% 50% 60% / 50%;
-            box-shadow: 0 0 60px #000;
+                url("data:image/svg+xml,%3Csvg viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='fibrin'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.5' numOctaves='5'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100' height='100' filter='url(%23fibrin)' opacity='0.3'/%3E%3C/svg%3E"),
+                radial-gradient(circle at 30% 30%, #5a0000 0%, #2a0000 60%, #110000 100%);
+            border-radius: 40% 60% 50% 70% / 50% 40% 60% 50%;
+            box-shadow: 0 0 100px rgba(0, 0, 0, 0.9);
             transform: translate(-50%, -50%) scale(0);
             transition: transform 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
-            z-index: 100;
+            z-index: 1000;
             opacity: 0;
             filter: url('#organic-morph');
-            border: 3px solid #5a0000;
+            border: 2px solid #3d0000;
+        }
+
+        /* Thrombus Pulsation for realism */
+        @keyframes thrombus-pulse {
+
+            0%,
+            100% {
+                transform: translate(-50%, -50%) scale(1.7);
+                filter: url('#organic-morph') brightness(1);
+            }
+
+            50% {
+                transform: translate(-50%, -50%) scale(1.75);
+                filter: url('#organic-morph') brightness(1.2);
+            }
         }
 
         [data-state="trombosi"] .thrombus-mass {
-            transform: translate(-50%, -50%) scale(1.7);
             opacity: 1;
+            animation: thrombus-pulse 4s infinite ease-in-out;
         }
 
         .vignette-overlay {
