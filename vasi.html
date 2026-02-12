@@ -258,15 +258,16 @@
             background:
                 url("data:image/svg+xml,%3Csvg viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='f'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100' height='100' filter='url(%23f)' opacity='.2'/%3E%3C/svg%3E"),
                 radial-gradient(ellipse at center, #ffd700 0%, #e6b800 60%, #b38f00 100%);
-            border-radius: 50%;
-            box-shadow: 0 -5px 15px rgba(0, 0, 0, 0.5);
+            /* Identical organic shape as thrombus */
+            border-radius: 40% 60% 50% 70% / 50% 40% 60% 50%;
+            box-shadow: 0 0 40px rgba(0, 0, 0, 0.5);
         }
 
         /* Plaque Visibility Triggers */
         [data-state="aterosclerosi"] .plaque-container,
         [data-state="trombosi"] .plaque-container {
             opacity: 1;
-            transform: translateX(-50%) scale(1) rotate(180deg);
+            transform: translate(-50%, -50%) scale(1) rotate(180deg);
         }
 
         /* State triggers - Refined for ECCENTRIC pathology (bottom-wall only) */
