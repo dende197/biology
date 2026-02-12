@@ -31,12 +31,13 @@
             margin: 0;
             font-family: var(--font);
             color: var(--text-primary);
-            overflow: hidden;
+            overflow-x: hidden;
+            overflow-y: auto;
             -webkit-font-smoothing: antialiased;
         }
 
         .app {
-            height: 100vh;
+            min-height: 100vh;
             display: flex;
             flex-direction: column;
         }
@@ -55,8 +56,7 @@
             justify-content: center;
             position: relative;
             perspective: 1200px;
-            /* Enable 3D space */
-            overflow: hidden;
+            overflow: visible;
         }
 
         /* ─── Hybrid Centrifuge (Dark Room, Light Machine) ─── */
@@ -67,9 +67,8 @@
             align-items: center;
             justify-content: center;
             perspective: none;
-            overflow: hidden;
+            overflow: visible;
             background: transparent;
-            /* Allows body radial gradient */
         }
 
         .centrifuge-top {
@@ -375,13 +374,14 @@
             backdrop-filter: blur(40px) saturate(180%);
             z-index: 500;
             display: flex;
-            align-items: center;
+            align-items: flex-start;
             justify-content: center;
             opacity: 0;
             pointer-events: none;
             transition: opacity 1s cubic-bezier(0.2, 0.8, 0.2, 1);
-            padding: 40px;
+            padding: 80px 40px;
             text-align: center;
+            overflow-y: auto;
         }
 
         .results-overlay.active {
